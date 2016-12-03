@@ -13,4 +13,4 @@ A Chrome extension for https://www.mturk.com/
 Now you have installed Mturk Suite!
 
 # Features
-- Right clicking inside an input field give the option to paste your Worker ID
+- Right clicking inside an input field gives the option to paste your Worker ID
