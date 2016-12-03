@@ -15,6 +15,7 @@ Congratulations, you have successfully installed Mturk Suite!
 
 # How to upgrade
 **If you deleted the folder from when you installed Mturk Suite the first time, you will have to delete the extension and repeat the intall steps**
+
 1. Download Mturk Suite as a .zip by clicking the "Clone or download" button and choosing "Download Zip" 
 2. Extract the downloaded file where the old file already is and choose replace all.
 3. Go to the extension menu by going to **chrome://extensions** or by clicking the 3 dots in the upper right corner --> Settings --> Extensions on the left hand side
