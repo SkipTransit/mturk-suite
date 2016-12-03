@@ -1,7 +1,7 @@
 let user = {};
 
 chrome.storage.local.get('user', (data) => {
-  user = data.user || {WorkerID: 'null'};
+  user = data.user || {WorkerID: 'worker_id'};
   
   chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'WorkerID') {
