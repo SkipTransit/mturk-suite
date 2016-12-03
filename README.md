@@ -1,5 +1,5 @@
 # Mturk Suite
-A Chrome extension for https://www.mturk.com/
+A Chrome extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
 
 # How to install
 1. Download Mturk Suite as a .zip by clicking the "Clone or download" button and choosing "Download Zip"
