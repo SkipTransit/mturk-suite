@@ -1,28 +1,28 @@
 {
   "manifest_version": 2,
 
-  "name"        : "Mturk Suite",
-  "version"     : "0.1.0",
+  "name": "Mturk Suite",
+  "version": "0.1.0",
 
-  "icons" : {
-    "16" : "icon_16.png",
-    "128" : "icon_128.png"
+  "icons": {
+    "16": "icon_16.png",
+    "128": "icon_128.png"
   },
   
   "browser_action": {
-    "default_icon" : "icon_128.png",
-    "default_title" : "Mturk Suite"
+    "default_icon": "icon_128.png",
+    "default_title": "Mturk Suite"
   },
 
-  "background" : {
-    "scripts" : [
+  "background": {
+    "scripts": [
       "jquery-3.1.1.min.js",
       "background.js"
     ],
-    "persistent" : true
+    "persistent": true
   },
 
-  "content_scripts" : [
+  "content_scripts": [
     {
       "matches": [
         "<all_urls>"
@@ -31,7 +31,7 @@
         "jquery-3.1.1.min.js", 
         "all.js"
       ],
-      "run_at" : "document_start"
+      "run_at": "document_start"
     },
     {
       "matches": [
@@ -41,7 +41,7 @@
         "jquery-3.1.1.min.js", 
         "global.js"
       ],
-      "run_at" : "document_start"
+      "run_at": "document_start"
     },
     {
       "matches": [
@@ -51,11 +51,11 @@
         "jquery-3.1.1.min.js", 
         "dashboard.js"
       ],
-      "run_at" : "document_start"
+      "run_at": "document_start"
     }
   ],
   
-  "permissions" : [
+  "permissions": [
     "storage",
     "contextMenus",
     "<all_urls>"

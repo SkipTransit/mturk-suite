@@ -11,7 +11,7 @@ chrome.storage.local.get('user', (data) => {
   });
 });
 
-
+// Adds context menu to paste worker id in input fields
 chrome.contextMenus.create({
   title: "Paste Mturk Worker ID",
   "type" : "normal",
