@@ -11,3 +11,6 @@ A Chrome extension for https://www.mturk.com/
 7. Select the folder that contains the manifest.json file and hit ok
 
 Now you have installed Mturk Suite!
+
+# Features
+- Right clicking inside an input field give the option to paste your Worker ID
