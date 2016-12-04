@@ -2,7 +2,7 @@
 A Chrome extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
 
 # How to install
-1. Download **[Mturk Suite](https://github.com/Kadauchi/mturk-suite/archive/master.zip)**
+1. Download Mturk Suite ([Download](https://github.com/Kadauchi/mturk-suite/archive/master.zip))
 2. Extract the downloaded file
 3. Go to the extension menu by going to **chrome://extensions** or by clicking the 3 dots in the upper right corner --> Settings --> Extensions on the left hand side
 4. Check developer mode on in the top right corner of the extension menu
