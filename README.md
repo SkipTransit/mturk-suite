@@ -14,7 +14,7 @@ A Chrome extension for https://www.mturk.com/ and in the future https://worker.m
 Congratulations, you have successfully installed Mturk Suite!
 
 # How to upgrade
-**If you deleted the folder from when you installed Mturk Suite the first time, you will have to delete the extension and repeat the intall steps**
+**If you deleted the folder from when you installed Mturk Suite the first time, you will have to delete the extension and repeat the install steps**
 
 1. Download Mturk Suite as a .zip by clicking the "Clone or download" button and choosing "Download Zip" 
 2. Extract the downloaded file where the old file already is and choose replace all.
