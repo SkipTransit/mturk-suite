@@ -14,8 +14,8 @@ const hits = {};
 const stuff = {key: null, export: null};
 
 const hitexport = () => {
-  for (let hit of $('table[cellpadding="0"][cellspacing="5"][border="0"]').children().children()) {
-    hit = $(hit);
+  for (let element of $('table[cellpadding="0"][cellspacing="5"][border="0"]').children().children()) {
+    const hit = $(element);
 
     const requesterIdentity = hit.find('.requesterIdentity').text();
     const requesterId = hit.find('a[href*="&requesterId="]').prop('href').split('&requesterId=')[1];
