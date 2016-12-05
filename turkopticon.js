@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+chrome.runtime.onMessage.addListener( function (request) {
+  if (request.msg == 'turkopticon.js') { console.log(request.data); }
+});
+
 const Ids = [];
 const turkopticon = () => {
   for (let href of $('a[href*="&requesterId="]')) {

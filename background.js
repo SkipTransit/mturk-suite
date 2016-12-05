@@ -13,10 +13,10 @@ chrome.storage.local.get('user', (data) => {
 
 chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.msg == 'turkopticon') {
-    TODB_turkopticon(sender.id, request.data);
+    TODB_turkopticon(sender.tab.id, request.data);
   }
   if (request.msg == 'hitexport') {
-    TODB_hitexport(sender.id, request.data);
+    TODB_hitexport(sender.tab.id, request.data);
   }
 });
 
@@ -56,6 +56,7 @@ const TODB_turkopticon = (tab, ids) => {
        objectStore.put(json[obj]);
      }
     }
+    chrome.tabs.sendMessage(tab, {msg: 'turkopticon.js', data: json}); 
   });
 };
 
@@ -66,14 +67,10 @@ const TODB_hitexport = (tab, id) => {
 
   request.onsuccess = (event) => {
     if (request.result) {
-      chrome.tabs.query({"active": true, "currentWindow": true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {msg: 'hitexport.js', data: request.result});
-      });
+      chrome.tabs.sendMessage(tab, {msg: 'hitexport.js', data: request.result});
     }
     else {
-      chrome.tabs.query({"active": true, "currentWindow": true}, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {msg: 'hitexport.js', data: {attrs: {comm: 'N/A', fair: 'N/A', fast: 'N/A', pay: 'N/A'}}});
-      });
+      chrome.tabs.sendMessage(tab, {msg: 'hitexport.js', data: {attrs: {comm: 'N/A', fair: 'N/A', fast: 'N/A', pay: 'N/A'}}});
     }
   };
 };
