@@ -40,7 +40,7 @@ request.onsuccess = (event) => {
 };
 request.onupgradeneeded = (event) => {
   const TODB = event.target.result;
-  const objectStore = TODB.createObjectStore('requester', {keyPath: 'id'});
+  TODB.createObjectStore('requester', {keyPath: 'id'});
 };
 
 const TODB_turkopticon = (tab, ids) => {
@@ -50,13 +50,29 @@ const TODB_turkopticon = (tab, ids) => {
 
     const json = JSON.parse(data);
     for (let obj in json) {
-     if (json[obj].length) {
-       json[obj].id = obj;
-       json[obj].edited = 1;
-       objectStore.put(json[obj]);
-     }
+      if (json[obj]) {
+        json[obj].id = obj;
+        json[obj].edited = 1;
+        objectStore.put(json[obj]);
+      }
     }
-    chrome.tabs.sendMessage(tab, {msg: 'turkopticon.js', data: json}); 
+    
+    const to = {};
+    for (let i = 0; i < ids.length; i ++) {
+      const request = objectStore.get(ids[i]);
+      request.onsuccess = (event) => {
+        if (request.result) {
+          to[ids[i]] = request.result;
+        }
+        else {
+          to[ids[i]] = {attrs: {comm: 'N/A', fair: 'N/A', fast: 'N/A', pay: 'N/A', reviews: 'N/A', tos_flags: 'N/A'}};
+        }
+      };
+    }
+    
+    transaction.oncomplete = (event) => {
+      chrome.tabs.sendMessage(tab, {msg: 'turkopticon.js', data: to}); 
+    };
   });
 };
 
