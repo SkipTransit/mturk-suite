@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "Mturk Suite",
-  "version": "0.1.0",
+  "version": "0.1.1",
 
   "icons": {
     "16": "icon_16.png",
@@ -23,6 +23,8 @@
   },
 
   "content_scripts": [
+
+    // all.js
     {
       "matches": [
         "<all_urls>"
@@ -33,6 +35,8 @@
       ],
       "run_at": "document_start"
     },
+    
+    // global.js
     {
       "matches": [
         "https://www.mturk.com/*"
@@ -43,6 +47,8 @@
       ],
       "run_at": "document_start"
     },
+    
+    // dashboard.js
     {
       "matches": [
         "https://www.mturk.com/mturk/dashboard"
@@ -52,12 +58,40 @@
         "dashboard.js"
       ],
       "run_at": "document_start"
+    },
+    
+    // hitexport.js
+    {
+      "matches" : [
+        "https://www.mturk.com/*"
+      ],
+      "js" : [
+        "jquery-3.1.1.min.js",
+        "hitexport.js"
+      ],
+      "run_at" : "document_start"
+    },
+    
+    // turkopticon.js
+    {
+      "matches" : [
+        "https://www.mturk.com/*"
+      ],
+      "js" : [
+        "jquery-3.1.1.min.js",
+        "turkopticon.js"
+      ],
+      "run_at" : "document_start"
     }
   ],
   
   "permissions": [
+    "tabs",
+    "activeTab",
     "storage",
+    "webRequest",
     "contextMenus",
+    "clipboardWrite",
     "<all_urls>"
   ]
 }
