@@ -25,4 +25,5 @@ Congratulations, you have successfully upgraded Mturk Suite!
 
 # Features
 - Right clicking inside an input field gives the option to paste your Worker ID
-- HIT export for the forums
+- HIT export for the forums 
+- Turkopticon links and values displayed
