@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  if ($('input[name="isAccepted"]').length) {
+  if ($('.popup-header').length) {
     sendhit();
   }
 });
