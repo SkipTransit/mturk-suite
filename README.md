@@ -24,6 +24,7 @@ Congratulations, you have successfully installed Mturk Suite!
 Congratulations, you have successfully upgraded Mturk Suite!
 
 # Features
-- Right clicking inside an input field gives the option to paste your Worker ID
+- Today's Projected Earnings displayed on every page and updates when you submit a HIT.
 - HIT export for the forums 
 - Turkopticon links and values displayed
+- Right clicking inside an input field gives the option to paste your Worker ID
