@@ -94,7 +94,7 @@ const TODB_hitexport = (tab, id) => {
 
 //******* Experimental *******//
 let hits  = {};
-const requests = {};
+let requests = {};
 
 chrome.storage.local.get('hits', (data) => {
   hits = data.hits || {};
@@ -113,6 +113,8 @@ chrome.storage.local.get('hits', (data) => {
   chrome.webRequest.onCompleted.addListener( (data) => {
     if (data.method == 'POST' && data.statusCode == '200') {
       if (requests[data.requestId].hitid) {
+        console.log(requests);
+        console.log(requests[data.requestId]);
         const key = requests[data.requestId].hitid;
         hits[key].status = 'Submitted';
         hits[key].submitted = new Date().getTime() / 1000;
@@ -132,6 +134,7 @@ chrome.storage.local.get('hits', (data) => {
   // Listens for messages from content scripts.
   chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sendhit') {
+      console.log(request.data);
       newhit(request.data);
     }
   });
@@ -139,6 +142,7 @@ chrome.storage.local.get('hits', (data) => {
   // Listens for messages from user scripts
   chrome.runtime.onMessageExternal.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sendhit') {
+      console.log(request.data);
       newhit(request.data);
     }
   });

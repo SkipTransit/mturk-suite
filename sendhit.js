@@ -11,9 +11,9 @@ const sendhit = () => {
   const reward   = $('input[name="prevReward"]').val().replace(/USD/, '$');
   const autoapp  = $('input[name="hitAutoAppDelayInSeconds"]').val();
 
-  const hitid    = $('input[name="hitId"]').val();
-  const assignid = $('input[name="assignmentId"]').val();
-  const status   = $('input[name="isAccepted"]').val() === 'true' ? 'Accepted' : 'Previewed';
+  const hitid    = $('.popup-header > input[name="hitId"]').val();
+  const assignid = $('.popup-header > input[name="assignmentId"]').val();
+  const status   = $('.popup-header > input[name="isAccepted"]').val() === 'true' ? 'Accepted' : 'Previewed';
 
   const timer    = $('#theTime').text().trim();
   const accepted = whenwas(timer);
