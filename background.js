@@ -134,7 +134,6 @@ chrome.storage.local.get('hits', (data) => {
   // Listens for messages from content scripts.
   chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sendhit') {
-      console.log(request.data);
       newhit(request.data);
     }
   });
@@ -142,7 +141,6 @@ chrome.storage.local.get('hits', (data) => {
   // Listens for messages from user scripts
   chrome.runtime.onMessageExternal.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sendhit') {
-      console.log(request.data);
       newhit(request.data);
     }
   });
