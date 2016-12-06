@@ -131,14 +131,14 @@ chrome.storage.local.get('hits', (data) => {
 
   // Listens for messages from content scripts.
   chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
-    if (request.msg == 'hit') {
+    if (request.msg == 'sendhit') {
       newhit(request.data);
     }
   });
   
   // Listens for messages from user scripts
   chrome.runtime.onMessageExternal.addListener( (request, sender, sendResponse) => {
-    if (request.msg == 'hit') {
+    if (request.msg == 'sendhit') {
       newhit(request.data);
     }
   });
