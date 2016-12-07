@@ -25,18 +25,47 @@ const globaljs = () => {
 
 const tpe_menu = () => {
   $('body').append(
-    '<div id="tpe_menu" style="z-index: 99; position: fixed; width: 80%; height: 550px; left: 10%; top: 300px; margin-top: -250px; background-color: #373b44;">' +
+    '<div id="tpe_menu" style="padding: 1px;z-index: 99; position: fixed; width: 80%; height: 600px; left: 10%; top: 300px; margin-top: -250px; background-color: #373b44;">' +
     '  <span style="float: right;">' +
     '    <button id="tpe_export" class="menu" type="button" style="height: 25px; margin-top: 5px;">Export</button>' +
     '    <button id="tpe_sync" class="menu" type="button" style="height: 25px; margin-top: 5px;">Sync</button>' +
     '    <button id="tpe_close" class="menu" type="button" style=" height: 25px; margin-top: 5px;">Close</button>' +
     '  </span>' +
     '  <div>' +
-    '    <h1 style="padding: 2px; color: #FFF;">Today\'s Projected Earnings Menu</h1>' +
+    '    <h1 style="color: #FFF;">Today\'s HITs Menu</h1>' +
     '  </div>' +
-    '  <div style="height: 500px; overflow: auto;">' +
+    
+    '  <div>' +
+    '    <ul class="tab">'+
+    '      <li><a href="javascript:void(0)" class="tablinks Overview active">Overview</a></li>'+
+    '      <li><a href="javascript:void(0)" class="tablinks Breakdown">Breakdown</a></li>'+
+    '      <li><a href="javascript:void(0)" class="tablinks Detailed">Detailed</a></li>'+
+    '    </ul>'+
+    '  </div>' +
+    
+
+    '  <div id="Overview" class="tabcontent" style="display: block;">'+
+    '    <h3>Other two tabs are working.</h3>'+
+    '    <p>This tab is under construction.</p> '+
+    '  </div>'+
+    
+    
+     '  <div id="Breakdown" class="tabcontent" style="height: 540px; overflow: auto;">' +
     '    <table style="width: 100%;">' +
     '      <thead style="display; block;">' +
+    '        <tr>' +
+    '          <th style="text-align: left;">Requester</th>' +
+    '          <th style="text-align: left;">HITs</th>' +
+    '          <th style="text-align: center;">Reward</th>' +
+    '        </tr>' +
+    '      </thead>' +
+    '      <tbody id="breakdown_tbody" style="display; block; height: 500px; overflow: auto;;"></tbody>' +
+    '    </table>' +
+    '  </div>' +
+    
+    '  <div id="Detailed" class="tabcontent" style="height: 523px; overflow: auto;">' +
+    '    <table style="width: 100%;">' +
+    '      <thead>' +
     '        <tr>' +
     '          <th style="text-align: left;">Requester</th>' +
     '          <th style="text-align: left;">Title</th>' +
@@ -44,17 +73,53 @@ const tpe_menu = () => {
     '          <th style="text-align: center;">Status</th>' +
     '        </tr>' +
     '      </thead>' +
-    '      <tbody id="tbody" style="display; block; height: 500px; overflow: auto;;"></tbody>' +
+    '      <tbody id="detailed_tbody"></tbody>' +
     '    </table>' +
     '  </div>' +
+    
     '</div>'
   );
   
   chrome.storage.local.get('hits', (data) => {
-    let hits = data.hits || {}, html = '';
+    const hits = data.hits || {};
+    let breakdown = {}, breakdown_html = '', detailed_html = '';
     
-    const sorted = Object.keys(hits).sort( (a, b) => {return hits[a].viewed - hits[b].viewed;});
+    // Breakdown
+    for (let key in hits) {
+      if (hits[key].status.match(/(Submitted|Paid|Approved|Pending)/)) {
+        const id = hits[key].reqid;
+        
+        if (!breakdown[id]) {
+          breakdown[id] = {
+            reqname : hits[key].reqname,
+            hits : 1,
+            reward : Number(hits[key].reward.replace(/[^0-9.]/g, ''))
+          };
+        }
+        else {
+          breakdown[id].hits   += 1;
+          breakdown[id].reward += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
+        }
+      }
+    }
+    
+    const breakdown_sorted = Object.keys(breakdown).sort( (a, b) => { return breakdown[a].reward - breakdown[b].reward;});
+    for (let i = breakdown_sorted.length - 1; i > -1; i --) {
+      let key = breakdown_sorted[i];
 
+      breakdown_html +=
+        `<tr>` +
+        `  <td>${breakdown[key].reqname}</td>` +
+        `  <td style="width: 50px; text-align: right;">${breakdown[key].hits}</td>` +
+        `  <td style="width: 50px; text-align: right;">$${breakdown[key].reward.toFixed(2)}</td>` +
+        `</tr>`
+      ;
+    }
+    
+    $('#breakdown_tbody').html(breakdown_html);
+    
+    // Detailed
+    const sorted = Object.keys(hits).sort( (a, b) => {return hits[a].viewed - hits[b].viewed;});
     for (let i = 0; i < sorted.length; i ++) {
       let key = sorted[i], color = '', source = '', autoapp = '', pend = false, status = 'allhits ';
       
@@ -82,7 +147,7 @@ const tpe_menu = () => {
         }
       }
       
-     html +=
+     detailed_html +=
        `<tr class="${status}">` +
        `  <td><div>${source + hits[key].reqname}</div></td>` +
        `  <td>${hits[key].title}</td>` +
@@ -92,7 +157,7 @@ const tpe_menu = () => {
       ;
     }
   
-    $('#tbody').html(html);
+    $('#detailed_tbody').html(detailed_html);
   });
 };
 
@@ -122,10 +187,22 @@ const approve_when = (aa, sub) => {
   return willapp;
 }
 
+const tablinks = (id) => {
+  $('.tabcontent').hide();
+  $('.tablinks').removeClass('active');
+
+  $(`#${id}`).show();
+  $(`.${id}`).addClass('active');
+}
+
 $('html').on('click', '#tpe', () => {
   tpe_menu();
 });
 
 $('html').on('click', '#tpe_close', () => {
   $('#tpe_menu').remove();
+});
+
+$('html').on('click', '.tablinks', function () {
+  tablinks($(this).text());
 });
