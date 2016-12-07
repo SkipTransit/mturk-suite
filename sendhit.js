@@ -82,8 +82,8 @@ const mturk_date = (time) => {
 const dst = () => {
   const today = new Date();
   const year = today.getFullYear();
-  let start = new Date('March 14, ' + year + ' 02:00:00');
-  let end = new Date('November 07, ' + year + ' 02:00:00');
+  let start = new Date(`March 14, ${year} 02:00:00`);
+  let end = new Date(`November 07, ${year} 02:00:00`);
   let day = start.getDay();
   start.setDate(14 - day);
   day = end.getDay();
