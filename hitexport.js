@@ -60,7 +60,7 @@ const hitexport = () => {
   }
 };
 
-$('body').on('click', '.vb', function () {
+$('html').on('click', '.vb', function () {
   const key = $(this).data('key')
   stuff.key = key;
   stuff.export = 'vb';
