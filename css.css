@@ -1,0 +1,43 @@
+.export {
+  display: inline-block;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0.214rem;
+  background-color: #DC8C1B;
+  font-size: 0.70rem;
+  background-image: linear-gradient(to bottom, #f7dfa5 0%, #f0c14b 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF7DFA5', endColorstr='#FFF0C14B', GradientType=0);
+  border: 1px solid;
+  border-color: #a88734 #9c7e31 #846a29;
+  margin-right: 3px;
+}
+
+.menu {
+  display: inline-block;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  border-radius: 0.214rem;
+  background-color: #DC8C1B;
+  background-image: linear-gradient(to bottom, #f7dfa5 0%, #f0c14b 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF7DFA5', endColorstr='#FFF0C14B', GradientType=0);
+  border: 1px solid;
+  border-color: #a88734 #9c7e31 #846a29;
+  margin-right: 3px;
+}
+
+#tpe_menu table * {
+  color: #FFF;
+}
+
+#tpe_menu table td {
+  background-color: #22252a;
+}

@@ -111,9 +111,9 @@ const tpe_menu = () => {
   $('body').append(
     '<div id="tpe_menu" style="display: none; z-index: 99; position: fixed; width: 80%; height: 550px; left: 10%; top: 300px; margin-top: -250px; background-color: #373b44;">' +
     '  <span style="float: right;">' +
-    '    <button id="tpe_export" class="menu" type="button" height="18px" style="height: 25px; margin-top: 5px;">Export</button>' +
-    '    <button id="tpe_sync" class="menu" type="button" height="18px" style="height: 25px; margin-top: 5px;">Sync</button>' +
-    '    <button id="tpe_close" class="menu" type="button" height="18px" style=" height: 25px; margin-top: 5px;">Close</button>' +
+    '    <button id="tpe_export" class="menu" type="button" style="height: 25px; margin-top: 5px;">Export</button>' +
+    '    <button id="tpe_sync" class="menu" type="button" style="height: 25px; margin-top: 5px;">Sync</button>' +
+    '    <button id="tpe_close" class="menu" type="button" style=" height: 25px; margin-top: 5px;">Close</button>' +
     '  </span>' +
     '  <div>' +
     '    <h1 style="padding: 2px; color: #FFF;">Today\'s Projected Earnings Menu</h1>' +
@@ -133,40 +133,6 @@ const tpe_menu = () => {
     '  </div>' +
     '</div>'
   );
-  
-  const css = `
-<style id="css" type="text/css">
-
-.menu {
-display: inline-block;
-font-weight: normal;
-text-align: center;
-white-space: nowrap;
-vertical-align: middle;
-cursor: pointer;
-user-select: none;
-border-radius: 0.214rem;
-background-color: #DC8C1B;
-background-image: linear-gradient(to bottom, #f7dfa5 0%, #f0c14b 100%);
-background-repeat: repeat-x;
-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF7DFA5', endColorstr='#FFF0C14B', GradientType=0);
-border: 1px solid;
-border-color: #a88734 #9c7e31 #846a29;
-margin-right: 3px;
-}
-
-#tpe_menu table * {
-color: #FFF;
-}
-
-#tpe_menu table td {
-background-color: #22252a;
-}
-
-</style>
-`;
-
-  $('head').append(css);
 };
 
 $('html').on('click', '#tpe', () => {

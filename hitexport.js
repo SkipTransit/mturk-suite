@@ -58,42 +58,14 @@ const hitexport = () => {
       `<button class="vb export" data-key="${key}" type="button" style="height: 15px; width: 25px;">vB</button>`
     );
   }
-
-  const css = `
-<style id="css" type="text/css">
-
-.export {
-display: inline-block;
-font-weight: normal;
-text-align: center;
-white-space: nowrap;
-vertical-align: middle;
-cursor: pointer;
-user-select: none;
-padding: 0;
-border-radius: 0.214rem;
-background-color: #DC8C1B;
-font-size: 0.70rem;
-background-image: linear-gradient(to bottom, #f7dfa5 0%, #f0c14b 100%);
-background-repeat: repeat-x;
-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF7DFA5', endColorstr='#FFF0C14B', GradientType=0);
-border: 1px solid;
-border-color: #a88734 #9c7e31 #846a29;
-margin-right: 3px;
-}
-
-</style>
-`;
-
-  $('head').append(css);
-
-  $('body').on('click', '.vb', function () {
-    const key = $(this).data('key')
-    stuff.key = key;
-    stuff.export = 'vb';
-    chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
-  });
 };
+
+$('body').on('click', '.vb', function () {
+  const key = $(this).data('key')
+  stuff.key = key;
+  stuff.export = 'vb';
+  chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
+});
 
 const vbexport = (data) => {
   const hit = hits[stuff.key];

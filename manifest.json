@@ -29,6 +29,9 @@
       "matches": [
         "<all_urls>"
       ],
+      "css": [
+        "css.css"
+      ],
       "js": [
         "jquery-3.1.1.min.js", 
         "all.js"
