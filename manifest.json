@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "Mturk Suite",
-  "version": "0.1.4",
+  "version": "0.1.4.3",
 
   "icons": {
     "16": "icon_16.png",
@@ -108,6 +108,10 @@
     "contextMenus",
     "clipboardWrite",
     "<all_urls>"
+  ],
+  
+  "web_accessible_resources" : [
+    "media/*"
   ],
   
   "externally_connectable": {
