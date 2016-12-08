@@ -1,4 +1,5 @@
 let user;
+let syncing_tpe = {tab: null, running: false};
 
 chrome.storage.local.get('user', (data) => {
   user = data.user || {WorkerID: 'worker_id'};
@@ -17,6 +18,9 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   }
   if (request.msg == 'hitexport') {
     TODB_hitexport(sender.tab.id, request.data);
+  }
+  if (request.msg == 'sync_tpe') {
+    sync_tpe(sender.tab.id, request.data);
   }
 });
 
@@ -97,24 +101,31 @@ let hits  = {};
 let requests = {};
 
 chrome.storage.local.get('hits', (data) => {
+  
   hits = data.hits || {};
+  
+  console.log(hits);
 
   // Listens for POST (before) requests to https://www.mturk.com/mturk/externalSubmit
   chrome.webRequest.onBeforeRequest.addListener( (data) => {
-    if (data.method == 'POST') {
+    if (data.requestBody) {
       requests[data.requestId] = {
-        hitid    :  data.requestBody.formData.hitId ? data.requestBody.formData.hitId[0] : null,
+        hitid : data.requestBody.formData.hitId ? data.requestBody.formData.hitId[0] : null,
         assignid : data.requestBody.formData.assignmentId ? data.requestBody.formData.assignmentId[0] : null
       };
     }
-  }, { urls: ['https://www.mturk.com/mturk/externalSubmi*'] }, ['requestBody']);
+    else {
+      requests[data.requestId] = {
+        hitid : data.url.indexOf('hitId=') !== -1 ? data.url.split('hitId=')[1].split('&')[0] : null,
+        assignid : data.url.indexOf('assignmentId=') !== -1  ? data.url.split('assignmentId=')[1].split('&')[0] : null
+      };
+    }
+  }, { urls: ['https://www.mturk.com/mturk/externalSubmit*'] }, ['requestBody']);
   
   // Listens for POST (after) requests to https://www.mturk.com/mturk/externalSubmit
   chrome.webRequest.onCompleted.addListener( (data) => {
-    if (data.method == 'POST' && data.statusCode == '200') {
+    if (data.statusCode == '200') {
       if (requests[data.requestId].hitid) {
-        console.log(requests);
-        console.log(requests[data.requestId]);
         const key = requests[data.requestId].hitid;
         hits[key].status = 'Submitted';
         hits[key].submitted = new Date().getTime() / 1000;
@@ -129,7 +140,7 @@ chrome.storage.local.get('hits', (data) => {
       }
       update_tpe();
     }
-  }, { urls: ['https://www.mturk.com/mturk/externalSubmi*'] }, ['responseHeaders']);
+  }, { urls: ['https://www.mturk.com/mturk/externalSubmit*'] }, ['responseHeaders']);
 
   // Listens for messages from content scripts.
   chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
@@ -171,6 +182,92 @@ const newhit = (data) => {
     hits[data.hitid].assignid = data.assignid;
   }
 };
+
+const sync_tpe = (tab) => {
+  const date = mturk_date(Date.now());
+  
+  const scrape = (page) => {
+    $.get(`https://www.mturk.com/mturk/statusdetail?encodedDate=${date}&pageNumber=${page}`, (data) => {
+      const $data = $(data);
+      const url = $data.find('a:contains(Next)').eq(0).prop('href');
+      const err = $data.find('.error_title:contains(You have exceeded the maximum allowed page request rate for this website.)').length;
+      const act = $data.find('td:contains(You have no HIT activity on this day matching the selected status.)').length;
+      const last = $data.find('a:contains(Last)').length ? $data.find('a:contains(Last)').eq(0).prop('href').split('Number=')[1].split('&')[0] : null;
+      const $hits = $data.find('#dailyActivityTable').find('tr[valign="top"]');
+
+      if ($hits.length) {
+        for (let i = 0; i < $hits.length; i++) {
+          const reqname = $hits.eq(i).find('td[class="statusdetailRequesterColumnValue"]').text().trim();
+          const reqid   = $hits.eq(i).find('a').prop('href').split('requesterId=')[1].split('&')[0];
+          const title   = $hits.eq(i).find('td[class="statusdetailTitleColumnValue"]').text().trim();
+          const reward  = $hits.eq(i).find('td[class="statusdetailAmountColumnValue"]').text().trim();
+          const status  = $hits.eq(i).find('td[class="statusdetailStatusColumnValue"]').text().trim();
+          const hitid   = $hits.eq(i).find('a').prop('href').split('hitId=')[1].split('&')[0];
+
+          if (!hits[hitid]) {
+            hits[hitid] = {
+              reqname   : reqname,
+              reqid     : reqid,
+              title     : title,
+              reward    : reward,
+              autoapp   : null,
+              status    : status,
+							
+              hitid     : hitid,
+              assignid  : null,
+		
+              source    : null,
+              
+              date      : date,
+              viewed    : new Date().getTime(),          
+              submitted : null
+            };
+          }
+          else {
+            hits[hitid].reqname = reqname;
+            hits[hitid].reqid   = reqid;
+            hits[hitid].title   = title;
+            hits[hitid].reward  = reward;
+            hits[hitid].status  = status;
+            hits[hitid].date    = date;
+          }
+        }
+        if (url) {
+          page ++;
+          scrape(page);
+          chrome.tabs.sendMessage(syncing_tpe.tab, {msg: 'sync_tpe_running', data: {current: page, total: last}});
+        }
+        else {
+          update_tpe();
+          syncing_tpe.running = false;
+          chrome.tabs.sendMessage(syncing_tpe.tab, {msg: 'sync_tpe_done', data: {current: page, total: last}});
+
+        }
+      }
+      else if (err) {
+        setTimeout( () => { scrape(page); }, 2000);
+      }
+      else if (act) {
+        hits = {};
+        update_tpe();
+        syncing_tpe.running = false;
+        chrome.tabs.sendMessage(syncing_tpe.tab, {msg: 'sync_tpe_done', data: {current: page, total: last}});
+      }
+    });
+  };
+  
+  if (!syncing_tpe.running) {
+    syncing_tpe.tab = tab;
+    syncing_tpe.running = true;
+    scrape(1);
+  }
+  else {
+    syncing_tpe.tab = tab;
+  }
+  
+};
+
+
 
 // Updates the TPE and removes old HITs from previous day
 const update_tpe = () => {
