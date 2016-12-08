@@ -127,11 +127,9 @@ const tpe_menu = () => {
       `<span><b>${total}</b> HITs have been viewed, submitted or returned today.</span>` +
       `<br>` +
       `<br>` +
-      //`<span><b>${submitted}</b> HITs have been submitted today for a total value of <b>$295.00</b>.</span>` +
       `<span><b>${submitted}</b> HITs have been submitted today for a total value of <b>$${submitted_pe.toFixed(2)}</b>.</span>` +
       `<br>` +
       `<br>` +
-      //`<span><b>${approved}</b> HITs have been approved today for a total value of <b>$295.00</b>.</span>` +
       `<span><b>${approved}</b> HITs have been approved today for a total value of <b>$${approved_pe.toFixed(2)}</b>.</span>` +
       `</div>`
     );
@@ -165,10 +163,8 @@ const tpe_menu = () => {
 
       breakdown_html +=
         `<tr>` +
-        //`  <td>reqname</td>` +
         `  <td>${breakdown[key].reqname}</td>` +
         `  <td style="width: 50px; text-align: right;">${breakdown[key].hits}</td>` +
-        //`  <td style="width: 50px; text-align: right;">$295.00</td>` +
         `  <td style="width: 50px; text-align: right;">$${breakdown[key].reward.toFixed(2)}</td>` +
         `</tr>`
       ;
@@ -215,9 +211,6 @@ const tpe_menu = () => {
       
      detailed_html +=
        `<tr class="${status}">` +
-       //`  <td><div>reqname</div></td>` +
-       //`  <td>title</td>` +
-       //`  <td style="width: 100px; text-align: center;">$295.00</td>` +
        `  <td><div>${source + hits[key].reqname}</div></td>` +
        `  <td>${hits[key].title}</td>` +
        `  <td style="width: 100px; text-align: center;">${hits[key].reward}</td>` +
