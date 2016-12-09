@@ -36,7 +36,6 @@
       "run_at": "document_start"
     },
     
-    // global.js
     {
       "matches": [
         "https://www.mturk.com/*"
@@ -46,24 +45,15 @@
       ],
       "js": [
         "jquery-3.1.1.min.js", 
-        "global.js"
+        "global.js",
+        "sendhit.js",
+        "hitexport.js",
+        "hitcapsule.js",
+        "turkopticon.js"
       ],
       "run_at": "document_start"
     },
     
-    // sendhit.js
-    {
-      "matches": [
-        "https://www.mturk.com/*"
-      ],
-      "js": [
-        "jquery-3.1.1.min.js", 
-        "sendhit.js"
-      ],
-      "run_at": "document_start"
-    },
-    
-    // dashboard.js
     {
       "matches": [
         "https://www.mturk.com/mturk/dashboard"
@@ -73,30 +63,6 @@
         "dashboard.js"
       ],
       "run_at": "document_start"
-    },
-    
-    // hitexport.js
-    {
-      "matches" : [
-        "https://www.mturk.com/*"
-      ],
-      "js" : [
-        "jquery-3.1.1.min.js",
-        "hitexport.js"
-      ],
-      "run_at" : "document_start"
-    },
-    
-    // turkopticon.js
-    {
-      "matches" : [
-        "https://www.mturk.com/*"
-      ],
-      "js" : [
-        "jquery-3.1.1.min.js",
-        "turkopticon.js"
-      ],
-      "run_at" : "document_start"
     }
   ],
   
@@ -104,7 +70,6 @@
     "tabs",
     "activeTab",
     "storage",
-    "webRequest",
     "contextMenus",
     "clipboardWrite",
     "<all_urls>"
