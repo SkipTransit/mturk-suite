@@ -5,10 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const hitcapsule = () => {
-  let req;
   const reqid = $('input[name="requesterId"]').eq(0).val() || $('a[href^="/mturk/return?"]').eq(0).prop('href').match(/requesterId=\w+/); //.replace('requesterId=');
   const reqname = $('.capsule_field_text').eq(0).text().trim();
-
 
   const aa = $('input[name="hitAutoAppDelayInSeconds"]').eq(0).val();
   const days = Math.floor((aa / (60 * 60 * 24)));
