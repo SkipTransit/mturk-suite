@@ -198,7 +198,7 @@ const tpe_menu = () => {
         status += 'vie';
       }
       if (hits[key].source) {
-        source = `<a href="${hits[key].source}" target="_blank">&#x1F5D7;</a> `;
+        source = `<a style="text-decoration: none;" href="${hits[key].source}" target="_blank">&#x1F5D7;</a> `;
       }
       if (pend) {
         if (hits[key].autoapp && hits[key].submitted) {
