@@ -1,18 +1,15 @@
-let user;
+let dashboard;
 let syncing_tpe = {tab: null, running: false};
 
-chrome.storage.local.get('user', (data) => {
-  user = data.user || {WorkerID: 'worker_id'};
-  
-  chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
-    if (request.msg == 'WorkerID') {
-      user.WorkerID = request.data;
-      chrome.storage.local.set({'user': user});
-    }
-  });
+chrome.storage.local.get('dashboard', (data) => {
+  dashboard = data.dashboard || {id: 'visit_your_dashboard', date: null, earn_hits: 0, earn_bonus: 0, earn_total: 0, earn_trans: 0, total_sub: 0, total_app: 0, total_rej: 0, total_pen: 0, today_sub: 0, today_app: 0, today_rej: 0, today_pen: 0};
 });
 
 chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
+  if (request.msg == 'dashboard') {
+    dashboard = request.data;
+    chrome.storage.local.set({'dashboard': dashboard});
+    }
   if (request.msg == 'turkopticon') {
     TODB_turkopticon(sender.tab.id, request.data);
   }
@@ -31,7 +28,7 @@ chrome.contextMenus.create({
   contexts: ["editable"],
   onclick: () => {
     chrome.tabs.query({"active": true, "currentWindow": true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {msg: 'WorkerID', "data": user.WorkerID});
+      chrome.tabs.sendMessage(tabs[0].id, {msg: 'WorkerID', "data": dashboard.id});
     });
   }
 });
@@ -104,9 +101,6 @@ chrome.storage.local.get('hits', (data) => {
   
   hits = data.hits || {};
   
-  console.log(hits);
-
-  // Listens for POST (before) requests to https://www.mturk.com/mturk/externalSubmit
   chrome.webRequest.onBeforeRequest.addListener( (data) => {
     if (data.requestBody) {
       requests[data.requestId] = {
@@ -122,7 +116,6 @@ chrome.storage.local.get('hits', (data) => {
     }
   }, { urls: ['https://www.mturk.com/mturk/externalSubmit*'] }, ['requestBody']);
   
-  // Listens for POST (after) requests to https://www.mturk.com/mturk/externalSubmit
   chrome.webRequest.onCompleted.addListener( (data) => {
     if (data.statusCode == '200') {
       if (requests[data.requestId].hitid) {
@@ -142,14 +135,12 @@ chrome.storage.local.get('hits', (data) => {
     }
   }, { urls: ['https://www.mturk.com/mturk/externalSubmit*'] }, ['responseHeaders']);
 
-  // Listens for messages from content scripts.
   chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sendhit') {
       newhit(request.data);
     }
   });
   
-  // Listens for messages from user scripts
   chrome.runtime.onMessageExternal.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sendhit') {
       newhit(request.data);
