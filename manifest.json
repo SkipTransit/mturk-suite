@@ -70,6 +70,7 @@
     "tabs",
     "activeTab",
     "storage",
+    "webRequest",
     "contextMenus",
     "clipboardWrite",
     "<all_urls>"
