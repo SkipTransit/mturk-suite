@@ -31,6 +31,7 @@ Congratulations, you have successfully upgraded Mturk Suite!
 - HIT export for the forums 
 - Turkopticon links and values displayed
 - Right clicking inside an input field gives the option to paste your Worker ID
+- Requester link and auto approval time added to the HIT capsule for HITs
 - **Dashboard**
   - Shows the changes to twelve different values
   - Shows what your approval rating will be if all of your pending HITs approve or reject
