@@ -543,7 +543,7 @@ const inject = () => {
     const user = data.user || {dark: true};
   
     if (user.dark) {
-      if (document.URL.match(/https:\/\/www.mturk.com\/mturk/)) {
+      if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|finder_).)*$/)) {
         css_all();
       }
       if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(dashboard|status)/)) {
