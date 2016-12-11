@@ -91,8 +91,12 @@ ul.tab li a:focus, .active {
 
 .circle {
   cursor: default;
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
   font-size: 9px;
   color: #000;
+  line-height: 18px;
   text-align: center;
   font-weight: bold;
 }
