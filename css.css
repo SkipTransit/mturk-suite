@@ -88,3 +88,26 @@ ul.tab li a:focus, .active {
   display: none;
   color: #FFFFFF;
 }
+
+.circle {
+  cursor: default;
+  font-size: 9px;
+  color: #000;
+  text-align: center;
+  font-weight: bold;
+}
+
+.circle:hover + .ratings, .ratings:hover {
+	display: block;
+}
+
+.ratings {
+  width: 300px;
+  position:absolute;
+  display: none;
+
+  color: #ffffff;
+  background-color: #373b44;
+  
+  padding: 10px;
+}
