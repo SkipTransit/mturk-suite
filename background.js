@@ -1,15 +1,23 @@
-let dashboard;
+let user, dashboard;
 let syncing_tpe = {tab: null, running: false};
+
+chrome.storage.local.get('user', (data) => {
+  user = data.user || {dark: true};
+});
 
 chrome.storage.local.get('dashboard', (data) => {
   dashboard = data.dashboard || {id: 'visit_your_dashboard', date: null, earn_hits: 0, earn_bonus: 0, earn_total: 0, earn_trans: 0, total_sub: 0, total_app: 0, total_rej: 0, total_pen: 0, today_sub: 0, today_app: 0, today_rej: 0, today_pen: 0};
 });
 
 chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
+  if (request.msg == 'user') {
+    user = request.data;
+    chrome.storage.local.set({'user': user});
+  }
   if (request.msg == 'dashboard') {
     dashboard = request.data;
     chrome.storage.local.set({'dashboard': dashboard});
-    }
+  }
   if (request.msg == 'turkopticon') {
     TODB_turkopticon(sender.tab.id, request.data);
   }

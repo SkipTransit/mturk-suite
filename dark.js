@@ -1,3 +1,11 @@
+chrome.storage.onChanged.addListener( (changes) => {
+  for (let change in changes) {
+    if (change === 'user') {
+      inject();
+    }
+  }
+});
+
 const css_all = () => {
   const css = document.createElement('style');
   css.className = 'dark';
@@ -26,10 +34,19 @@ html > body {
     color : purple;
 }
 
+
 #whyHITReport,
 #reportHITForm {
     color            : #FFFFFF !important;
     background-color : #16181d !important;
+}
+
+.ratings {
+  color            : #FFFFFF !important;
+  background-color : #16181d !important;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #FFFFFF;
 }
 
 .footer_separator {
@@ -52,14 +69,15 @@ option {
     background-color : #16181d !important;
 }
 
+.ya_list,
 .MsoNormal,
 .MsoNormal > * {
-    color            : #FFFFFF !important;
+    color: #FFFFFF !important;
 }
 
 /* Not sure if working for http://www.mturkgrind.com/posts/1001517/ */
 .externalSubmit * {
-    color            : #000000 !important;
+    color: #000000 !important;
 }
 
 
@@ -158,18 +176,15 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
     background   : url(http://i.imgur.com/nTDxw4t.png) no-repeat !important;
 }
 
-/* Replace Go Image */
-input[src="https://images-na.ssl-images-amazon.com/images/G/01/buttons/go-orange-trans.gif"],
-input[src="/media/go-button-gateway.gif"]
-{
-    height       : 0;
-    width        : 0;
-    border       : 0;
-    padding-left : 21px                                          !important;
-    padding-top  : 21px                                          !important;
-    background   : url(http://i.imgur.com/kBeHbH8.png) no-repeat !important;
+[type="image"] {
+  border: none !important;
+  background-color: transparent !important;
 }
 
+img[src="/media/left_dbl_arrow.gif"],
+img[src="/media/left_arrow.gif"],
+img[src="/media/right_dbl_arrow.gif"],
+img[src="/media/right_arrow.gif"],
 img[src="/media/more.gif"],
 img[src="/media/less.gif"],
 img[src="/media/lb_left_corner_blue.gif"],
@@ -191,8 +206,9 @@ const css_dash = () => {
   const css = document.createElement('style');
   css.className = 'dark';
   css.innerHTML = `
+.container-content,
 td[bgcolor="#7fb4cf"],
-.container-content {
+body > table:not([border="0"]) > tbody > tr > td {
   background-color : #0b0c0f !important;
   background-image : none !important;
 }
@@ -200,7 +216,8 @@ td[bgcolor="#7fb4cf"],
 body > table > tbody > tr {
   border-color     : #FFFFFF;
   border-width     : 1px;
-  border-style     : solid;    
+  border-style     : solid;   
+
 }
 
 tr.grayHead,
@@ -439,21 +456,119 @@ const css_3 = () => {
   document.documentElement.insertBefore(css, null);
 };
 
-if (document.URL.match(/https:\/\/www.mturk.com\/mturk/)) {
-    css_all();
-}
-if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(dashboard|status)/)) {
-    css_dash();
-}
-
-if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|dashboard|transferearnings|last_hits_previewed|finder).)*$/)) {
-    css_1();
+const css_4 = () => {
+  const css = document.createElement('style');
+  css.className = 'dark';
+  css.innerHTML = `
+#subtabs_and_searchbar:first-of-type + table  > tbody > tr:nth-child(4) {
+    background-color: #0b0c0f !important;
 }
 
-if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(transferearnings|requesttransferearnings)/)) {
-    css_2();
+#subtabs_and_searchbar:first-of-type + table  > tbody tr:nth-child(4) > td {
+  border-color  : #FFFFFF !important;
+  border-radius : 0px     !important;
+  border-style  : solid   !important;
+  border-width  : 1px     !important;
 }
 
-if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(findquals|sortquals|pendingquals|searchbar\?selectedSearchType=quals|sortsearchbar\?searchSpec=QualTypeSearch|requestqualification|takequalificationtest)/)) {
-    css_3();
+font.almostblack_text_big_bold {
+  color : #FFFFFF;   
 }
+
+td.greyBox {
+  background-image : none;
+}
+`;
+  document.documentElement.insertBefore(css, null);
+};
+
+const css_5 = () => {
+  const css = document.createElement('style');
+  css.className = 'dark';
+  css.innerHTML = `
+.black_text {
+  color : #FFFFFF !important;   
+}
+
+#subtabs_and_searchbar:first-of-type + table td {
+  color : #FFFFFF !important;
+}
+
+.contactusfaq {
+  border-color  : #FFFFFF !important;
+  border-radius : 0px     !important;
+  border-style  : solid   !important;
+  border-width  : 1px     !important;
+}
+
+.contactusfaq > tbody > tr {
+  color            : #FFFFFF !important;
+  background-color : #0D0D0D !important;
+}
+
+.contactus {
+  background-color : #16181d !important;
+}
+
+.email {
+  background-color : #21242c !important;
+  border-color     : #FFFFFF !important;
+  border-radius    : 0px     !important;
+  border-style     : solid   !important;
+  border-width     : 1px     !important;
+}
+
+.contactus input[type="submit"][value="Submit"] {
+  display: inline-block;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  border-radius: 0.214rem;
+  background-color: #DC8C1B;
+  background-image: linear-gradient(to bottom, #f7dfa5 0%, #f0c14b 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF7DFA5', endColorstr='#FFF0C14B', GradientType=0);
+  border: 1px solid;
+  border-color: #a88734 #9c7e31 #846a29;
+  margin-right: 3px;
+}
+`;
+  document.documentElement.insertBefore(css, null);
+};
+
+const inject = () => {
+  chrome.storage.local.get('user', (data) => {
+    const user = data.user || {dark: true};
+  
+    if (user.dark) {
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk/)) {
+        css_all();
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(dashboard|status)/)) {
+        css_dash();
+      }
+      if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|dashboard|transferearnings|last_hits_previewed|finder).)*$/)) {
+        css_1();
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(transferearnings|requesttransferearnings)/)) {
+        css_2();
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(findquals|sortquals|pendingquals|searchbar\?selectedSearchType=quals|sortsearchbar\?searchSpec=QualTypeSearch|requestqualification|takequalificationtest)/)) {
+        css_3();
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/youraccount/)) {
+        css_4();
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/contact/)) {
+        css_5();
+      } 
+    }
+    else {
+      $('style.dark').remove();
+    }
+  });
+};
+
+inject();
