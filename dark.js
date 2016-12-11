@@ -2,12 +2,7 @@ const css_all = () => {
   const css = document.createElement('style');
   css.className = 'dark';
   css.innerHTML = `
-/***********************/
-/****** All pages ******/
-/***********************/
 
-/****** Styling ******/
-html,
 html > body {
     color            : #FFFFFF;
     background-color : #0b0c0f;    
@@ -69,22 +64,22 @@ option {
 
 
 /****** Changes link colors ******/
-:not(.capsule_field_title) > a:link:not(.capsulelink),
+:not(.capsule_field_title) > a:link:not(.capsulelink):not(.tablinks),
 #subtabs_and_searchbar > #subtabs > a:link {
-    color : #146EB4;
+    color : #146EB4 !important;
 }
 
-:not(.capsule_field_title) > a:visited:not(.capsulelink),
+:not(.capsule_field_title) > a:visited:not(.capsulelink):not(.tablinks),
 #subtabs_and_searchbar > #subtabs > a:visited {
-    color : #96177b;
+    color : #96177b !important;
 }
 
-:not(.capsule_field_title) > a:hover:not(.capsulelink),
+:not(.capsule_field_title) > a:hover:not(.capsulelink):not(.tablinks),
 #subtabs_and_searchbar > #subtabs > a:hover {
     color : #0c446f !important;
 }
 
-:not(.capsule_field_title) > a:active:not(.capsulelink),
+:not(.capsule_field_title) > a:active:not(.capsulelink):not(.tablinks),
 #subtabs_and_searchbar > #subtabs > a:active {
     color : blue;
 }
