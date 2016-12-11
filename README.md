@@ -29,10 +29,11 @@ Congratulations, you have successfully upgraded Mturk Suite!
 # Features
 - Today's Projected Earnings displayed on every page and updates when you submit a HIT.
 - HIT export for the forums 
-- Turkopticon links and values displayed
+- Turkopticon links and values displayed on hover of TO circle
 - Right clicking inside an input field gives the option to paste your Worker ID
 - Requester link and auto approval time added to the HIT capsule for HITs
 - **Dashboard**
   - Shows the changes to twelve different values
   - Shows what your approval rating will be if all of your pending HITs approve or reject
   - Shows how many rejections you have to get to drop below 99% and 95% approval rating
+- Dark theme with toggle added
