@@ -191,9 +191,11 @@ const css_dash = () => {
   const css = document.createElement('style');
   css.className = 'dark';
   css.innerHTML = `
-body > table:not([border="0"]) > tbody > tr > td {
-  background-color : #0b0c0f;
-  background-image : none;
+body > table:not([border="0"]) > tbody > tr > td,
+td[bgcolor="#7fb4cf"],
+.container-content {
+  background-color : #0b0c0f !important;
+  background-image : none !important;
 }
 
 body > table > tbody > tr {
