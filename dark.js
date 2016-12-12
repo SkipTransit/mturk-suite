@@ -80,28 +80,21 @@ option {
     color: #000000 !important;
 }
 
-
-/****** Changes link colors ******/
-:not(.capsule_field_title) > a:link:not(.capsulelink):not(.tablinks),
-#subtabs_and_searchbar > #subtabs > a:link {
+a:link:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
     color : #146EB4 !important;
 }
 
-:not(.capsule_field_title) > a:visited:not(.capsulelink):not(.tablinks),
-#subtabs_and_searchbar > #subtabs > a:visited {
+a:visited:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
     color : #96177b !important;
 }
 
-:not(.capsule_field_title) > a:hover:not(.capsulelink):not(.tablinks),
-#subtabs_and_searchbar > #subtabs > a:hover {
+a:hover:not(.capsulelink):not(.subnavclass) {
     color : #0c446f !important;
 }
 
-:not(.capsule_field_title) > a:active:not(.capsulelink):not(.tablinks),
-#subtabs_and_searchbar > #subtabs > a:active {
-    color : blue;
+a.subnavclass, a.nonboldsubnavclass, a.header_links {
+  color: #336699 !important;
 }
-
 
 font[color="#000080"] {
     color : #9BAED2 !important;
