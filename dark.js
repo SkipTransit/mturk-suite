@@ -80,28 +80,20 @@ option {
     color: #000000 !important;
 }
 
-a:link:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
+:not(.capsule_field_title) > a:link:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
     color : #146EB4 !important;
 }
 
-a:visited:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
+:not(.capsule_field_title) > a:visited:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
     color : #96177b !important;
 }
 
-a:hover:not(.capsulelink):not(.subnavclass) {
+:not(.capsule_field_title) > a:hover:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
     color : #0c446f !important;
 }
 
 a.subnavclass, a.nonboldsubnavclass, a.header_links {
   color: #336699 !important;
-}
-
-font[color="#000080"] {
-    color : #9BAED2 !important;
-}
-
-font[color="#000080"]:hover {
-    color : hotpink !important;
 }
 
 /* Navigation "Your Account" Active */
