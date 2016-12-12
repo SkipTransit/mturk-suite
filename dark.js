@@ -75,21 +75,20 @@ option {
     color: #FFFFFF !important;
 }
 
-/* Not sure if working for http://www.mturkgrind.com/posts/1001517/ */
 .externalSubmit * {
-    color: #000000 !important;
+  color: #000000 !important;
 }
 
-:not(.capsule_field_title) > a:link:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
-    color : #146EB4 !important;
+:not(.capsule_field_title) > a:link:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass):not(.tablinks) {
+  color : #146EB4 !important;
 }
 
-:not(.capsule_field_title) > a:visited:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
-    color : #96177b !important;
+:not(.capsule_field_title) > a:visited:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass):not(.tablinks) {
+  color : #96177b !important;
 }
 
-:not(.capsule_field_title) > a:hover:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass) {
-    color : #0c446f !important;
+:not(.capsule_field_title) > a:hover:not(.capsulelink):not(.subnavclass):not(.header_links):not(.nonboldsubnavclass):not(.tablinks) {
+  color : #0c446f !important;
 }
 
 a.subnavclass, a.nonboldsubnavclass, a.header_links {
