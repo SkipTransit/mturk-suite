@@ -74,7 +74,7 @@ const TODB_turkopticon = (tab, ids) => {
           to[ids[i]] = request.result;
         }
         else {
-          to[ids[i]] = {attrs: {comm: 'N/A', fair: 'N/A', fast: 'N/A', pay: 'N/A', reviews: 'N/A', tos_flags: 'N/A'}};
+          to[ids[i]] = {attrs: {comm: 0, fair: 0, fast: 0, pay: 0, reviews: 0, tos_flags: 0}};
         }
       };
     }
