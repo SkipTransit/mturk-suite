@@ -26,6 +26,13 @@ const dashboard = () => {
   chrome.storage.local.get('dashboard', (data) => {
     const loaded_dash = data.dashboard || {id: null, date: null, earn_hits: 0, earn_bonus: 0, earn_total: 0, earn_trans: 0, total_sub: 0, total_app: 0, total_rej: 0, total_pen: 0, today_sub: 0, today_app: 0, today_rej: 0, today_pen: 0};  
    
+    if (dash.date !== loaded_dash.date) {
+      loaded_dash.total_sub = 0;
+      loaded_dash.total_app = 0;
+      loaded_dash.total_rej = 0;
+      loaded_dash.total_pen = 0;
+    }
+    
     $('.metrics-table-first-value:contains(... Pending)').append(
       `<span style="color: orange;" title=""> (${((dash.total_rej - 0.01 * dash.total_sub) / -0.99 | 0)} ≥ 99%)</span>` + 
       `<span style="color: red;"> (${((dash.total_rej - 0.05 * dash.total_sub) / -0.95 | 0)} ≥ 95%)</span>`
