@@ -1,8 +1,9 @@
-let user, dashboard;
+let user = {}, dashboard = {}, tpe = {};
 let syncing_tpe = {tab: null, running: false};
 
 chrome.storage.local.get('user', (data) => {
-  user = data.user || {dark: true};
+  user = data.user || {goal: 20, dark: true};
+  tpe.goal = user.goal;
 });
 
 chrome.storage.local.get('dashboard', (data) => {
@@ -13,6 +14,8 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.msg == 'user') {
     user = request.data;
     chrome.storage.local.set({'user': user});
+    tpe.goal = user.goal;
+    chrome.storage.local.set({'tpe': tpe});
   }
   if (request.msg == 'dashboard') {
     dashboard = request.data;
@@ -270,7 +273,7 @@ const sync_tpe = (tab) => {
 
 // Updates the TPE and removes old HITs from previous day
 const update_tpe = () => {
-  let tpe = 0;
+  tpe.tpe = 0;
   const date = mturk_date(Date.now());
 
   for (let key in hits) {
@@ -278,7 +281,7 @@ const update_tpe = () => {
       delete hits[key];
     }
     else if (!hits[key].status.match(/(Rejected|Accepted|Previewed|Returned)/)) {
-      tpe += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
+      tpe.tpe += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
     }
   }
 

@@ -6,17 +6,30 @@ let user;
 
 const defaultjs = () => {
   chrome.storage.local.get('user', (data) => {
-    user = data.user || {dark: true};
+    user = data.user || {dark: true, goal: 20};
     
     $('body').append(
+      GOAL_WRITE(user.goal),
       build_switch('darktheme', user.dark)
     );
     
-    $(':checkbox').change( () => {
+    $('input').change( () => {
+      user.goal = $('#goal').val();
       user.dark = $('#darktheme').prop('checked');
       chrome.runtime.sendMessage({msg: 'user', data: user});
+      console.log(user);
     });
   });
+};
+
+const GOAL_WRITE = (goal) => {
+  const html =
+        `<div>` +
+        `  <label>Daily Goal: ` +
+        `    <input id="goal" type="number" value="${Number(goal).toFixed(2)}" style="width: 60px;">` +
+        `  </label>` +
+        `</div>`;
+  return html;
 };
 
 const build_switch = (name, prop) => {

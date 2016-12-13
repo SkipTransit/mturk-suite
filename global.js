@@ -6,14 +6,7 @@ let tpeexport = '';
 
 const globaljs = () => {
   chrome.storage.local.get('tpe', (data) => {
-    const tpe = data.tpe || 0;
-
-    $('#subtabs_and_searchbar').prepend(
-      `<b style="position: absolute; right: 8px; margin-top: -15px; color: #CC6600;">` +
-      `Today's Projected Earnings: ` +
-      `<span id="tpe" style="color: #008000; cursor: pointer;">$${tpe.toFixed(2)}<span>` +
-      `</b>`
-    );
+    TPE_WRITE(data.tpe.tpe || 0, data.tpe.goal || 20);
   });
   
   chrome.runtime.onMessage.addListener( (request) => {
@@ -29,10 +22,31 @@ const globaljs = () => {
   chrome.storage.onChanged.addListener( (changes) => {
     for (let change in changes) {
       if (change === 'tpe') {
-        $('#tpe').text(`$${changes[change].newValue.toFixed(2)}`);
+        TPE_WRITE(
+          changes[change].newValue.tpe !== undefined ? changes[change].newValue.tpe : changes[change].oldValue.tpe,
+          changes[change].newValue.goal !== undefined ? changes[change].newValue.goal : changes[change].oldValue.goal
+        );
       }
     }
   });
+};
+
+const TPE_WRITE = (earnings, goal) => {
+  const html =
+      `<div>` +
+      `  <div id="tpe_goal_outer">` +
+      `    <div id="tpe_goal_inner" style="width: ${Number(earnings) / Number(goal) * 100}%;"></div>` +
+      `  </div>` +
+      `  <div id="tpe_earnings">$${Number(earnings).toFixed(2)}/${Number(goal).toFixed(2)}<div>` +
+      `</div>`
+  ;
+  
+  if ($('#tpe').length) {
+    $('#tpe').html(html);
+  }
+  else {
+    $('#subtabs_and_searchbar').prepend(`<div id="tpe">${html}</div>`);
+  }
 };
 
 const tpe_menu = () => {
