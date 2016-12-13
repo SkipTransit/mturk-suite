@@ -9,7 +9,7 @@ const defaultjs = () => {
     user = data.user || {dark: true, goal: 20};
     
     $('body').append(
-      GOAL_WRITE(user.goal),
+      GOAL_WRITE(user.goal || 20),
       build_switch('darktheme', user.dark)
     );
     
