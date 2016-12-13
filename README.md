@@ -27,7 +27,8 @@ Congratulations, you have successfully upgraded Mturk Suite!
 2. Make sure the manifest.json file is in the same location it shows in the "Loaded from:" in the extension menu
 
 # Features
-- Today's Projected Earnings displayed on every page and updates when you submit a HIT.
+- Today's Projected Earnings displayed on every page and updates when you submit a HIT
+  - Progress bar live updates with TPE and goal is set in extension dropdown
 - HIT export for the forums 
 - Turkopticon links and values displayed on hover of TO circle
 - Right clicking inside an input field gives the option to paste your Worker ID
