@@ -1,16 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
   if ($('a[href*="requesterId="]').length) {
-    turkopticon();
+    TURKOPTICON();
   }
 });
 
 chrome.runtime.onMessage.addListener( (request) => {
   if (request.msg == 'turkopticon.js') {
-    ratings(request.data);
+    RATINGS(request.data);
   }
 });
 
-const turkopticon = () => {
+const TURKOPTICON = () => {
   const ids = [];
 
   for (let element of $('a[href*="requesterId="]')) {
@@ -22,22 +22,24 @@ const turkopticon = () => {
   chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
 };
 
-const ratings = (data) => {
+const RATINGS = (data) => {
   const to = (id) => {
     const html = 
-          `<span style="float:left;">` +
-          `<div class="circle" style="background-color: ${color(data[id].attrs.pay)}; margin-right: 2px;">TO</div>` +
-          `<div class="ratings">` +
+          `<div style="float:left;">` +
+          `  <div class="circle" style="background-color: ${color(data[id].attrs.pay)}; margin-right: 2px;">TO</div>` +
+          `  <div class="ratings">` +
           rating('Fair', data[id].attrs.fair) +
           rating('Fast', data[id].attrs.fast) +
           rating('Pay', data[id].attrs.pay) +
           rating('Comm', data[id].attrs.comm) +
-          `<br>` +
-          `<div>Scores based on <a href="https://turkopticon.ucsd.edu/${id}" target="_blank" style="color: #FFFFFF;">${data[id].reviews} review(s)</a></div>` +
-          `<div>Terms of Service violation flags: ${data[id].tos_flags}</div>` +
-          `<div><a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}" target="_blank" style="color: #FFFFFF;">Report your experience with this requester »</a></div>` +
-          `</div>` +
-          `</span>`;
+          `    <br>` +
+          `    <div>Scores based on <a href="https://turkopticon.ucsd.edu/${id}" target="_blank" style="color: #FFFFFF;">${data[id].reviews} review(s)</a></div>` +
+          `    <div>Terms of Service violation flags: ${data[id].tos_flags}</div>` +
+          `    <div>` +
+          `      <a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}" target="_blank" style="color: #FFFFFF;">Report your experience with this requester »</a>` +
+          `    </div>` +
+          `  </div>` +
+          `</div>`;
     return html;
   };
   
