@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   if ($('input[name="isAccepted"]').length) {
-    hitcapsule();
+    HIT_CAPSULE();
   }
 });
 
-const hitcapsule = () => {
-  const reqid = $('input[name="requesterId"]').eq(0).val() || $('a[href^="/mturk/return?"]').eq(0).prop('href').match(/requesterId=\w+/); //.replace('requesterId=');
+const HIT_CAPSULE = () => {
+  const reqid = $('input[name="requesterId"]').eq(0).val() || $('a[href^="/mturk/return?"]').eq(0).prop('href').match(/requesterId=\w+/);
   const reqname = $('.capsule_field_text').eq(0).text().trim();
 
   const aa = $('input[name="hitAutoAppDelayInSeconds"]').eq(0).val();
@@ -25,7 +25,11 @@ const hitcapsule = () => {
   }
 
   $('.capsule_field_text').eq(0).parent().append(
-    `<td><img src="/media/spacer.gif" width="25" height="1" border="0"></td><td align="right" valign="top" nowrap="" class="capsule_field_title">AA:&nbsp;&nbsp;</td><td align="left" valign="top" nowrap="" class="capsule_field_text">${aa_time}</td>`
+    `<td>` +
+    `  <img src="/media/spacer.gif" width="25" height="1" border="0">` +
+    `</td>` +
+    `<td align="right" valign="top" nowrap="" class="capsule_field_title">AA:&nbsp;&nbsp;</td>` +
+    `<td align="left" valign="top" nowrap="" class="capsule_field_text">${aa_time}</td>`
   );
 
   
