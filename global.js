@@ -1,30 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
-  globaljs();
+  GLOBALJS();
 });
 
 let tpeexport = '';
 
-const globaljs = () => {
+const GLOBALJS = () => {
   chrome.storage.local.get('tpe', (data) => {
     TPE_WRITE(data.tpe.tpe || 0, data.tpe.goal || 20);
   });
   
-  chrome.runtime.onMessage.addListener( (request) => {
+  chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sync_tpe_running') {
       progress(request.data.current, request.data.total);
     }
     if (request.msg == 'sync_tpe_done') {
-      $('#tpe_menu').remove();
       tpe_menu();
     }
   });
 
   chrome.storage.onChanged.addListener( (changes) => {
-    for (let change in changes) {
-      if (change === 'tpe') {
+    for (let key in changes) {
+      if (key === 'tpe') {
         TPE_WRITE(
-          changes[change].newValue.tpe !== undefined ? changes[change].newValue.tpe : changes[change].oldValue.tpe,
-          changes[change].newValue.goal !== undefined ? changes[change].newValue.goal : changes[change].oldValue.goal
+          changes[key].newValue.tpe !== undefined ? changes[key].newValue.tpe : changes[key].oldValue.tpe,
+          changes[key].newValue.goal !== undefined ? changes[key].newValue.goal : changes[key].oldValue.goal
         );
       }
     }
@@ -50,6 +49,8 @@ const TPE_WRITE = (earnings, goal) => {
 };
 
 const tpe_menu = () => {
+  $('#tpe_menu').remove();
+  
   $('body').append(
     '<div id="tpe_menu" style="padding: 1px;z-index: 99; position: fixed; width: 80%; height: 600px; left: 10%; top: 300px; margin-top: -250px; background-color: #373b44;">' +
     '  <span style="float: right;">' +
@@ -110,9 +111,8 @@ const tpe_menu = () => {
     let breakdown = {}, breakdown_html = '', detailed_html = '';
     
     // Overview
-    const total = Object.keys(hits).length
+    const total = Object.keys(hits).length;
     let submitted = 0, submitted_pe = 0;
-    let returned = 0;
     let approved = 0, approved_pe = 0;
     
     for (let key in hits) {
@@ -123,8 +123,8 @@ const tpe_menu = () => {
         if (hits[key].status.match(/Paid|Approved/)) {
           approved ++;
           approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
-        };
-        
+        }
+      
         if (hits[key].status.match(/Submitted|Pending/)) {
           const apped = is_approved(hits[key].autoapp, hits[key].submitted);
           if (apped) {
@@ -281,7 +281,7 @@ const approve_when = (aa, sub) => {
     willapp = 'This HIT should be approved.';
   }
   return willapp;
-}
+};
 
 const tablinks = (id) => {
   $('.tabcontent').hide();
@@ -289,7 +289,7 @@ const tablinks = (id) => {
 
   $(`#${id}`).show();
   $(`.${id}`).addClass('active');
-}
+};
 
 const copyToClipboard1 = (template) => {
   $('body').append(`<textarea id="copyToClipboard" style="opacity: 0;">${template}</textarea>`);
@@ -299,21 +299,20 @@ const copyToClipboard1 = (template) => {
   alert(`Today's HITs Breakdown has been copied to your clipboard.`);
 };
 
-
-$('html').on('click', '#tpe', () => {
+$('html').on('click', '#tpe', function () {
   tpe_menu();
 });
 
-$('html').on('click', '#tpe_export', () => {
+$('html').on('click', '#tpe_export', function () {
   copyToClipboard1(tpeexport);
 });
 
-$('html').on('click', '#tpe_sync', () => {
+$('html').on('click', '#tpe_sync', function () {
   progress(1, '???');
   chrome.runtime.sendMessage({msg: 'sync_tpe'});
 });
 
-$('html').on('click', '#tpe_close', () => {
+$('html').on('click', '#tpe_close', function () {
   $('#tpe_menu').remove();
 });
 
