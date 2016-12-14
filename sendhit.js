@@ -1,50 +1,42 @@
 document.addEventListener('DOMContentLoaded', () => {
   if ($('input[name="isAccepted"]').length) {
-    sendhit();
+    SEND_HIT();
   }
 });
 
-const sendhit = () => {
+const SEND_HIT = () => {
   const reqname  = $('input[name="prevRequester"]').val() || null;
   const reqid    = $('input[name="requesterId"]').val() || reqname;
   const title    = $('.capsulelink_bold').text().trim();
   const reward   = $('input[name="prevReward"]').val().replace(/USD/, '$');
   const autoapp  = $('input[name="hitAutoAppDelayInSeconds"]').val();
-
   const hitid    = $('.popup-header > input[name="hitId"]').val();
   const assignid = $('.popup-header > input[name="assignmentId"]').val();
   const status   = $('.popup-header > input[name="isAccepted"]').val() === 'true' ? 'Accepted' : 'Previewed';
-
-  const timer    = $('#theTime').text().trim();
-  const accepted = whenwas(timer);
-  const date     = mturk_date(accepted);
-
   const source = $('iframe').prop('src') || null;
-
+  const timer    = $('#theTime').text().trim();
+  const accepted = WHEN_ACCEPTED(timer);
+  const date     = MTURK_DATE(accepted);
+  
   const data = {
     reqname   : reqname,
     reqid     : reqid,
     title     : title,
     reward    : reward,
     autoapp   : autoapp,
-    status    : status,
-
     hitid     : hitid,
     assignid  : assignid,
-
+    status    : status,
     source    : source,
-
     date      : date,
     viewed    : new Date().getTime(),
-
     submitted : null
   };
 
   chrome.runtime.sendMessage({msg: 'sendhit', data: data});
 };
 
-// Get the date string for when the HIT was accepted
-const whenwas = (time) => {
+const WHEN_ACCEPTED = (time) => {
   const split = time.split(/:| /);
   let days = 0;
   let hours = 0;
@@ -66,11 +58,10 @@ const whenwas = (time) => {
   return Date.now() - milli;
 };
 
-// Get the date in PST
-const mturk_date = (time) => {
+const MTURK_DATE = (time) => {
   const given = new Date(time);
   const utc = given.getTime() + (given.getTimezoneOffset() * 60000);
-  const offset = dst() === true ? '-7' : '-8';
+  const offset = DST() === true ? '-7' : '-8';
   const amz = new Date(utc + (3600000 * offset));
   const day = (amz.getDate()) < 10 ? '0' + (amz.getDate()).toString() : (amz.getDate()).toString();
   const month = (amz.getMonth() + 1) < 10 ? '0' + (amz.getMonth() + 1).toString() : ((amz.getMonth() + 1)).toString();
@@ -78,8 +69,7 @@ const mturk_date = (time) => {
   return month + day + year;
 };
 
-// Check if DST
-const dst = () => {
+const DST = () => {
   const today = new Date();
   const year = today.getFullYear();
   let start = new Date(`March 14, ${year} 02:00:00`);
