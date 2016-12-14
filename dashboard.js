@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-  dashboard();
+  DASHBOARD();
 });
 
-const dashboard = () => {
+const DASHBOARD = () => {
   const dash = {
     id : $('.orange_text_right:contains(Your Worker ID: )').text().split('ID: ')[1],
     date : $('a:contains(Today)').length ? $('a:contains(Today)').prop('href').split('encodedDate=')[1] : null,
