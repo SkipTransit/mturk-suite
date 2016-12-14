@@ -122,15 +122,15 @@ const vbexport = (data) => {
   }
   
   if (stuff.export === 'vb_mtc') {
-    const confirm_post = confirm('Do you want to post this HIT to MTC?');
-    if (confirm_post) {
-      SEND_MTC(direct_template);
+    const confirm_post = prompt('Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
+    if (confirm_post != null) {
+      SEND_MTC(direct_template + `<p>${confirm_post}</p>`);
     }
   }
   if (stuff.export === 'vb_th') {
-    const confirm_post = confirm('Do you want to post this HIT to TH?');
-    if (confirm_post) {
-      SEND_TH(direct_template);
+    const confirm_post = prompt('Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
+    if (confirm_post != null) {
+      SEND_TH(direct_template + `<p>${confirm_post}</p>`);
     }
   }
 };
