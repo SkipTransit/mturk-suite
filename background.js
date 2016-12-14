@@ -30,6 +30,12 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.msg == 'sync_tpe') {
     sync_tpe(sender.tab.id, request.data);
   }
+  if (request.msg == 'send_mtc') {
+    SEND_MTC(sender.tab.id, request.data);
+  }
+  if (request.msg == 'send_th') {
+    SEND_TH(sender.tab.id, request.data);
+  }
 });
 
 // Adds context menu to paste worker id in input fields
@@ -103,6 +109,31 @@ const TODB_hitexport = (tab, id) => {
   };
 };
 
+const SEND_MTC = (tab, template) => {
+  $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, (data) => {
+    const $data = $(data);
+    const thread = $data.find('li[id^="thread-"]').eq(1).prop('id').replace('thread-', '');
+    const xfToken = $data.find('input[name="_xfToken"]').eq(0).val();
+
+    $.post(`http://www.mturkcrowd.com/threads/${thread}/add-reply`, {
+      message_html: template,
+      _xfToken: xfToken
+    });
+  });
+};
+
+const SEND_TH = (tab, template) => {
+  $.get(`https://turkerhub.com/forums/2/?order=post_date&direction=desc`, (data) => {
+    const $data = $(data);
+    const thread = $data.find('li[id^="thread-"]').eq(1).prop('id').replace('thread-', '');
+    const xfToken = $data.find('input[name="_xfToken"]').eq(0).val();
+
+    $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
+      message_html: template,
+      _xfToken: xfToken
+    });
+  });
+};
 
 //******* Experimental *******//
 let hits  = {};
@@ -148,18 +179,18 @@ chrome.storage.local.get('hits', (data) => {
 
   chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sendhit') {
-      newhit(request.data);
+      ADD_HIT(request.data);
     }
   });
   
   chrome.runtime.onMessageExternal.addListener( (request, sender, sendResponse) => {
     if (request.msg == 'sendhit') {
-      newhit(request.data);
+      ADD_HIT(request.data);
     }
   });
 });
 
-const newhit = (data) => {
+const ADD_HIT = (data) => {
   if (!hits[data.hitid]) {
     hits[data.hitid] = {
       reqname   : data.reqname,
@@ -167,13 +198,10 @@ const newhit = (data) => {
       title     : data.title,
       reward    : data.reward,
       autoapp   : data.autoapp,
-      status    : data.status,
-      
       hitid     : data.hitid,
       assignid  : data.assignid,
-      
+      status    : data.status,
       source    : data.source,
-      
       date      : data.date,
       viewed    : data.viewed,
       submitted : data.submitted
@@ -213,13 +241,10 @@ const sync_tpe = (tab) => {
               title     : title,
               reward    : reward,
               autoapp   : null,
-              status    : status,
-							
               hitid     : hitid,
               assignid  : null,
-		
+              status    : status,
               source    : null,
-              
               date      : date,
               viewed    : new Date().getTime(),          
               submitted : null
@@ -268,8 +293,6 @@ const sync_tpe = (tab) => {
   }
   
 };
-
-
 
 // Updates the TPE and removes old HITs from previous day
 const update_tpe = () => {

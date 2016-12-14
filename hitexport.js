@@ -55,15 +55,31 @@ const hitexport = () => {
     };
 
     hit.find('a[id^="capsule"]').before(
-      `<button class="vb export" data-key="${key}" type="button" style="height: 15px; width: 25px;">vB</button>`
+      `<button class="vb export" data-key="${key}" type="button" style="height: 15px; width: 25px;">vB</button>` +
+      `<button class="vb_mtc export" data-key="${key}" type="button" style="height: 15px; width: 25px;">MTC</button>` +
+      `<button class="vb_th export" data-key="${key}" type="button" style="height: 15px; width: 25px;">TH</button>`
     );
   }
 };
 
 $('html').on('click', '.vb', function () {
-  const key = $(this).data('key')
+  const key = $(this).data('key');
   stuff.key = key;
   stuff.export = 'vb';
+  chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
+});
+
+$('html').on('click', '.vb_mtc', function () {
+  const key = $(this).data('key');
+  stuff.key = key;
+  stuff.export = 'vb_mtc';
+  chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
+});
+
+$('html').on('click', '.vb_th', function () {
+  const key = $(this).data('key');
+  stuff.key = key;
+  stuff.export = 'vb_th';
   chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
 });
 
@@ -89,8 +105,34 @@ const vbexport = (data) => {
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
         `[b]Qualifications:[/b] ${hit.quals}\n` +
         `[/td][/tr][/table]`;
+  
+  const direct_template =
+        `<p>[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]</p>` +
+        `<p>[b]Requester:[/b] [URL=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/URL] [${hit.reqid}] ([URL=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/URL])</p>` +
+        `<p>([URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]): ${toformat('Pay', data.attrs.pay)} ${toformat('Fair', data.attrs.fair)} ${toformat('Comm', data.attrs.comm)} ${toformat('Fast', data.attrs.fast)}</p>` +
+        `<p>[b]Description:[/b] ${hit.desc}</p>` +
+        `<p>[b]Time:[/b] ${hit.time}</p>` +
+        `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
+        `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
+        `<p>[b]Qualifications:[/b] ${hit.quals}[/td][/tr]</p>` +
+        `[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`;
 
-  copyToClipboard(template);
+  if (stuff.export === 'vb') {
+    copyToClipboard(template);
+  }
+  
+  if (stuff.export === 'vb_mtc') {
+    const confirm_post = confirm('Do you want to post this HIT to MTC?');
+    if (confirm_post) {
+      SEND_MTC(direct_template);
+    }
+  }
+  if (stuff.export === 'vb_th') {
+    const confirm_post = confirm('Do you want to post this HIT to TH?');
+    if (confirm_post) {
+      SEND_TH(direct_template);
+    }
+  }
 };
 
 const copyToClipboard = (template) => {
@@ -99,4 +141,12 @@ const copyToClipboard = (template) => {
   document.execCommand('Copy');
   $('#copyToClipboard').remove();
   alert('HIT export has been copied to your clipboard.');
+};
+
+const SEND_MTC = (template) => {
+  chrome.runtime.sendMessage({msg: 'send_mtc', data: template});
+};
+
+const SEND_TH = (template) => {
+  chrome.runtime.sendMessage({msg: 'send_th', data: template});
 };
