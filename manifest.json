@@ -48,7 +48,7 @@
         "global.js",
         "sendhit.js",
         "hitexport.js",
-        "pandalinks.js",
+        "accept_links.js",
         "hitcapsule.js",
         "turkopticon.js"
       ],
