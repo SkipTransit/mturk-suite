@@ -8,14 +8,23 @@ const defaultjs = () => {
   chrome.storage.local.get('user', (data) => {
     user = data.user || {dark: true, goal: 20};
     
-    $('body').append(
-      GOAL_WRITE(user.goal || 20),
-      build_switch('darktheme', user.dark)
+    $('body').prepend(
+      GOAL_WRITE(user.goal || 20)
+    );
+    
+    $('#options').append(
+      build_switch('darktheme', user.dark),
+      build_switch('vb', user.vb),
+      build_switch('vb_th', user.vb_th),
+      build_switch('vb_mtc', user.vb_mtc)
     );
     
     $('input').change( () => {
       user.goal = $('#goal').val();
       user.dark = $('#darktheme').prop('checked');
+      user.vb = $('#vb').prop('checked');
+      user.vb_th = $('#vb_th').prop('checked');
+      user.vb_mtc = $('#vb_mtc').prop('checked');
       chrome.runtime.sendMessage({msg: 'user', data: user});
       console.log(user);
     });
@@ -34,16 +43,16 @@ const GOAL_WRITE = (goal) => {
 
 const build_switch = (name, prop) => {
   const html =
-        `<div>` +
-        `  <div class="switch" style="float: left;">` +
+        `<tr style=" width: 100%;">` +
+        `  <td class="switch">` +
         `    <input id="${name}" type="checkbox" name="${name}" class="switch-checkbox" ${(prop ? 'checked' : '')}>` +
         `    <label class="switch-label" for="${name}">` +
         `      <span class="switch-inner"></span>` +
         `      <span class="switch-switch"></span>` +
         `    </label>` +
-        `  </div>` +
-        `  <div style="float: right;">${name}</div>` +
-        `</div>`;
+        `  </td>` +
+        `  <td>${name}</td>` +
+        `</tr>`;
   return html;
 };
 
