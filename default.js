@@ -55,4 +55,3 @@ const build_switch = (id, prop, name) => {
         `</tr>`;
   return html;
 };
-
