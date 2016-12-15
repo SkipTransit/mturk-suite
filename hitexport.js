@@ -53,12 +53,17 @@ const hitexport = () => {
       avail    : available.trim(),
       quals    : qualifications !== '' ? qualifications.trim() : 'None;',
     };
-
-    hit.find('a[id^="capsule"]').before(
-      `<button class="vb export" data-key="${key}" type="button" style="height: 15px; width: 25px;">vB</button>` +
-      `<button class="vb_mtc export" data-key="${key}" type="button" style="height: 15px; width: 25px;">MTC</button>` +
-      `<button class="vb_th export" data-key="${key}" type="button" style="height: 15px; width: 25px;">TH</button>`
-    );
+    
+    chrome.storage.local.get('user', (data) => {
+      const user = data.user || {vb: true, vb_th: false, vb_mtc: false};
+      let html = '';
+      
+      html += user.vb ? `<button class="vb export" data-key="${key}" type="button" style="height: 15px; width: 25px;">vB</button>` : '';
+      html += user.vb_th ? `<button class="vb_th export" data-key="${key}" type="button" style="height: 15px; width: 25px;">TH</button>` : '';
+      html += user.vb_mtc ? `<button class="vb_mtc export" data-key="${key}" type="button" style="height: 15px; width: 25px;">MTC</button>` : '';
+      
+      hit.find('a[id^="capsule"]').before(html);
+    });
   }
 };
 
@@ -69,17 +74,17 @@ $('html').on('click', '.vb', function () {
   chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
 });
 
-$('html').on('click', '.vb_mtc', function () {
-  const key = $(this).data('key');
-  stuff.key = key;
-  stuff.export = 'vb_mtc';
-  chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
-});
-
 $('html').on('click', '.vb_th', function () {
   const key = $(this).data('key');
   stuff.key = key;
   stuff.export = 'vb_th';
+  chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
+});
+
+$('html').on('click', '.vb_mtc', function () {
+  const key = $(this).data('key');
+  stuff.key = key;
+  stuff.export = 'vb_mtc';
   chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
 });
 
@@ -143,10 +148,11 @@ const copyToClipboard = (template) => {
   alert('HIT export has been copied to your clipboard.');
 };
 
+const SEND_TH = (template) => {
+  chrome.runtime.sendMessage({msg: 'send_th', data: template});
+};
+
 const SEND_MTC = (template) => {
   chrome.runtime.sendMessage({msg: 'send_mtc', data: template});
 };
 
-const SEND_TH = (template) => {
-  chrome.runtime.sendMessage({msg: 'send_th', data: template});
-};
