@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "Mturk Suite",
-  "version": "0.1.7.2",
+  "version": "0.1.8.0",
 
   "icons": {
     "16": "icon_16.png",
@@ -48,6 +48,7 @@
         "global.js",
         "sendhit.js",
         "hitexport.js",
+        "accept_next.js",
         "accept_links.js",
         "hitcapsule.js",
         "turkopticon.js"

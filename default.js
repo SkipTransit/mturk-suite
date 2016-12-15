@@ -16,7 +16,8 @@ const defaultjs = () => {
       build_switch('darktheme', user.dark, 'Dark Theme'),
       build_switch('vb', user.vb, 'Forum Export'),
       build_switch('vb_th', user.vb_th, 'TH Direct Export'),
-      build_switch('vb_mtc', user.vb_mtc, 'MTC Direct Export')
+      build_switch('vb_mtc', user.vb_mtc, 'MTC Direct Export'),
+      build_switch('accept_next', user.accept_next, 'Accept Next Checked')
     );
     
     $('input').change( () => {
@@ -25,6 +26,7 @@ const defaultjs = () => {
       user.vb = $('#vb').prop('checked');
       user.vb_th = $('#vb_th').prop('checked');
       user.vb_mtc = $('#vb_mtc').prop('checked');
+      user.accept_next = $('#accept_next').prop('checked');
       chrome.runtime.sendMessage({msg: 'user', data: user});
       console.log(user);
     });
