@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
   if ($('a:contains(View a HIT in this group)').length) {
-    hitexport();
+    HIT_EXPORT();
   }
 });
 
 chrome.extension.onMessage.addListener( (request) => {
   if (request.msg == 'hitexport.js') {
-    vbexport(request.data);
+    VB_EXPORT(request.data);
   }
 });
 
@@ -21,7 +21,7 @@ chrome.storage.onChanged.addListener( (changes) => {
 const hits = {};
 const stuff = {key: null, export: null};
 
-const hitexport = () => {
+const HIT_EXPORT = () => {
   for (let element of $('table[cellpadding="0"][cellspacing="5"][border="0"]').children().children()) {
     const hit = $(element);
 
@@ -113,7 +113,7 @@ $('html').on('click', '.vb_mtc', function () {
   chrome.runtime.sendMessage({msg: 'hitexport', data: hits[key].reqid});
 });
 
-const vbexport = (data) => {
+const VB_EXPORT = (data) => {
   const hit = hits[stuff.key];
   
   const attr = (type, rating) => {
@@ -121,7 +121,7 @@ const vbexport = (data) => {
     if (rating > 1.99) {color = 'orange';}
     if (rating > 2.99) {color = 'yellow';}
     if (rating > 3.99) {color = 'green';}
-    if (rating < 0.01) {color = 'grey'; rating = 'N/A'}
+    if (rating < 0.01) {color = 'grey'; rating = 'N/A';}
     return `[b][${type}: [color=${color}]${rating}[/color]][/b]`;
   };
   
@@ -159,13 +159,13 @@ const vbexport = (data) => {
   
   if (stuff.export === 'vb_mtc') {
     const confirm_post = prompt('Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
-    if (confirm_post != null) {
+    if (confirm_post !== null) {
       SEND_MTC(direct_template + `<p>${confirm_post}</p>`);
     }
   }
   if (stuff.export === 'vb_th') {
     const confirm_post = prompt('Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
-    if (confirm_post != null) {
+    if (confirm_post !== null) {
       SEND_TH(direct_template + `<p>${confirm_post}</p>`);
     }
   }

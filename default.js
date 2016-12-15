@@ -13,10 +13,10 @@ const defaultjs = () => {
     );
     
     $('#options').append(
-      build_switch('darktheme', user.dark),
-      build_switch('vb', user.vb),
-      build_switch('vb_th', user.vb_th),
-      build_switch('vb_mtc', user.vb_mtc)
+      build_switch('darktheme', user.dark, 'Dark Theme'),
+      build_switch('vb', user.vb, 'Forum Export'),
+      build_switch('vb_th', user.vb_th, 'TH Direct Export'),
+      build_switch('vb_mtc', user.vb_mtc, 'MTC Direct Export')
     );
     
     $('input').change( () => {
@@ -41,12 +41,12 @@ const GOAL_WRITE = (goal) => {
   return html;
 };
 
-const build_switch = (name, prop) => {
+const build_switch = (id, prop, name) => {
   const html =
         `<tr style=" width: 100%;">` +
         `  <td class="switch">` +
-        `    <input id="${name}" type="checkbox" name="${name}" class="switch-checkbox" ${(prop ? 'checked' : '')}>` +
-        `    <label class="switch-label" for="${name}">` +
+        `    <input id="${id}" type="checkbox" name="${name}" class="switch-checkbox" ${(prop ? 'checked' : '')}>` +
+        `    <label class="switch-label" for="${id}">` +
         `      <span class="switch-inner"></span>` +
         `      <span class="switch-switch"></span>` +
         `    </label>` +
