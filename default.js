@@ -13,25 +13,13 @@ const defaultjs = () => {
     );
     
     $('#options').append(
-      build_switch('darktheme', user.dark, 'Dark Theme'),
-      build_switch('vb', user.vb, 'Forum Export'),
-      build_switch('vb_th', user.vb_th, 'TH Direct Export'),
-      build_switch('vb_mtc', user.vb_mtc, 'MTC Direct Export'),
-      build_switch('accept_next', user.accept_next, 'Accept Next Checked'),
-      build_switch('workspace', user.workspace, 'Workspace Expand + Scroll')
+      SWITCH_WRITE('darktheme', user.dark, 'Dark Theme'),
+      SWITCH_WRITE('vb', user.vb, 'Forum Export'),
+      SWITCH_WRITE('vb_th', user.vb_th, 'TH Direct Export'),
+      SWITCH_WRITE('vb_mtc', user.vb_mtc, 'MTC Direct Export'),
+      SWITCH_WRITE('accept_next', user.accept_next, 'Accept Next Checked'),
+      SWITCH_WRITE('workspace', user.workspace, 'Workspace Expand + Scroll')
     );
-    
-    $('input').change( () => {
-      user.goal = $('#goal').val();
-      user.dark = $('#darktheme').prop('checked');
-      user.vb = $('#vb').prop('checked');
-      user.vb_th = $('#vb_th').prop('checked');
-      user.vb_mtc = $('#vb_mtc').prop('checked');
-      user.accept_next = $('#accept_next').prop('checked');
-      user.workspace = $('#workspace').prop('checked');
-      chrome.runtime.sendMessage({msg: 'user', data: user});
-      console.log(user);
-    });
   });
 };
 
@@ -45,7 +33,7 @@ const GOAL_WRITE = (goal) => {
   return html;
 };
 
-const build_switch = (id, prop, name) => {
+const SWITCH_WRITE = (id, prop, name) => {
   const html =
         `<tr style=" width: 100%;">` +
         `  <td class="switch">` +
@@ -59,3 +47,15 @@ const build_switch = (id, prop, name) => {
         `</tr>`;
   return html;
 };
+
+$('html').on('change', 'input', function () {
+  user.goal = $('#goal').val();
+  user.dark = $('#darktheme').prop('checked');
+  user.vb = $('#vb').prop('checked');
+  user.vb_th = $('#vb_th').prop('checked');
+  user.vb_mtc = $('#vb_mtc').prop('checked');
+  user.accept_next = $('#accept_next').prop('checked');
+  user.workspace = $('#workspace').prop('checked');
+  
+  chrome.runtime.sendMessage({msg: 'user', data: user});
+});
