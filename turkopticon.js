@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 chrome.runtime.onMessage.addListener( (request) => {
   if (request.msg == 'turkopticon.js') {
-    RATINGS(request.data);
+    RATINGS_WRITE(request.data);
   }
 });
 
@@ -22,11 +22,11 @@ const TURKOPTICON = () => {
   chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
 };
 
-const RATINGS = (data) => {
+const RATINGS_WRITE = (data) => {
   const to = (id) => {
     const html = 
           `<div style="float:left;">` +
-          `  <div class="circle" style="background-color: ${color(data[id].attrs.pay)}; margin-right: 2px;">TO</div>` +
+          `  <div class="circle" style="background-color: ${color(data[id].attrs.pay)};">TO</div>` +
           `  <div class="ratings">` +
           rating('Fair', data[id].attrs.fair) +
           rating('Fast', data[id].attrs.fast) +
