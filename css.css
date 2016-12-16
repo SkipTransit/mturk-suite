@@ -119,6 +119,7 @@ ul.tab li a:focus, .active {
   color: #FFFFFF;
 }
 
+/* Turkopticon styling */
 .circle {
   cursor: default;
   width: 18px;
@@ -129,6 +130,7 @@ ul.tab li a:focus, .active {
   line-height: 18px;
   text-align: center;
   font-weight: bold;
+  margin-right: 2px;
 }
 
 .circle:hover + .ratings, .ratings:hover {
