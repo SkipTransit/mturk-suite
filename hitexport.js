@@ -154,7 +154,7 @@ const VB_EXPORT = (data) => {
         `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`;
 
   if (stuff.export === 'vb') {
-    copyToClipboard(template);
+    EXPORT_TO_CLIP(template);
   }
   
   if (stuff.export === 'vb_mtc') {
@@ -171,11 +171,11 @@ const VB_EXPORT = (data) => {
   }
 };
 
-const copyToClipboard = (template) => {
-  $('body').append(`<textarea id="copyToClipboard" style="opacity: 0;">${template}</textarea>`);
-  $('#copyToClipboard').select();
+const EXPORT_TO_CLIP = (template) => {
+  $('body').append(`<textarea id="clipboard" style="opacity: 0;">${template}</textarea>`);
+  $('#clipboard').select();
   document.execCommand('Copy');
-  $('#copyToClipboard').remove();
+  $('#clipboard').remove();
   alert('HIT export has been copied to your clipboard.');
 };
 
