@@ -140,7 +140,6 @@ let hits  = {};
 let requests = {};
 
 chrome.storage.local.get('hits', (data) => {
-  
   hits = data.hits || {};
   
   chrome.webRequest.onBeforeRequest.addListener( (data) => {
@@ -268,7 +267,6 @@ const sync_tpe = (tab) => {
           update_tpe();
           syncing_tpe.running = false;
           chrome.tabs.sendMessage(syncing_tpe.tab, {msg: 'sync_tpe_done', data: {current: page, total: last}});
-
         }
       }
       else if (err) {
