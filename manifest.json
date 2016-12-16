@@ -48,6 +48,7 @@
         "global.js",
         "sendhit.js",
         "hitexport.js",
+        "queue_value.js",
         "accept_next.js",
         "accept_links.js",
         "hitcapsule.js",
