@@ -17,7 +17,8 @@ const defaultjs = () => {
       build_switch('vb', user.vb, 'Forum Export'),
       build_switch('vb_th', user.vb_th, 'TH Direct Export'),
       build_switch('vb_mtc', user.vb_mtc, 'MTC Direct Export'),
-      build_switch('accept_next', user.accept_next, 'Accept Next Checked')
+      build_switch('accept_next', user.accept_next, 'Accept Next Checked'),
+      build_switch('workspace', user.workspace, 'Workspace Expand + Scroll')
     );
     
     $('input').change( () => {
@@ -27,6 +28,7 @@ const defaultjs = () => {
       user.vb_th = $('#vb_th').prop('checked');
       user.vb_mtc = $('#vb_mtc').prop('checked');
       user.accept_next = $('#accept_next').prop('checked');
+      user.workspace = $('#workspace').prop('checked');
       chrome.runtime.sendMessage({msg: 'user', data: user});
       console.log(user);
     });
