@@ -117,10 +117,10 @@ const VB_EXPORT = (data) => {
   const hit = hits[stuff.key];
   
   const attr = (type, rating) => {
-    let color = 'red';
-    if (rating > 1.99) {color = 'orange';}
-    if (rating > 2.99) {color = 'yellow';}
-    if (rating > 3.99) {color = 'green';}
+    let color = '#B30000';
+    if (rating > 1.99) {color = '#B37400';}
+    if (rating > 2.99) {color = '#B3B300';}
+    if (rating > 3.99) {color = '#00B300';}
     if (rating < 0.01) {color = 'grey'; rating = 'N/A';}
     return `[b][${type}: [color=${color}]${rating}[/color]][/b]`;
   };
