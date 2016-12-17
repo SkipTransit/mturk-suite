@@ -82,7 +82,6 @@
   
   "web_accessible_resources" : [
     "media/*",
-    "bootstrap/*",
     "todays_hits_menu.html"
   ],
   
