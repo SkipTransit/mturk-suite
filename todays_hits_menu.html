@@ -1,0 +1,41 @@
+<!doctype html>
+<html style="min-width: 250px; overflow-x: hidden;">
+  <head>
+    <meta charset="utf-8">
+    <!-- Scripts -->
+    <script src="jquery-3.1.1.min.js"></script>
+    <script src="todays_hits_menu.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <!-- Cascading Style Sheets -->
+    <link href="default.css" rel="stylesheet" media="screen">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="row">
+      <div class="col-xs-8">
+        <h4><b>Today's HIT Menu</b></h4>
+      </div>
+      <div style="margin-right: 15px;">
+        <div class="text-right">
+          <button id="export" type="button" class="btn btn-primary">Export</button>
+          <button id="sync" type="button" class="btn btn-primary">Sync</button>
+          <button id="close" type="button" class="btn btn-danger">Close</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#overview" aria-controls="overview" role="tab" data-toggle="tab">Overview</a></li>
+        <li role="presentation"><a href="#requester" aria-controls="requester" role="tab" data-toggle="tab">Requester Breakdown</a></li>
+        <li role="presentation"><a href="#detailed" aria-controls="detailed" role="tab" data-toggle="tab">Detailed Breakdown</a></li>
+      </ul>
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <div id="overview" role="tabpanel" class="tab-pane active">Loading Information...</div>
+        <div id="requester" role="tabpanel" class="tab-pane">Loading Information...</div>
+        <div id="detailed" role="tabpanel" class="tab-pane">Loading Information...</div>
+      </div>
+    </div>
+  </body>
+</html>
