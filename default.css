@@ -3,50 +3,93 @@
   background: #DDDDDD;
 }
 
-.header-fixed {
-    width: 100% 
+/* Fixed width table */
+.table-fixed {
+  width: 100%;   
 }
 
-.header-fixed > thead,
-.header-fixed > tbody,
-.header-fixed > thead > tr,
-.header-fixed > tbody > tr,
-.header-fixed > thead > tr > th,
-.header-fixed > tbody > tr > td {
-    display: block;
+.table-fixed,
+.table-fixed > thead,
+.table-fixed > tbody,
+.table-fixed > thead > tr,
+.table-fixed > tbody > tr,
+.table-fixed > thead > tr > th,
+.table-fixed > tbody > td {
+  display: block;
 }
 
-.header-fixed > tbody > tr:after,
-.header-fixed > thead > tr:after {
-    content: ' ';
-    display: block;
-    visibility: hidden;
-    clear: both;
+.table-fixed > thead > tr:after,
+.table-fixed > tbody > tr:after {
+  content: ' ';
+  display: block;
+  visibility: hidden;
+  clear: both;
 }
 
-.header-fixed > tbody {
-    overflow-y: auto;
-    height: 490px;
+.table-fixed > tbody {
+  overflow-y: scroll;
+  height: 485px;
 }
 
-.header-fixed > tbody > tr > td:nth-child(1),
-.header-fixed > thead > tr > th:nth-child(1) {
+.table-fixed > thead {
+  overflow-y: scroll;    
+}
+
+.table-fixed > thead::-webkit-scrollbar {
+  background-color: inherit;
+}
+
+.table-fixed > thead > tr > th:after,
+.table-fixed > tbody > tr > td:after {
+  content: ' ';
+  display: table-cell;
+  visibility: hidden;
+  clear: both;
+}
+
+.table-fixed > thead tr th,
+.table-fixed > tbody tr td {
+  float: left;    
+  word-wrap: break-word;     
+}
+
+/* Cell size for Requester table */
+.table-requester > tbody > tr > td:nth-child(1),
+.table-requester > thead > tr > th:nth-child(1) {
+    width: 70%;
+    float: left;
+}
+
+.table-requester > tbody > tr > td:nth-child(2),
+.table-requester > thead > tr > th:nth-child(2) {
+    width: 15%;
+    float: left;
+}
+.table-requester > tbody > tr > td:nth-child(3),
+.table-requester > thead > tr > th:nth-child(3) {
+    width: 15%;
+    float: left;
+}
+
+/* Cell size for Detailed table */
+.table-detailed > tbody > tr > td:nth-child(1),
+.table-detailed > thead > tr > th:nth-child(1) {
     width: 20%;
     float: left;
 }
 
-.header-fixed > tbody > tr > td:nth-child(2),
-.header-fixed > thead > tr > th:nth-child(2) {
+.table-detailed > tbody > tr > td:nth-child(2),
+.table-detailed > thead > tr > th:nth-child(2) {
     width: 50%;
     float: left;
 }
-.header-fixed > tbody > tr > td:nth-child(3),
-.header-fixed > thead > tr > th:nth-child(3) {
+.table-detailed > tbody > tr > td:nth-child(3),
+.table-detailed > thead > tr > th:nth-child(3) {
     width: 15%;
     float: left;
 }
-.header-fixed > tbody > tr > td:nth-child(4),
-.header-fixed > thead > tr > th:nth-child(4) {
+.table-detailed > tbody > tr > td:nth-child(4),
+.table-detailed > thead > tr > th:nth-child(4) {
     width: 15%;
     float: left;
 }

@@ -12,7 +12,7 @@ const GLOBALJS = () => {
       TPE_MENU_WRITE();
     }
     if (request.msg == 'close_tpe_menu') {
-      $('#tpe_menu').remove();
+      TPE_MENU_CLOSE();
     }
   });
 
@@ -47,12 +47,25 @@ const TPE_WRITE = (earnings, goal) => {
 };
 
 const TPE_MENU_WRITE = () => {
-  $('#tpe_menu').remove();
+  const html = `<iframe src="${chrome.runtime.getURL('todays_hits_menu.html')}" style="width: 100%; height: 100%;"></iframe>`;
+  
+  if ($('#tpe_menu').length) {
+    $('#tpe_menu').html(html);
+  }
+  else {
+    $('body').append(`<div id="tpe_menu">${html}</div>`);
+  }
+  /*
   $('body').append(
     `<div id="tpe_menu" style="padding: 1px; z-index: 99; position: fixed; width: 80%; height: 600px; left: 10%; top: 300px; margin-top: -250px;">` +
-    `  <iframe src="${chrome.runtime.getURL('todays_hits_menu.html')}" style="width: 100%; height: 100%;"></iframe>` +
+     +
     `</div>`
   );
+  */
+};
+
+const TPE_MENU_CLOSE = () => {
+  $('#tpe_menu').remove();
 };
 
 $('html').on('click', '#tpe', function () {

@@ -16,7 +16,7 @@ const WRITE = () => {
   );
   
   $('#requester').html(
-    '    <table class="table table-striped table-condensed">' +
+    '    <table class="table table-striped table-condensed table-bordered table-fixed table-requester">' +
     '      <thead>' +
     '        <tr>' +
     '          <th>Requester</th>' +
@@ -29,7 +29,7 @@ const WRITE = () => {
   );
   
   $('#detailed').html(
-    '    <table class="table table-striped table-condensed header-fixed">' +
+    '    <table class="table table-striped table-condensed table-bordered table-fixed table-detailed">' +
     '      <thead>' +
     '        <tr>' +
     '          <th>Requester</th>' +
@@ -125,6 +125,8 @@ const WRITE = () => {
         ;
       }
 
+      //hit.reqname = 'Kadauchi'; hit.reward = 295;
+      
       breakdown_html +=
         `<tr>` +
         `  <td><a href="${reqlink}" target="_blank">${hit.reqname}</td>` +
@@ -147,13 +149,13 @@ const WRITE = () => {
     // Detailed
     const sorted = Object.keys(hits).sort( (a, b) => {return hits[a].viewed - hits[b].viewed;});
     for (let i = 0; i < sorted.length; i ++) {
-      let hit = hits[sorted[i]], contact = '', reqlink = '', color = '', source = '', autoapp = '', pend = false,trclass = '';
+      let hit = hits[sorted[i]], contact = '', reqlink = '', color = '', source = '', autoapp = '', pend = false, trclass = '';
       
       if (hit.status.match(/Paid|Approved/)) {
-        color = 'green';
+        color = 'green';  trclass = 'success';
       }
       else if (hit.status.match(/Pending|Submitted/)) {
-        color = 'orange'; pend = true;
+        color = 'orange'; pend = true;  trclass = 'warning';
       }
       else if (hit.status.match(/Rejected/)) {
         color = 'red'; trclass = 'danger';
@@ -172,7 +174,7 @@ const WRITE = () => {
         }
       }
       
-      if (hit.reqname !== hit.reqid) {
+      if (hit.reqname !== hit.reqid) { //hit.reqname = 'Kadauchi';
         contact =
           `<a href="https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}&hitId=${hit.hitid}&requesterName=${hit.reqname}&subject=Regarding+Amazon+Mechanical+Turk+HIT+${hit.hitid}" target="_blank">` +
           `  <span class="glyphicon glyphicon-envelope" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Contact the requester about this HIT."></span>` +
@@ -182,7 +184,7 @@ const WRITE = () => {
           `<a href="https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit.reqid}" target="_blank">${hit.reqname}</a>`
         ;
       }
-      else {
+      else { //hit.reqname = 'Kadauchi';
         contact =
           `<span class="glyphicon glyphicon-envelope text-muted" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Sync to be able to contact requester."></span>`
         ;
@@ -191,13 +193,15 @@ const WRITE = () => {
         ;
       }
 
-     detailed_html +=
-       `<tr class="${status} ${trclass}">` +
-       `  <td>${contact} ${reqlink}</div></td>` +
-       `  <td>${source} ${hit.title}</td>` +
-       `  <td>${hit.reward}</td>` +
-       `  <td style="color: ${color};" data-toggle="tooltip" data-placement="left" title="${autoapp}">${hit.status.split(/\s/)[0]}</td>` +
-       `</tr>`
+      //hit.title = 'Go Away!'; hit.reward = '295.00';
+      
+      detailed_html +=
+        `<tr class="${status} ${trclass}">` +
+        `  <td>${contact} ${reqlink}</div></td>` +
+        `  <td>${source} ${hit.title}</td>` +
+        `  <td>${hit.reward}</td>` +
+        `  <td style="color: ${color};" data-toggle="tooltip" data-placement="left" title="${autoapp}">${hit.status.split(/\s/)[0]}</td>` +
+        `</tr>`
       ;
     }
   
