@@ -11,6 +11,9 @@ const GLOBALJS = () => {
     if (request.msg == 'sync_tpe_done') {
       TPE_MENU_WRITE();
     }
+    if (request.msg == 'close_tpe_menu') {
+      $('#tpe_menu').remove();
+    }
   });
 
   chrome.storage.onChanged.addListener( (changes) => {

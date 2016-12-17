@@ -36,6 +36,9 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   if (request.msg == 'send_th') {
     SEND_TH(sender.tab.id, request.data);
   }
+  if (request.msg == 'close_tpe_menu') {
+    chrome.tabs.sendMessage(sender.tab.id, {msg: 'close_tpe_menu'});
+  }
 });
 
 // Adds context menu to paste worker id in input fields

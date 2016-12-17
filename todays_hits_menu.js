@@ -75,14 +75,14 @@ const WRITE = () => {
         
     $('#overview').html(
       `<div style="font-size: 20px; line-height: normal;">` +
-      `<br>` +
-      `<span><b>${total}</b> HITs have been viewed, submitted or returned today.</span>` +
-      `<br>` +
-      `<br>` +
-      `<span><b>${submitted}</b> HITs have been submitted today for a total value of <b>$${submitted_pe.toFixed(2)}</b>.</span>` +
-      `<br>` +
-      `<br>` +
-      `<span><b>${approved}</b> HITs have been approved today for a total value of <b>$${approved_pe.toFixed(2)}</b>.</span>` +
+      `  <br>` +
+      `  <span><b>${total}</b> HITs have been viewed, submitted or returned today.</span>` +
+      `  <br>` +
+      `  <br>` +
+      `  <span><b>${submitted}</b> HITs have been submitted today for a total value of <b>$${submitted_pe.toFixed(2)}</b>.</span>` +
+      `  <br>` +
+      `  <br>` +
+      `  <span><b>${approved}</b> HITs have been approved today for a total value of <b>$${approved_pe.toFixed(2)}</b>.</span>` +
       `</div>`
     );
     
@@ -135,7 +135,7 @@ const WRITE = () => {
         `</tr>`
       ;
       
-     tpeexport +=
+      tpeexport +=
         `[tr]` +
         `[td][url=${reqlink}]${hit.reqname}[/url][/td]` +
         `[td]${hit.hits}[/td]` +
@@ -272,7 +272,6 @@ $('html').on('click', '#sync', function () {
 });
 
 $('html').on('click', '#close', function () {
-  // Need testers for this else will have to message background.js
-  $(window.self.top.document).find('#tpe_menu').remove();
+  chrome.runtime.sendMessage({msg: 'close_tpe_menu'});
 });
 
