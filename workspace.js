@@ -19,7 +19,7 @@ const WORKSPACE = () => {
     const $wrapper = $('#hit-wrapper');
     const $timer = $('#theTime');
 
-    if (user.workspace  && !$('[name="userCaptchaResponse"]').length) {
+    if (user.workspace && !$('[name="userCaptchaResponse"]').length) {
       if ($('input[name="isAccepted"][value="true"]').length) {
         if ($iframe.length) {
           $iframe.height('100vh');
