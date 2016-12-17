@@ -11,8 +11,6 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
 let tpeexport = '';
 
 const WRITE = () => {
-  
-  
   $('#overview').html(
     '<h3>Loading Information.....</h3>'
   );
@@ -31,7 +29,7 @@ const WRITE = () => {
   );
   
   $('#detailed').html(
-    '    <table class="table table-striped table-condensed">' +
+    '    <table class="table table-striped table-condensed header-fixed">' +
     '      <thead>' +
     '        <tr>' +
     '          <th>Requester</th>' +
