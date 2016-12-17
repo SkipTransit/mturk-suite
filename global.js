@@ -55,13 +55,6 @@ const TPE_MENU_WRITE = () => {
   else {
     $('body').append(`<div id="tpe_menu">${html}</div>`);
   }
-  /*
-  $('body').append(
-    `<div id="tpe_menu" style="padding: 1px; z-index: 99; position: fixed; width: 80%; height: 600px; left: 10%; top: 300px; margin-top: -250px;">` +
-     +
-    `</div>`
-  );
-  */
 };
 
 const TPE_MENU_CLOSE = () => {
