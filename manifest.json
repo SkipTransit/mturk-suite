@@ -12,7 +12,7 @@
   "browser_action": {
     "default_icon": "icon_128.png",
     "default_title": "Mturk Suite",
-    "default_popup" : "default.html"
+    "default_popup": "popup.html"
   },
 
   "background": {
@@ -81,7 +81,9 @@
   ],
   
   "web_accessible_resources" : [
-    "media/*"
+    "media/*",
+    "bootstrap/*",
+    "todays_hits_menu.html"
   ],
   
   "externally_connectable": {
