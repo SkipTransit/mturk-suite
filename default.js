@@ -8,11 +8,8 @@ const defaultjs = () => {
   chrome.storage.local.get('user', (data) => {
     user = data.user || {dark: true, goal: 20};
     
-    $('body').prepend(
-      GOAL_WRITE(user.goal || 20)
-    );
-    
     $('#options').append(
+      GOAL_WRITE(user.goal || 20),
       SWITCH_WRITE('darktheme', user.dark, 'Dark Theme'),
       SWITCH_WRITE('vb', user.vb, 'Forum Export'),
       SWITCH_WRITE('vb_th', user.vb_th, 'TH Direct Export'),
@@ -24,29 +21,33 @@ const defaultjs = () => {
 };
 
 const GOAL_WRITE = (goal) => {
-  const html =
-        `<div>` +
-        `  <label>Daily Goal: ` +
-        `    <input id="goal" type="number" value="${Number(goal).toFixed(2)}" style="width: 60px;">` +
-        `  </label>` +
-        `</div>`;
+  const html = `
+  <div class="form-inline">
+    <div class="input-group">
+      <div class="input-group-addon">Daily Goal</div>
+      <input id="goal" type="number" class="form-control" value="${Number(goal).toFixed(2)}">
+    </div>
+  </div>
+      `;
   return html;
 };
 
 const SWITCH_WRITE = (id, prop, name) => {
   const html =
-        `<tr style=" width: 100%;">` +
-        `  <td class="switch">` +
-        `    <input id="${id}" type="checkbox" name="${name}" class="switch-checkbox" ${(prop ? 'checked' : '')}>` +
-        `    <label class="switch-label" for="${id}">` +
-        `      <span class="switch-inner"></span>` +
-        `      <span class="switch-switch"></span>` +
-        `    </label>` +
-        `  </td>` +
-        `  <td>${name}</td>` +
-        `</tr>`;
+        `<div class="checkbox" style="padding: 2px; margin: 1px;">` +
+        `  <label>` +
+        `    <input id="${id}" type="checkbox" data-toggle="toggle" data-size="mini" data-onstyle="success" ${(prop ? 'checked' : '')}>` +
+        `${name}` +
+        `  </label>` +
+        `</div>`
   return html;
 };
+
+$('html').on('click', '.checkbox, label', function (e) {
+  if (e.target !== this) return;
+  
+  $(this).find('input[type="checkbox"]').bootstrapToggle('toggle')  
+});
 
 $('html').on('change', 'input', function () {
   user.goal = $('#goal').val();
