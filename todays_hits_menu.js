@@ -8,6 +8,9 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   }
 });
 
+// Toggle to hide what was worked on
+const testing = false;
+
 let tpeexport = '';
 
 const WRITE = () => {
@@ -46,7 +49,6 @@ const WRITE = () => {
     const hits = data.hits || {};
     let breakdown = {}, breakdown_html = '', detailed_html = '';
     
-    // Overview
     const total = Object.keys(hits).length;
     let submitted = 0, submitted_pe = 0;
     let approved = 0, approved_pe = 0;
@@ -62,7 +64,7 @@ const WRITE = () => {
         }
       
         if (hits[key].status.match(/Submitted|Pending/)) {
-          const apped = is_approved(hits[key].autoapp, hits[key].submitted);
+          const apped = IS_APPROVED(hits[key].autoapp, hits[key].submitted);
           if (apped) {
             approved ++;
             approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
@@ -70,7 +72,8 @@ const WRITE = () => {
         }
       }
     }
-        
+    
+    if (testing) {submitted_pe = 295; approved_pe = 295;}
     $('#overview').html(
       `<div style="font-size: 20px; line-height: normal;">` +
       `  <br>` +
@@ -84,7 +87,6 @@ const WRITE = () => {
       `</div>`
     );
     
-    // Breakdown
     tpeexport =
       `[b]Today\'s Projected Earnings: $${submitted_pe.toFixed(2)}[/b] (Exported from Mturk Suite)\n` +
       `[spoiler=Today's Projected Earnings Full Details][table][tr][th][b]Requester[/b][/th][th][b]HITs[/b][/th][th][b]Projected[/b][/th][/tr]` +
@@ -125,8 +127,7 @@ const WRITE = () => {
         ;
       }
 
-      //hit.reqname = 'Kadauchi'; hit.reward = 295;
-      
+      if (testing) {hit.reqname = 'Kadauchi'; hit.reward = 295;}
       breakdown_html +=
         `<tr>` +
         `  <td><a href="${reqlink}" target="_blank">${hit.reqname}</td>` +
@@ -146,7 +147,6 @@ const WRITE = () => {
     
     $('#requester_tbody').html(breakdown_html);
     
-    // Detailed
     const sorted = Object.keys(hits).sort( (a, b) => {return hits[a].viewed - hits[b].viewed;});
     for (let i = 0; i < sorted.length; i ++) {
       let hit = hits[sorted[i]], contact = '', reqlink = '', color = '', source = '', autoapp = '', pend = false, trclass = '';
@@ -167,14 +167,15 @@ const WRITE = () => {
       }
       if (pend) {
         if (hit.autoapp && hit.submitted) {
-          autoapp = approve_when(hit.autoapp, hit.submitted);
+          autoapp = APPROVES_WHEN(hit.autoapp, hit.submitted);
         }
         else {
           autoapp = 'There is no AA data for this HIT.';
         }
       }
       
-      if (hit.reqname !== hit.reqid) { //hit.reqname = 'Kadauchi';
+      if (hit.reqname !== hit.reqid) {
+        if (testing) {hit.reqname = 'Kadauchi';}
         contact =
           `<a href="https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}&hitId=${hit.hitid}&requesterName=${hit.reqname}&subject=Regarding+Amazon+Mechanical+Turk+HIT+${hit.hitid}" target="_blank">` +
           `  <span class="glyphicon glyphicon-envelope" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Contact the requester about this HIT."></span>` +
@@ -184,7 +185,8 @@ const WRITE = () => {
           `<a href="https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit.reqid}" target="_blank">${hit.reqname}</a>`
         ;
       }
-      else { //hit.reqname = 'Kadauchi';
+      else {
+        if (testing) {hit.reqname = 'Kadauchi';}
         contact =
           `<span class="glyphicon glyphicon-envelope text-muted" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Sync to be able to contact requester."></span>`
         ;
@@ -193,8 +195,7 @@ const WRITE = () => {
         ;
       }
 
-      //hit.title = 'Go Away!'; hit.reward = '295.00';
-      
+      if (testing) {hit.title = 'Go Away!'; hit.reward = '$295.00';}
       detailed_html +=
         `<tr class="${status} ${trclass}">` +
         `  <td>${contact} ${reqlink}</div></td>` +
@@ -210,7 +211,7 @@ const WRITE = () => {
   });  
 };
 
-const is_approved = (aa, sub) => {
+const IS_APPROVED = (aa, sub) => {
   const autoapp = Number(aa);
   const submit  = Number(sub);
   const current = new Date().getTime() / 1000;
@@ -218,7 +219,7 @@ const is_approved = (aa, sub) => {
   return remain > 0 ? false : true;
 };
 
-const approve_when = (aa, sub) => {
+const APPROVES_WHEN = (aa, sub) => {
   let willapp = 'This HIT will approve in ';
   const autoapp = Number(aa);
   const submit  = Number(sub);
