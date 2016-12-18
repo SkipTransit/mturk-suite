@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-  GLOBALJS();
+  if ($('a[href="/mturk/beginsignout"]').length) {
+    GLOBALJS();
+  }
 });
 
 const GLOBALJS = () => {
@@ -47,7 +49,7 @@ const TPE_WRITE = (earnings, goal) => {
 };
 
 const TPE_MENU_WRITE = () => {
-  const html = `<iframe src="${chrome.runtime.getURL('todays_hits_menu.html')}" style="width: 100%; height: 100%;"></iframe>`;
+  const html = `<iframe src="${chrome.runtime.getURL('todays_hits_menu.html')}" style="width: 100%; height: 100%;">`;
   
   if ($('#tpe_menu').length) {
     $('#tpe_menu').html(html);
