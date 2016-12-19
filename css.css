@@ -7,7 +7,7 @@
 }
 
 #tpe_goal_outer {
-  float:left;
+  float: left;
   margin-right: 3px;
   width: 150px;
   height: 7px;
@@ -38,6 +38,7 @@
   margin-top: -250px;
 }
 
+/* vB TH MTC export buttons */
 .export {
   display: inline-block;
   font-weight: normal;
@@ -57,78 +58,6 @@
   margin-right: 3px;
 }
 
-.menu {
-  display: inline-block;
-  font-weight: normal;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-  cursor: pointer;
-  border-radius: 0.214rem;
-  background-color: #DC8C1B;
-  background-image: linear-gradient(to bottom, #f7dfa5 0%, #f0c14b 100%);
-  background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF7DFA5', endColorstr='#FFF0C14B', GradientType=0);
-  border: 1px solid;
-  border-color: #a88734 #9c7e31 #846a29;
-  margin-right: 3px;
-}
-
-#tpe_menu table * {
-  color: #FFF;
-}
-
-#tpe_menu table td {
-  background-color: #22252a;
-}
-
-/* Style the list */
-ul.tab {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  
-  font-weight: bold;
-/*    border: 1px solid #ccc; */
- /*  background-color: #f1f1f1; */
-}
-
-/* Float the list items side by side */
-ul.tab li {float: left; width: calc(100% / 3);}
-
-/* Style the links inside the list items */
-ul.tab li a {
-  display: inline-block;
-  color: black;
-  text-align: center;
-  padding: 14px 0px;
-  text-decoration: none;
-  transition: 0.3s;
-  font-size: 17px;
-  color: #FFFFFF;
-  width: 100%;
-}
-
-/* Change background color of links on hover */
-ul.tab li a:hover {
-  background-color: #CCCCCC;
-  color: #000000;
-}
-
-/* Create an active/current tablink class */
-ul.tab li a:focus, .active {
-  background-color: #DC8C1b;
-  background-image: linear-gradient(to bottom, #f7dfa5 0%, #f0c14b 100%);
-  color: #000000 !important;
-}
-
-/* Style the tab content */
-.tabcontent {
-  display: none;
-  color: #FFFFFF;
-}
-
 /* Turkopticon styling */
 .circle {
   cursor: default;
@@ -144,16 +73,14 @@ ul.tab li a:focus, .active {
 }
 
 .circle:hover + .ratings, .ratings:hover {
-	display: block;
+  display: block;
 }
 
 .ratings {
   width: 300px;
   position:absolute;
   display: none;
-
   color: #ffffff;
   background-color: #373b44;
-  
   padding: 10px;
 }
