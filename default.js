@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-  defaultjs();
+  DEFAULT_JS();
 });
 
 let user;
 
-const defaultjs = () => {
+const DEFAULT_JS = () => {
   chrome.storage.local.get('user', (data) => {
     user = data.user || {dark: true, goal: 20};
     
@@ -21,14 +21,14 @@ const defaultjs = () => {
 };
 
 const GOAL_WRITE = (goal) => {
-  const html = `
-  <div class="form-inline">
-    <div class="input-group">
-      <div class="input-group-addon">Daily Goal</div>
-      <input id="goal" type="number" class="form-control" value="${Number(goal).toFixed(2)}">
-    </div>
-  </div>
-      `;
+  const html = 
+        `<div class="form-inline">` +
+        `  <div class="input-group">` +
+        `    <div class="input-group-addon">Daily Goal</div>` +
+        `    <input id="goal" type="number" class="form-control" value="${Number(goal).toFixed(2)}">` +
+        `  </div>` +
+        `</div>`
+  ;
   return html;
 };
 
@@ -45,7 +45,6 @@ const SWITCH_WRITE = (id, prop, name) => {
 
 $('html').on('click', '.checkbox, label', function (e) {
   if (e.target !== this) return;
-  
   $(this).find('input[type="checkbox"]').bootstrapToggle('toggle')  
 });
 
@@ -57,6 +56,5 @@ $('html').on('change', 'input', function () {
   user.vb_mtc = $('#vb_mtc').prop('checked');
   user.accept_next = $('#accept_next').prop('checked');
   user.workspace = $('#workspace').prop('checked');
-  
   chrome.runtime.sendMessage({msg: 'user', data: user});
 });
