@@ -107,7 +107,7 @@ const TODB_hitexport = (tab, id) => {
       chrome.tabs.sendMessage(tab, {msg: 'hitexport.js', data: request.result});
     }
     else {
-      chrome.tabs.sendMessage(tab, {msg: 'hitexport.js', data: {attrs: {comm: 'N/A', fair: 'N/A', fast: 'N/A', pay: 'N/A'}}});
+      chrome.tabs.sendMessage(tab, {msg: 'hitexport.js', data: {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0}});
     }
   };
 };

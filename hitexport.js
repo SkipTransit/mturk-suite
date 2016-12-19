@@ -131,7 +131,8 @@ const VB_EXPORT = (data) => {
         `([URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]): ` +
         `${attr('Pay', data.attrs.pay)} ${attr('Fair', data.attrs.fair)} ` +
         `${attr('Comm', data.attrs.comm)} ${attr('Fast', data.attrs.fast)} ` +
-        `[Reviews: ${data.reviews}] [ToS: ${data.tos_flags === 0 ? data.tos_flags : '[color=red]' + data.tos_flags + '[/color]'}]\n` +
+        `[b][Reviews: ${data.reviews}][/b] ` +
+        `[b][ToS: ${data.tos_flags === 0 ? '[color=green]' + data.tos_flags : '[color=red]' + data.tos_flags}[/color]][/b]\n` +
         `[b]Description:[/b] ${hit.desc}\n` +
         `[b]Time:[/b] ${hit.time}\n` +
         `[b]HITs Available:[/b] ${hit.avail}\n` +
@@ -145,7 +146,8 @@ const VB_EXPORT = (data) => {
         `<p>([URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]): ` +
         `${attr('Pay', data.attrs.pay)} ${attr('Fair', data.attrs.fair)} ` +
         `${attr('Comm', data.attrs.comm)} ${attr('Fast', data.attrs.fast)} ` +
-        `[Reviews: ${data.reviews}] [ToS: ${data.tos_flags === 0 ? data.tos_flags : '[color=red]' + data.tos_flags + '[/color]'}]</p>` +
+        `[b][Reviews: ${data.reviews}][/b] ` +
+        `[b][ToS: ${data.tos_flags === 0 ? '[color=green]' + data.tos_flags : '[color=red]' + data.tos_flags}[/color]][/b]\n</p>` +
         `<p>[b]Description:[/b] ${hit.desc}</p>` +
         `<p>[b]Time:[/b] ${hit.time}</p>` +
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
