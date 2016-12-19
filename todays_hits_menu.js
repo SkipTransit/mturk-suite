@@ -163,7 +163,7 @@ const WRITE = () => {
       else if (hit.status.match(/Accepted|Previewed/)) {
       }
       if (hit.source) {
-        source = `<a href="${hit.source}" target="_blank"><span class="glyphicon glyphicon-new-window" aria-hidden="true"></span></a> `;
+        source = `<a href="${hit.source}" target="_blank"><span class="glyphicon glyphicon-new-window" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Opens the HIT source in a new window."></span></a> `;
       }
       if (pend) {
         if (hit.autoapp && hit.submitted) {
