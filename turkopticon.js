@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   if ($('a[href*="requesterId="]').length) {
-    TURKOPTICON();
+    TURKOPTICON_JS();
   }
 });
 
@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener( (request) => {
   }
 });
 
-const TURKOPTICON = () => {
+const TURKOPTICON_JS = () => {
   const ids = [];
 
   for (let element of $('a[href*="requesterId="]')) {
