@@ -1,32 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
   if ($('a[href="/mturk/beginsignout"]').length) {
-    GLOBALJS();
+    GLOBAL_JS();
   }
 });
 
-const GLOBALJS = () => {
+chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
+  if (request.msg == 'sync_tpe_done') {
+    TPE_MENU_WRITE();
+  }
+  if (request.msg == 'close_tpe_menu') {
+    TPE_MENU_CLOSE();
+  }
+});
+
+chrome.storage.onChanged.addListener( (changes) => {
+  for (let key in changes) {
+    if (key === 'tpe') {
+      TPE_WRITE(
+        changes[key].newValue.tpe !== undefined ? changes[key].newValue.tpe : changes[key].oldValue.tpe,
+        changes[key].newValue.goal !== undefined ? changes[key].newValue.goal : changes[key].oldValue.goal
+      );
+    }
+  }
+});
+
+const GLOBAL_JS = () => {
   chrome.storage.local.get('tpe', (data) => {
     TPE_WRITE(data.tpe.tpe || 0, data.tpe.goal || 20);
-  });
-  
-  chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
-    if (request.msg == 'sync_tpe_done') {
-      TPE_MENU_WRITE();
-    }
-    if (request.msg == 'close_tpe_menu') {
-      TPE_MENU_CLOSE();
-    }
-  });
-
-  chrome.storage.onChanged.addListener( (changes) => {
-    for (let key in changes) {
-      if (key === 'tpe') {
-        TPE_WRITE(
-          changes[key].newValue.tpe !== undefined ? changes[key].newValue.tpe : changes[key].oldValue.tpe,
-          changes[key].newValue.goal !== undefined ? changes[key].newValue.goal : changes[key].oldValue.goal
-        );
-      }
-    }
   });
 };
 
