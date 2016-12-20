@@ -3,12 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 chrome.extension.onMessage.addListener( (request) => {
+  if (request.msg == 'turkopticon.js') {
+    console.log(request.data);
+    HITS_WRITE(keys, request.data);
+  }
   if (request.msg == 'hitexport.js') {
     VB_EXPORT(request.data);
   }
 });
 
 let hitlog = {};
+let keys = [];
 
 const stuff = {key: null, export: null};
 
@@ -86,7 +91,7 @@ const FIND = () => {
     $.get(url, (data) => { FIND_OLD(data); });
   }
 };
-  
+
 const SEARCH_TYPE = () => {
   if (CONFIG.sort_by === 'latest') {
     return 'LastUpdatedTime%3A1';
@@ -100,7 +105,7 @@ const SEARCH_TYPE = () => {
 };
 
 const FIND_OLD = (data, timeis) => {
-  var keys = [], log_keys = [], to = [], logged_in;
+  let ids = []; keys = [];
 
   var $hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"]').eq(0).children('tbody').children('tr');
   
@@ -180,58 +185,93 @@ const FIND_OLD = (data, timeis) => {
         masters  : masters.trim(),
         key      : key.trim(),
         tolink   : to_link.trim(),
-        to       : {comm: 0, fair: 0, fast: 0, pay : 0}
+        to       : {comm: 0, fair: 0, fast: 0, pay : 0},
+        new      : true
       };
-      //to.push([key, req_id]);
-      //log_keys.push(key);
-      //_color_db(hitlog[key]);
     }
     else {
       hitlog[key].avail = avail.trim();
+      hitlog[key].new = false;
     }
+    ids.push(req_id);
   }
   if ($hits.length) {
-    HITS_WRITE(keys);
+    chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
+    //HITS_WRITE(keys);
   }
   else {
     setTimeout( () => { FIND(); }, 2500);
   }
 };
 
-const HITS_WRITE = (keys) => {
-  let html = '';
+const HITS_WRITE = (keys, data) => {
+  let found_html = '', logged_html = '';
   for (let i = 0; i < keys.length; i ++) {
     const hit = hitlog[keys[i]];
-    html += 
-      `<tr>` +
-          `  <td>` +
-          `    <div class="btn-group btn-group-xs">` +
-          `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this requester.">R</button>` +
-          `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this HIT.">T</button>` +
-          `    </div>` +
-          `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
-          `  </td>` +
-          `  <td>` +
-          `<div class="btn-group btn-group-xs">` +
-          `<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
-          `Export <span class="caret"></span>` +
-          `</button>` +
-          `<ul class="dropdown-menu">` +
-          `<li><a class="vb" href="#" data-key="${hit.key}">Forum</a></li>` +
-          `<li><a class="vb_th" href="#" data-key="${hit.key}">TH Direct</a></li>` +
-          `<li><a class="vb_mtc" href="#" data-key="${hit.key}">MTC Direct</a></li>` +
-          `</ul>` +
-          `</div>` +
-          `    <a href="${hit.prevlink}" target="_blank">${hit.title}</a>` +
-          `  </td>` +
-          `  <td>${hit.avail}</td>` +
-          `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
-          `  <td>0.00</td>` +
-          `  <td>?</td>` +
-          `</tr>`
+    const tr_color = TO_COLOR(data[hit.reqid].attrs.pay);
+    
+    found_html += 
+      `<tr class="${tr_color}">` +
+      `  <td>` +
+      `    <div class="btn-group btn-group-xs">` +
+      `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this requester.">R</button>` +
+      `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this HIT.">T</button>` +
+      `    </div>` +
+      `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
+      `  </td>` +
+      `  <td>` +
+      `    <div class="btn-group btn-group-xs">` +
+      `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
+      `        Export <span class="caret"></span>` +
+      `      </button>` +
+      `      <ul class="dropdown-menu">` +
+      `        <li><a class="vb" href="#" data-key="${hit.key}">Forum</a></li>` +
+      `        <li><a class="vb_th" href="#" data-key="${hit.key}">TH Direct</a></li>` +
+      `        <li><a class="vb_mtc" href="#" data-key="${hit.key}">MTC Direct</a></li>` +
+      `      </ul>` +
+      `    </div>` +
+      `    <a href="${hit.prevlink}" target="_blank">${hit.title}</a>` +
+      `  </td>` +
+      `  <td>${hit.avail}</td>` +
+      `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+      `  <td>${data[hit.reqid].attrs.pay}</td>` +
+      `  <td>?</td>` +
+      `</tr>`
     ;
+    
+    if (hit.new) {
+      logged_html += 
+        `<tr class="${tr_color}">` +
+        `  <td>12:00am</td>` +
+        `  <td>` +
+        `    <div class="btn-group btn-group-xs">` +
+        `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this requester.">R</button>` +
+        `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this HIT.">T</button>` +
+        `    </div>` +
+        `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
+        `  </td>` +
+        `  <td>` +
+        `    <div class="btn-group btn-group-xs">` +
+        `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
+        `        Export <span class="caret"></span>` +
+        `      </button>` +
+        `      <ul class="dropdown-menu">` +
+        `        <li><a class="vb" href="#" data-key="${hit.key}">Forum</a></li>` +
+        `        <li><a class="vb_th" href="#" data-key="${hit.key}">TH Direct</a></li>` +
+        `        <li><a class="vb_mtc" href="#" data-key="${hit.key}">MTC Direct</a></li>` +
+        `      </ul>` +
+        `    </div>` +
+        `    <a href="${hit.prevlink}" target="_blank">${hit.title}</a>` +
+        `  </td>` +
+        `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+        `  <td>${data[hit.reqid].attrs.pay}</td>` +
+        `  <td>?</td>` +
+        `</tr>`
+      ;
+    }
   }
-  $('#found_tbody').html(html);
+  $('#found_tbody').html(found_html);
+  $('#logged_tbody').prepend(logged_html);
   $('[data-toggle="tooltip"]').tooltip({container: 'body'});
   
   if ($('#scan').text() === 'Stop') {
@@ -277,6 +317,15 @@ const SAVE_CONFIG = () => {
   $(CONFIG.hide_nl ? '.nl' : '.nl_hidden').toggleClass('nl nl_hidden');
   $(CONFIG.hide_bl ? '.bl' : '.bl_hidden').toggleClass('bl bl_hidden');
   $(CONFIG.hide_m ? '.m' : '.m_hidden').toggleClass('m m_hidden');
+};
+
+const TO_COLOR = (rating) => {
+  let color = 'toLow';
+  if (rating > 1.99) {color = 'toAverage';}
+  if (rating > 2.99) {color = 'toGood';}
+  if (rating > 3.99) {color = 'toHigh';}
+  if (rating < 0.01) {color = 'toNone';}
+  return color;
 };
 
 const VB_EXPORT = (data) => {
