@@ -76,6 +76,7 @@
     "storage",
     "webRequest",
     "contextMenus",
+    "clipboardRead",
     "clipboardWrite",
     "<all_urls>"
   ],
