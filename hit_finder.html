@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>HIT Finder</title>
+    <!-- Scripts -->
+    <script src="jquery-3.1.1.min.js"></script>
+    <script src="hit_finder.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="bootstrap/toggle/js/bootstrap-toggle.min.js"></script>
+    <!-- Cascading Style Sheets -->
+    <link href="hit_finder.css" rel="stylesheet" media="screen">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="bootstrap/toggle/css/bootstrap-toggle.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div>
+      <button id="scan" type="button" class="btn btn-xs btn-success">Start</button>
+      <button id="block_list" type="button" class="btn btn-xs btn-primary">Block List</button>
+      <button id="include_list" type="button" class="btn btn-xs btn-primary">Include List</button>
+      <button id="settings" type="button" class="btn btn-xs btn-primary">Settings</button>
+    </div>
+    
+     <br>
+    
+    <div class="form-inline">
+      <div class="input-group input-group-sm">
+        <div class="input-group-addon">Scan Delay</div>
+        <input id="scan_delay" type="number" class="form-control" value="0" style="width: 70px;">
+      </div>
+      <div class="input-group input-group-sm">
+        <div class="input-group-addon">Min Reward</div>
+        <input id="min_reward" type="number" class="form-control" value="0.00" style="width: 70px;">
+      </div>
+      <div class="input-group input-group-sm">
+        <div class="input-group-addon">Min Avail</div>
+        <input id="min_avail" type="number" class="form-control" value="0" style="width: 70px;">
+      </div>
+      <div class="input-group input-group-sm">
+        <div class="input-group-addon">Min TO</div>
+        <input id="min_to" type="number" class="form-control" value="0.00" style="width: 70px;">
+      </div>
+      <div class="input-group input-group-sm">
+        <div class="input-group-addon">Size</div>
+        <input id="size" type="number" class="form-control" value="25" style="width: 70px;">
+      </div>
+      <label style="font-weight: 400;">
+        Sort by:
+        <select id="sort_by" value="latest">
+          <option value="latest">Latest</option>
+          <option value="most">Most Available</option>
+          <option value="reward">Reward (Most)</option>
+        </select>
+      </label>
+    </div>
+    
+    <div class="form-inline" style="margin-top: 5px;">
+      <!-- qualified -->
+      <div class="form-group">
+        <input id="qualified" name="qualified" type="checkbox" autocomplete="off" />
+        <div class="btn-group btn-group-sm">
+          <label for="qualified" class="btn btn-default">
+            <span class="glyphicon glyphicon-ok"></span>
+            <span> </span>
+          </label>
+          <label for="qualified" class="btn btn-default active">Qualified</label>
+        </div>
+      </div>
+      
+      <!-- enable_to -->
+      <div class="form-group">
+        <input id="enable_to" name="enable_to" type="checkbox" autocomplete="off" />
+        <div class="btn-group btn-group-sm">
+          <label for="enable_to" class="btn btn-default">
+            <span class="glyphicon glyphicon-ok"></span>
+            <span> </span>
+          </label>
+          <label for="enable_to" class="btn btn-default active">Enable TO</label>
+        </div>
+      </div>
+      
+      <!-- hide_nl -->
+      <div class="form-group">
+        <input id="hide_nl" name="hide_nl" type="checkbox" autocomplete="off" />
+        <div class="btn-group btn-group-sm">
+          <label for="hide_nl" class="btn btn-default">
+            <span class="glyphicon glyphicon-ok"></span>
+            <span> </span>
+          </label>
+          <label for="hide_nl" class="btn btn-default active">Hide Non Include List</label>
+        </div>
+      </div>
+      
+      <!-- hide_bl -->
+      <div class="form-group">
+        <input id="hide_bl" name="hide_bl" type="checkbox" autocomplete="off" />
+        <div class="btn-group btn-group-sm">
+          <label for="hide_bl" class="btn btn-default">
+            <span class="glyphicon glyphicon-ok"></span>
+            <span> </span>
+          </label>
+          <label for="hide_bl" class="btn btn-default active">Hide Block List</label>
+        </div>
+      </div>
+      
+      <!-- hide_m -->
+      <div class="form-group">
+        <input id="hide_m" name="hide_m" type="checkbox" autocomplete="off" />
+        <div class="btn-group btn-group-sm">
+          <label for="hide_m" class="btn btn-default">
+            <span class="glyphicon glyphicon-ok"></span>
+            <span> </span>
+          </label>
+          <label for="hide_m" class="btn btn-default active">Hide Masters</label>
+        </div>
+      </div>
+      
+      <!-- enable_to -->
+      <div class="form-group">
+        <input id="new_hit" name="new_hit" type="checkbox" autocomplete="off" />
+        <div class="btn-group btn-group-sm">
+          <label for="new_hit" class="btn btn-default">
+            <span class="glyphicon glyphicon-ok"></span>
+            <span> </span>
+          </label>
+          <label for="new_hit" class="btn btn-default active">New HIT Sound</label>
+        </div>
+      </div>
+      
+      <!-- enable_to -->
+      <div class="form-group">
+        <input id="pushbullet" name="pushbullet" type="checkbox" autocomplete="off" />
+        <div class="btn-group btn-group-sm">
+          <label for="pushbullet" class="btn btn-default">
+            <span class="glyphicon glyphicon-ok"></span>
+            <span> </span>
+          </label>
+          <label for="pushbullet" class="btn btn-default active">Pushbullet</label>
+        </div>
+      </div>
+    </div>
+    
+    <br>
+    
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading">Found HITs</div>
+      <!-- Found HITs -->
+      <table class="table table-striped table-condensed table-bordered">
+        <thead>
+          <tr>
+            <th>Requester</th>
+            <th>Project</th>
+            <th>Tasks</th>
+            <th>Accept</th>
+            <th>TO</th>
+            <th>M</th>
+          </tr>
+        </thead>
+        <tbody id="found_tbody"></tbody>
+      </table>
+    </div>
+    
+    <br>
+    
+    <div class="panel panel-default">
+      <!-- Default panel contents -->
+      <div class="panel-heading">Logged HITs</div>
+      <!-- Table -->
+      <table class="table">
+      </table>
+    </div>
+  </body>
+</html>
