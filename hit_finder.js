@@ -50,6 +50,7 @@ $('html').on('click', '#scan', function () {
   }
 });
 
+// Block List Stuff
 $('html').on('click', '#block_list', function () {
   SHOW_BLOCK_LIST();
 });
@@ -82,7 +83,11 @@ $('html').on('click', '#export_block_list', function () {
   EXPORT_BLOCK_LIST();
 });
 
+$('html').on('click', '.rt_block', function () {
+  RT_ADD_BLOCK_LIST($(this).data('term'), $(this).data('name'));
+});
 
+// Setting Stuff
 $('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet', function () {
   SAVE_CONFIG();
 });
@@ -91,6 +96,7 @@ $('html').on('input', '#scan_delay, #min_reward, #min_avail, #min_to, #size', fu
   SAVE_CONFIG();
 });
 
+// Export Stuff
 $('html').on('click', '.vb', function () {
   const key = $(this).data('key');
   EXPORT.key = key;
@@ -110,6 +116,12 @@ $('html').on('click', '.vb_mtc', function () {
   EXPORT.key = key;
   EXPORT.type = 'vb_mtc';
   chrome.runtime.sendMessage({msg: 'hitexport', data: hitlog[key].reqid});
+});
+
+$(document).on('show.bs.modal', '.modal', function (event) {
+  const zindex = 1040 + (10 * $('.modal:visible').length);
+  $(this).css('z-index', zindex);
+  setTimeout( () => { $('.modal-backdrop').not('.modal-stack').css('z-index', zindex - 1).addClass('modal-stack'); }, 0);
 });
 
 const FIND = () => {
@@ -244,8 +256,8 @@ const HITS_WRITE = (keys, data) => {
       // Requester
       `  <td>` +
       `    <div class="btn-group btn-group-xs">` +
-      `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this requester.">R</button>` +
-      `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this HIT.">T</button>` +
+      `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this requester." data-term="${hit.reqid}" data-name="${hit.reqname}">R</button>` +
+      `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this HIT." data-term="${hit.groupid}" data-name="${hit.title}">T</button>` +
       `    </div>` +
       `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
       `  </td>` +
@@ -282,8 +294,8 @@ const HITS_WRITE = (keys, data) => {
         // Requester
         `  <td>` +
         `    <div class="btn-group btn-group-xs">` +
-        `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this requester.">R</button>` +
-        `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this HIT.">T</button>` +
+        `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this requester." data-term="${hit.reqid}" data-name="${hit.reqname}">R</button>` +
+        `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this HIT." data-term="${hit.groupid}" data-name="${hit.title}">T</button>` +
         `    </div>` +
         `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
         `  </td>` +
@@ -379,6 +391,7 @@ const TIME = () => {
   return `${hours}:${minutes}${ampm}`;
 };
 
+// Block List Stuff
 const IS_BLOCKED = (hit) => {
   for (let key in BLOCK_LIST) {
     const bl = BLOCK_LIST[key];
@@ -393,6 +406,12 @@ const SHOW_BLOCK_LIST = () => {
 };
 
 const ADD_BLOCK_LIST = () => {
+  $('#block_list_add').modal('show');
+};
+
+const RT_ADD_BLOCK_LIST = (term, name) => {
+  $('#save_block_list_term').val(term);
+  $('#save_block_list_name').val(name);
   $('#block_list_add').modal('show');
 };
 
@@ -491,16 +510,6 @@ const EXPORT_BLOCK_LIST = () => {
   COPY_TO_CLIP(localStorage.getItem('BLOCK_LIST'), 'Your block list has been copied to your clipboard.');
 };
 
-const VALID_JSON = (data) => {
-  try {
-    JSON.parse(data);
-    return true;
-  }
-  catch (e) {
-    return false;
-  }
-};
-
 // Export Stuff
 const VB_EXPORT = (data) => {
   const hit = hitlog[EXPORT.key];
@@ -571,10 +580,21 @@ const EXPORT_TO_MTC = (template) => {
   chrome.runtime.sendMessage({msg: 'send_mtc', data: template});
 };
 
+// Random Stuff
 const COPY_TO_CLIP = (string, message) => {
   $('body').append(`<textarea id="clipboard" style="opacity: 0;">${string}</textarea>`);
   $('#clipboard').select();
   document.execCommand('Copy');
   $('#clipboard').remove();
   alert(message);
+};
+
+const VALID_JSON = (data) => {
+  try {
+    JSON.parse(data);
+    return true;
+  }
+  catch (e) {
+    return false;
+  }
 };
