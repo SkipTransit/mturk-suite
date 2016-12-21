@@ -26,17 +26,6 @@
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "jquery-3.1.1.min.js", 
-        "all.js"
-      ],
-      "run_at": "document_start"
-    },
-    
-    {
-      "matches": [
         "https://www.mturk.com/*"
       ],
       "css": [
@@ -76,8 +65,6 @@
     "storage",
     "webRequest",
     "contextMenus",
-    "clipboardRead",
-    "clipboardWrite",
     "<all_urls>"
   ],
   

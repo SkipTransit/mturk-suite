@@ -46,10 +46,18 @@ chrome.contextMenus.create({
   title: "Paste Mturk Worker ID",
   "type" : "normal",
   contexts: ["editable"],
-  onclick: () => {
-    chrome.tabs.query({"active": true, "currentWindow": true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, {msg: 'WorkerID', "data": dashboard.id});
+  onclick: (info, tab) => {
+    console.log(info);
+    console.log(tab);
+    chrome.tabs.executeScript(tab.id, {
+        frameId: info.frameId,
+        code: '// This code runs in one frame, specified via frameId \n' +
+              `document.activeElement.value += '${dashboard.id}';`
     });
+    //chrome.tabs.sendMessage(info.frameId, {msg: 'WorkerID', "data": dashboard.id});
+    //chrome.tabs.query({"active": true, "currentWindow": true}, (tabs) => {
+    //  chrome.tabs.sendMessage(tabs[0].id, {msg: 'WorkerID', "data": dashboard.id});
+    //});
   }
 });
 
