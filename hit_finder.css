@@ -45,11 +45,18 @@
   font-weight: bold;
 }
 
-/*
-a, td {
-  color: #000 !important;
+.bl td {
+  border: 2px solid #FF0000 !important;
 }
-*/
+
+.bl_hidden {
+  display: none;
+}
+
 a:link, a:visited {
   color : #224f77;
+}
+
+.vb, .vb_th, .vb_mtc {
+  cursor: pointer;
 }

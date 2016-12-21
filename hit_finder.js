@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   SET_CONFIG();
+  BLOCK_LIST_WRITE();
 });
 
 chrome.extension.onMessage.addListener( (request) => {
@@ -15,7 +16,9 @@ chrome.extension.onMessage.addListener( (request) => {
 let hitlog = {};
 let keys = [];
 
-const stuff = {key: null, export: null};
+const BLOCK_LIST = JSON.parse(localStorage.getItem('BLOCK_LIST')) || {};
+
+const EXPORT = {key: null, type: null};
 
 const LOADED_CONFIG = JSON.parse(localStorage.getItem('CONFIG')) || {};
 
@@ -47,6 +50,39 @@ $('html').on('click', '#scan', function () {
   }
 });
 
+$('html').on('click', '#block_list', function () {
+  SHOW_BLOCK_LIST();
+});
+
+$('html').on('click', '#add_block_list', function () {
+  ADD_BLOCK_LIST();
+});
+
+$('html').on('click', '#save_block_list', function () {
+  SAVE_BLOCK_LIST();
+});
+
+$('html').on('click', '.bl_item', function () {
+  EDIT_BLOCK_LIST($(this).data('key'));
+});
+
+$('html').on('click', '#save_edit_block_list', function () {
+  SAVE_EDIT_BLOCK_LIST();
+});
+
+$('html').on('click', '#delete_edit_block_list', function () {
+  DELETE_EDIT_BLOCK_LIST();
+});
+
+$('html').on('click', '#import_block_list', function () {
+  IMPORT_BLOCK_LIST();
+});
+
+$('html').on('click', '#export_block_list', function () {
+  EXPORT_BLOCK_LIST();
+});
+
+
 $('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet', function () {
   SAVE_CONFIG();
 });
@@ -57,22 +93,22 @@ $('html').on('input', '#scan_delay, #min_reward, #min_avail, #min_to, #size', fu
 
 $('html').on('click', '.vb', function () {
   const key = $(this).data('key');
-  stuff.key = key;
-  stuff.export = 'vb';
+  EXPORT.key = key;
+  EXPORT.type = 'vb';
   chrome.runtime.sendMessage({msg: 'hitexport', data: hitlog[key].reqid});
 });
 
 $('html').on('click', '.vb_th', function () {
   const key = $(this).data('key');
-  stuff.key = key;
-  stuff.export = 'vb_th';
+  EXPORT.key = key;
+  EXPORT.type = 'vb_th';
   chrome.runtime.sendMessage({msg: 'hitexport', data: hitlog[key].reqid});
 });
 
 $('html').on('click', '.vb_mtc', function () {
   const key = $(this).data('key');
-  stuff.key = key;
-  stuff.export = 'vb_mtc';
+  EXPORT.key = key;
+  EXPORT.type = 'vb_mtc';
   chrome.runtime.sendMessage({msg: 'hitexport', data: hitlog[key].reqid});
 });
 
@@ -104,26 +140,23 @@ const SEARCH_TYPE = () => {
   }
 };
 
-const FIND_OLD = (data, timeis) => {
+const FIND_OLD = (data) => {
   let ids = []; keys = [];
 
   var $hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"]').eq(0).children('tbody').children('tr');
   
-  for (var i = 0; i < $hits.length; i ++) {
+  for (let i = 0; i < $hits.length; i ++) {
     var $hit = $hits.eq(i);
 
-    var req_name, req_id, req_link, to_link;
-
-    var req = $hit.find('a[href^="/mturk/searchbar?selectedSearchType=hitgroups&requesterId="]');
+    let req_id, req_name, req_link, to_link;
+    var req = $hit.find('a[href*="requesterId="]');
     if (req.length) {
-      logged_in = true;
-      req_name  = $hit.find('span.requesterIdentity').text().trim();
       req_id    = req.prop('href').split('requesterId=')[1];
+      req_name  = $hit.find('span.requesterIdentity').text().trim();
       req_link  = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=' + req_id;
       to_link   = 'https://turkopticon.ucsd.edu/' + req_id;
     }
     else {
-      logged_in = false;
       req_name  = $hit.find('span.requesterIdentity').text().trim();
       req_id    = $hit.find('span.requesterIdentity').text().trim();
       req_link  = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=' + req_id.replace(/ /g, '+');
@@ -131,30 +164,18 @@ const FIND_OLD = (data, timeis) => {
       to_link   = 'https://turkopticon.ucsd.edu/main/php_search?field=name&query=' + req_id.replace(/ /g, '+');
     }
 
-    var group_id, prev_link, pand_link;
+    const group_id = $hit.find('a[href*="roupId="]').length ? $hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1] : null;
+    const prev_link = `https://www.mturk.com/mturk/preview?groupId=${group_id}`;
+    const pand_link = `https://www.mturk.com/mturk/previewandaccept?groupId=${group_id}`;
 
-    var prev = $hit.find('a[href*="groupId="]');
-    if (prev.length) {
-      group_id  = prev.prop('href').split('groupId=')[1].split('&')[0];
-      prev_link = 'https://www.mturk.com/mturk/preview?groupId=' + group_id;
-      pand_link = 'https://www.mturk.com/mturk/previewandaccept?groupId=' + group_id;
-    }
-    else {
-      group_id  = 'na';
-      prev_link = req_link;
-      pand_link = req_link;
-    }
+    const title  = $hit.find('a.capsulelink').text();
+    const desc   = $hit.find('.capsule_field_title:contains(Description:)').next().text();
+    const time   = $hit.find('.capsule_field_title:contains(Time Allotted:)').next().text();
+    const reward = $hit.find('.capsule_field_title:contains(Reward:)').next().text();
+    const avail  = $hit.find('.capsule_field_title:contains(HITs Available:)').next().text() || 'N/A';
 
-    var title  = $hit.find('a.capsulelink').text();
-    var desc   = $hit.find('.capsule_field_title:contains(Description:)').next().text();
-    var time   = $hit.find('.capsule_field_title:contains(Time Allotted:)').next().text();
-    var reward = $hit.find('.capsule_field_title:contains(Reward:)').next().text();
-    var avail  = $hit.find('.capsule_field_title:contains(HITs Available:)').next().text() || 'N/A';
-
-    var quals   = $hit.find('td[style="padding-right: 2em; white-space: nowrap;"]');
-    var	qualif  = 'None';
-    var	masters = 'N';
-
+    const quals   = $hit.find('td[style="padding-right: 2em; white-space: nowrap;"]');
+    let	qualif  = 'None;', masters = 'N';
     if (quals.length) {
       qualif = '';
       for (var j = 0; j < quals.length; j ++) {
@@ -165,13 +186,13 @@ const FIND_OLD = (data, timeis) => {
       }
     }
 
-    var key = req_id.trim() + title.trim() + reward.trim() + group_id.trim();
+    var key = group_id || req_id.trim() + title.trim() + reward.trim();
     keys.push(key);
 
     if (!hitlog[key]) {
       hitlog[key] = {
-        reqname  : req_name.trim(),
         reqid    : req_id.trim(),
+        reqname  : req_name.trim(),
         reqlink  : req_link.trim(),
         groupid  : group_id.trim(),
         prevlink : prev_link.trim(),
@@ -206,12 +227,21 @@ const FIND_OLD = (data, timeis) => {
 
 const HITS_WRITE = (keys, data) => {
   let found_html = '', logged_html = '';
+  
   for (let i = 0; i < keys.length; i ++) {
     const hit = hitlog[keys[i]];
+    const time = TIME();
     const tr_color = TO_COLOR(data[hit.reqid].attrs.pay);
+    const blocked = IS_BLOCKED(hit);
+    
+    let classes = '';
+    if (blocked) {
+      classes += CONFIG.hide_bl ? ' bl_hidden' : ' bl';
+    }
     
     found_html += 
-      `<tr class="${tr_color}">` +
+      `<tr class="${tr_color}${classes}">` +
+      // Requester
       `  <td>` +
       `    <div class="btn-group btn-group-xs">` +
       `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this requester.">R</button>` +
@@ -219,30 +249,37 @@ const HITS_WRITE = (keys, data) => {
       `    </div>` +
       `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
       `  </td>` +
+      // Project
       `  <td>` +
       `    <div class="btn-group btn-group-xs">` +
       `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
       `        Export <span class="caret"></span>` +
       `      </button>` +
       `      <ul class="dropdown-menu">` +
-      `        <li><a class="vb" href="#" data-key="${hit.key}">Forum</a></li>` +
-      `        <li><a class="vb_th" href="#" data-key="${hit.key}">TH Direct</a></li>` +
-      `        <li><a class="vb_mtc" href="#" data-key="${hit.key}">MTC Direct</a></li>` +
+      `        <li><a class="vb" data-key="${hit.key}">Forum</a></li>` +
+      `        <li><a class="vb_th" data-key="${hit.key}">TH Direct</a></li>` +
+      `        <li><a class="vb_mtc" data-key="${hit.key}">MTC Direct</a></li>` +
       `      </ul>` +
       `    </div>` +
       `    <a href="${hit.prevlink}" target="_blank">${hit.title}</a>` +
       `  </td>` +
+      // Tasks
       `  <td>${hit.avail}</td>` +
+      // Accept and Reward
       `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+      // TO
       `  <td>${data[hit.reqid].attrs.pay}</td>` +
-      `  <td>?</td>` +
+      // Masters
+      `  <td>${hit.masters}</td>` +
       `</tr>`
     ;
     
-    if (hit.new) {
+    if (hit.new && !blocked) {
       logged_html += 
         `<tr class="${tr_color}">` +
-        `  <td>12:00am</td>` +
+        // Time
+        `  <td>${time}</td>` +
+        // Requester
         `  <td>` +
         `    <div class="btn-group btn-group-xs">` +
         `      <button class="btn btn-danger" data-toggle="tooltip" data-placement="right" title="Block this requester.">R</button>` +
@@ -250,28 +287,33 @@ const HITS_WRITE = (keys, data) => {
         `    </div>` +
         `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
         `  </td>` +
+        // Project
         `  <td>` +
         `    <div class="btn-group btn-group-xs">` +
         `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
         `        Export <span class="caret"></span>` +
         `      </button>` +
         `      <ul class="dropdown-menu">` +
-        `        <li><a class="vb" href="#" data-key="${hit.key}">Forum</a></li>` +
-        `        <li><a class="vb_th" href="#" data-key="${hit.key}">TH Direct</a></li>` +
-        `        <li><a class="vb_mtc" href="#" data-key="${hit.key}">MTC Direct</a></li>` +
+        `        <li><a class="vb" data-key="${hit.key}">Forum</a></li>` +
+        `        <li><a class="vb_th" data-key="${hit.key}">TH Direct</a></li>` +
+        `        <li><a class="vb_mtc" data-key="${hit.key}">MTC Direct</a></li>` +
         `      </ul>` +
         `    </div>` +
         `    <a href="${hit.prevlink}" target="_blank">${hit.title}</a>` +
         `  </td>` +
+        // Accept and Reward
         `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+        // TO
         `  <td>${data[hit.reqid].attrs.pay}</td>` +
-        `  <td>?</td>` +
+        // Masters
+        `  <td>${hit.masters}</td>` +
         `</tr>`
       ;
     }
   }
   $('#found_tbody').html(found_html);
   $('#logged_tbody').prepend(logged_html);
+  $('[role="tooltip"]').remove();
   $('[data-toggle="tooltip"]').tooltip({container: 'body'});
   
   if ($('#scan').text() === 'Stop') {
@@ -294,7 +336,7 @@ const SET_CONFIG = () => {
   $('#hide_m').prop('checked', CONFIG.hide_m);
   $('#new_hit').prop('checked', CONFIG.new_hit);
   $('#pushbullet').prop('checked', CONFIG.pushbullet);
-}
+};
 
 const SAVE_CONFIG = () => {
   CONFIG.scan_delay = $('#scan_delay').val();
@@ -328,8 +370,140 @@ const TO_COLOR = (rating) => {
   return color;
 };
 
+const TIME = () => {
+  const date = new Date();
+  let hours = date.getHours(), minutes = date.getMinutes(), ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  return `${hours}:${minutes}${ampm}`;
+};
+
+const IS_BLOCKED = (hit) => {
+  for (let key in BLOCK_LIST) {
+    const bl = BLOCK_LIST[key];
+    if (bl.term.toLowerCase() === hit.reqname.toLowerCase() || bl.term.toLowerCase() === hit.title.toLowerCase() || bl.term.toLowerCase() === hit.reqid.toLowerCase() || bl.term.toLowerCase() === hit.groupid.toLowerCase()) {
+      return true;
+    }
+  }
+}
+
+const SHOW_BLOCK_LIST = () => {
+  $('#block_list_modal').modal('show');
+};
+
+const ADD_BLOCK_LIST = () => {
+  $('#block_list_add').modal('show');
+};
+
+const SAVE_BLOCK_LIST = () => {
+  const term = $('#save_block_list_term').val();
+  const name = $('#save_block_list_name').val() === '' ? $('#save_block_list_term').val() : $('#save_block_list_name').val();
+  
+  if (!BLOCK_LIST[term]) {
+    BLOCK_LIST[term] = {term: term, name: name};
+    BLOCK_LIST_WRITE();
+  }
+  $('#block_list_add').modal('hide');
+  $('#save_block_list_term, #save_block_list_name').val('');
+};
+
+const EDIT_BLOCK_LIST = (key) => {
+  $('#edit_block_list_term').val(BLOCK_LIST[key].term);
+  $('#edit_block_list_name').val(BLOCK_LIST[key].name);
+  $('#block_list_edit').modal('show');
+};
+
+const SAVE_EDIT_BLOCK_LIST = () => {
+  const term = $('#edit_block_list_term').val();
+  const name = $('#edit_block_list_name').val() === '' ? $('#edit_block_list_term').val() : $('#edit_block_list_name').val();
+  BLOCK_LIST[term].name = name;
+  BLOCK_LIST_WRITE();
+  $('#block_list_edit').modal('hide');
+};
+
+const DELETE_EDIT_BLOCK_LIST = () => {
+  const term = $('#edit_block_list_term').val();
+  delete BLOCK_LIST[term];
+  BLOCK_LIST_WRITE();
+  $('#block_list_edit').modal('hide');
+};
+
+const BLOCK_LIST_WRITE = () => {
+  let block_list_sorted = [], html = '';
+  
+  for (let key in BLOCK_LIST) {
+    block_list_sorted.push([key, BLOCK_LIST[key].name]);
+  }
+  
+  block_list_sorted.sort( (a, b) => {
+    if (a[1].toLowerCase() < b[1].toLowerCase()) return -1;
+    if (a[1].toLowerCase() > b[1].toLowerCase()) return 1;
+    return 0;
+  });
+  
+  for (let i = 0; i < block_list_sorted.length; i ++) {
+    const bl = BLOCK_LIST[block_list_sorted[i][0]];
+    html += `<button type="button" class="btn btn-xs btn-danger bl_item" data-key="${bl.term}" style="margin: 2px;">${bl.name}</button>`;
+  }
+  
+  $('#block_list_modal').find('.modal-body').html(html);
+  
+  localStorage.setItem('BLOCK_LIST', JSON.stringify(BLOCK_LIST));
+};
+
+const IMPORT_BLOCK_LIST = () => {
+  let import_block_list  = prompt(
+    `Block List Import\n\n` +
+    `This will not delete your current block list, only add to it.\n\n` +
+    `Please enter your block list here.`,
+    ``
+  );
+
+  if (import_block_list) {
+    const json = VALID_JSON(import_block_list);
+
+    if (json) {
+      const bl = JSON.parse(import_block_list);
+      for (let key in bl) {
+        if (bl[key].hasOwnProperty(`term`) && bl[key].hasOwnProperty(`name`) && !bl[key].hasOwnProperty(`sound`)) {
+          if (!BLOCK_LIST[key]) {
+            BLOCK_LIST[key] = {
+              term : bl[key].term,
+              name : bl[key].name
+            };
+          }
+        }
+        else {
+          alert('An error occured while importing.\n\n Please check if you have a valid import and try again.');
+          break;
+        }
+      }
+      BLOCK_LIST_WRITE();
+    }
+  }
+  else {
+    alert('An error occured while importing.\n\n Please check if you have a valid import and try again.');
+  }
+};
+
+const EXPORT_BLOCK_LIST = () => {
+  COPY_TO_CLIP(localStorage.getItem('BLOCK_LIST'), 'Your block list has been copied to your clipboard.');
+};
+
+const VALID_JSON = (data) => {
+  try {
+    JSON.parse(data);
+    return true;
+  }
+  catch (e) {
+    return false;
+  }
+};
+
+// Export Stuff
 const VB_EXPORT = (data) => {
-  const hit = hitlog[stuff.key];
+  const hit = hitlog[EXPORT.key];
   
   const attr = (type, rating) => {
     let color = '#B30000';
@@ -353,7 +527,8 @@ const VB_EXPORT = (data) => {
         `[b]HITs Available:[/b] ${hit.avail}\n` +
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
         `[b]Qualifications:[/b] ${hit.quals}\n` +
-        `[/td][/tr][/table]`;
+        `[/td][/tr][/table]`
+  ;
   
   const direct_template =
         `<p>[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]</p>` +
@@ -368,38 +543,38 @@ const VB_EXPORT = (data) => {
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
         `<p>[b]Qualifications:[/b] ${hit.quals}[/td][/tr]</p>` +
-        `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`;
+        `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`
+  ;
 
-  if (stuff.export === 'vb') {
-    EXPORT_TO_CLIP(template);
+  if (EXPORT.type === 'vb') {
+    COPY_TO_CLIP(template, 'HIT export has been copied to your clipboard.');
   }
-  
-  if (stuff.export === 'vb_mtc') {
-    const confirm_post = prompt('Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
-    if (confirm_post !== null) {
-      SEND_MTC(direct_template + `<p>${confirm_post}</p>`);
-    }
-  }
-  if (stuff.export === 'vb_th') {
+  if (EXPORT.type === 'vb_th') {
     const confirm_post = prompt('Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
     if (confirm_post !== null) {
-      SEND_TH(direct_template + `<p>${confirm_post}</p>`);
+      EXPORT_TO_TH(direct_template + `<p>${confirm_post}</p>`);
+    }
+  }
+  if (EXPORT.type === 'vb_mtc') {
+    const confirm_post = prompt('Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
+    if (confirm_post !== null) {
+      EXPORT_TO_MTC(direct_template + `<p>${confirm_post}</p>`);
     }
   }
 };
 
-const EXPORT_TO_CLIP = (template) => {
-  $('body').append(`<textarea id="clipboard" style="opacity: 0;">${template}</textarea>`);
-  $('#clipboard').select();
-  document.execCommand('Copy');
-  $('#clipboard').remove();
-  alert('HIT export has been copied to your clipboard.');
-};
-
-const SEND_TH = (template) => {
+const EXPORT_TO_TH = (template) => {
   chrome.runtime.sendMessage({msg: 'send_th', data: template});
 };
 
-const SEND_MTC = (template) => {
+const EXPORT_TO_MTC = (template) => {
   chrome.runtime.sendMessage({msg: 'send_mtc', data: template});
+};
+
+const COPY_TO_CLIP = (string, message) => {
+  $('body').append(`<textarea id="clipboard" style="opacity: 0;">${string}</textarea>`);
+  $('#clipboard').select();
+  document.execCommand('Copy');
+  $('#clipboard').remove();
+  alert(message);
 };
