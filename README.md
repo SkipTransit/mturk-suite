@@ -28,6 +28,7 @@ Congratulations, you have successfully upgraded Mturk Suite!
 
 # Features
 - Right clicking inside an input field gives the option to paste your Worker ID
+- Right clicking highlighted text gives the option to search for it on Mturk
 - Today's Projected Earnings displayed on every page and updates when you submit a HIT
   - Progress bar live updates with TPE and goal is set in the extension dropdown
 - HIT export for the forums
