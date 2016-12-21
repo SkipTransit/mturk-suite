@@ -44,20 +44,23 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
 // Adds context menu to paste worker id in input fields
 chrome.contextMenus.create({
   title: "Paste Mturk Worker ID",
-  "type" : "normal",
   contexts: ["editable"],
   onclick: (info, tab) => {
-    console.log(info);
-    console.log(tab);
     chrome.tabs.executeScript(tab.id, {
         frameId: info.frameId,
         code: '// This code runs in one frame, specified via frameId \n' +
               `document.activeElement.value += '${dashboard.id}';`
     });
-    //chrome.tabs.sendMessage(info.frameId, {msg: 'WorkerID', "data": dashboard.id});
-    //chrome.tabs.query({"active": true, "currentWindow": true}, (tabs) => {
-    //  chrome.tabs.sendMessage(tabs[0].id, {msg: 'WorkerID', "data": dashboard.id});
-    //});
+  }
+});
+
+// Adds context menu to paste worker id in input fields
+chrome.contextMenus.create({
+  title: "Search Mturk",
+  "type" : "normal",
+  contexts: ["selection"],
+  onclick: (info, tab) => {
+    chrome.tabs.create({url: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${info.selectionText}`})
   }
 });
 
