@@ -201,6 +201,7 @@
       </div>
     </div>
     
+    <!-- Add To Block List -->
     <div class="modal fade" id="block_list_add">
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -225,6 +226,7 @@
       </div>
     </div>
     
+    <!-- Edit Block List Item -->
     <div class="modal fade" id="block_list_edit">
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -245,6 +247,106 @@
           <div class="modal-footer">
             <button id="save_edit_block_list" class="btn btn-primary">Save</button>
             <button id="delete_edit_block_list" class="btn btn-primary">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Include List -->
+    <div class="modal fade modal" id="include_list_modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Include List</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">	
+            <button id="add_include_list" class="btn btn-primary">Add</button>
+            <button id="import_include_list" class="btn btn-primary">Import</button>
+            <button id="export_include_list" class="btn btn-primary">Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Add To Include List -->
+    <div class="modal fade" id="include_list_add">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Add To Include List</h4>
+          </div>
+          <div class="modal-body">
+            <div class="input-group input-group-sm" style="width: 100%;">
+              <div class="input-group-addon" style="width: 60px;">Term</div>
+              <input id="save_include_list_term" type="text" class="form-control">
+            </div>
+            <div class="input-group input-group-sm" style="width: 100%;">
+              <div class="input-group-addon" style="width: 60px;">Name</div>
+              <input id="save_include_list_name" type="text" class="form-control">
+            </div>
+            <label style="font-weight: 400;">
+              Sound on match:
+              <select id="sort_by" value="voice">
+                <option value="voice">Voice</option>
+                <option value="sound">Sound</option>
+              </select>
+            </label>
+          </div>
+          <div class="modal-footer">
+            <button id="save_include_list" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Edit Include List Item -->
+    <div class="modal fade" id="include_list_edit">
+      <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Edit Include List Item</h4>
+          </div>
+          <div class="modal-body">
+            <div class="input-group input-group-sm" style="width: 100%;">
+              <div class="input-group-addon" style="width: 60px;">Term</div>
+              <input id="edit_include_list_term" type="text" class="form-control" disabled>
+            </div>
+            <div class="input-group input-group-sm" style="width: 100%;">
+              <div class="input-group-addon" style="width: 60px;">Name</div>
+              <input id="edit_include_list_name" type="text" class="form-control">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="save_edit_include_list" class="btn btn-primary">Save</button>
+            <button id="delete_edit_include_list" class="btn btn-primary">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Settings -->
+    <div class="modal fade" id="settings_modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">Settings</h4>
+          </div>
+          <div class="modal-body">
+            <label style="font-weight: 400;">
+              Voice:
+              <select id="voices">
+              <!--  <option value="0">Male</option>
+                <option value="1">Female</option> -->
+              </select>
+            </label>
+          </div>
+          <div class="modal-footer">
+            <button id="save_include_list" class="btn btn-primary">Save</button>
           </div>
         </div>
       </div>

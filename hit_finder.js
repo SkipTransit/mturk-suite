@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   SET_CONFIG();
+  SETTINGS_WRITE();
   BLOCK_LIST_WRITE();
 });
 
@@ -87,6 +88,15 @@ $('html').on('click', '.rt_block', function () {
   RT_ADD_BLOCK_LIST($(this).data('term'), $(this).data('name'));
 });
 
+// Include List Stuff
+$('html').on('click', '#include_list', function () {
+  SHOW_INCLUDE_LIST();
+});
+
+$('html').on('click', '#add_include_list', function () {
+  ADD_INCLUDE_LIST();
+});
+
 // Setting Stuff
 $('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet', function () {
   SAVE_CONFIG();
@@ -94,6 +104,17 @@ $('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #h
 
 $('html').on('input', '#scan_delay, #min_reward, #min_avail, #min_to, #size', function () {
   SAVE_CONFIG();
+});
+
+$('html').on('click', '#settings', function () {
+  SHOW_SETTINGS();
+});
+
+$('html').on('change', '#voices', function () {
+  const msg = new SpeechSynthesisUtterance();
+  msg.text = 'This is my voice.';
+  msg.voice = window.speechSynthesis.getVoices()[$('#voices').val()];
+  window.speechSynthesis.speak(msg);
 });
 
 // Export Stuff
@@ -508,6 +529,28 @@ const IMPORT_BLOCK_LIST = () => {
 
 const EXPORT_BLOCK_LIST = () => {
   COPY_TO_CLIP(localStorage.getItem('BLOCK_LIST'), 'Your block list has been copied to your clipboard.');
+};
+
+//Incude List Stuff
+const SHOW_INCLUDE_LIST = () => {
+  $('#include_list_modal').modal('show');
+};
+
+const ADD_INCLUDE_LIST = () => {
+  $('#include_list_add').modal('show');
+};
+
+// Settings Stuff
+const SHOW_SETTINGS = () => {
+  $('#settings_modal').modal('show');
+};
+
+const SETTINGS_WRITE = () => {
+  speechSynthesis.onvoiceschanged = () => {
+    speechSynthesis.getVoices().forEach( (voice, index) => {
+      $('#voices').append(`<option value="${index}">${(voice.name + (voice.default ? ' (default)' :''))}</option>`);
+    });
+  }
 };
 
 // Export Stuff
