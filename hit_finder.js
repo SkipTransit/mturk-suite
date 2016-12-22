@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
   SET_CONFIG();
-  SETTINGS_WRITE();
   BLOCK_LIST_WRITE();
   INCLUDE_LIST_WRITE();
   window.speechSynthesis.getVoices();
@@ -18,6 +17,9 @@ chrome.extension.onMessage.addListener( (request) => {
 
 let hitlog = {};
 let keys = [];
+const DELAY_ALERTS = [];
+const DELAY_PUSHBULLET = [];
+
 
 const BLOCK_LIST = JSON.parse(localStorage.getItem('BLOCK_LIST')) || {};
 const INCLUDE_LIST = JSON.parse(localStorage.getItem('INCLUDE_LIST')) || {};
@@ -40,7 +42,11 @@ let CONFIG = {
   hide_bl    : LOADED_CONFIG.hasOwnProperty('hide_bl')    ? LOADED_CONFIG.hide_bl    : false,
   hide_m     : LOADED_CONFIG.hasOwnProperty('hide_m')     ? LOADED_CONFIG.hide_m     : false,
   new_hit    : LOADED_CONFIG.hasOwnProperty('new_hit')    ? LOADED_CONFIG.new_hit    : true,
-  pushbullet : LOADED_CONFIG.hasOwnProperty('pushbullet') ? LOADED_CONFIG.pushbullet : false
+  pushbullet : LOADED_CONFIG.hasOwnProperty('pushbullet') ? LOADED_CONFIG.pushbullet : false,
+  
+  pushbullet_token : LOADED_CONFIG.pushbullet_token || 'access_token_here',
+  include_voice    : LOADED_CONFIG.include_voice    || '0',
+  include_sound    : LOADED_CONFIG.include_sound    || '1'
 };
 
 $('html').on('click', '#scan', function () {
@@ -149,23 +155,33 @@ $('html').on('click', '#test_edit_include_list', function () {
 });
 
 // Setting Stuff
-$('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet', function () {
+$('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet, #include_voice, #include_sound', function () {
   SAVE_CONFIG();
 });
 
-$('html').on('input', '#scan_delay, #min_reward, #min_avail, #min_to, #size', function () {
+$('html').on('input', '#scan_delay, #min_reward, #min_avail, #min_to, #size, #pushbullet_token', function () {
   SAVE_CONFIG();
 });
 
-$('html').on('click', '#settings', function () {
-  SHOW_SETTINGS();
+$('html').on('click', '#advanced_settings', function () {
+  SHOW_ADVANCED_SETTINGS();
 });
 
-$('html').on('change', '#voices', function () {
+$('html').on('click', '#save_advanced_settings', function () {
+  SAVE_ADVANCED_SETTINGS();
+});
+
+$('html').on('change', '#include_voice', function () {
   const msg = new SpeechSynthesisUtterance();
   msg.text = 'This is my voice.';
-  msg.voice = window.speechSynthesis.getVoices()[$('#voices').val()];
+  msg.voice = window.speechSynthesis.getVoices()[$('#include_voice').val()];
   window.speechSynthesis.speak(msg);
+});
+
+$('html').on('change', '#include_sound', function () {
+  const audio = new Audio();
+  audio.src = `sounds/include_list_${$('#include_sound').val()}.mp3`;
+  audio.play();
 });
 
 // Export Stuff
@@ -244,7 +260,6 @@ const FIND_OLD = (data) => {
       req_name  = $hit.find('span.requesterIdentity').text().trim();
       req_id    = $hit.find('span.requesterIdentity').text().trim();
       req_link  = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=' + req_id.replace(/ /g, '+');
-      con_link  = 'https://#';
       to_link   = 'https://turkopticon.ucsd.edu/main/php_search?field=name&query=' + req_id.replace(/ /g, '+');
     }
 
@@ -317,12 +332,28 @@ const HITS_WRITE = (keys, data) => {
     const time = TIME();
     const tr_color = TO_COLOR(data[hit.reqid].attrs.pay);
     const blocked = IS_BLOCKED(hit);
+    const included = IS_INCLUDED(hit);
     
-    let classes = '';
+    let classes = '', log = true;
     if (blocked) {
       classes += CONFIG.hide_bl ? ' bl_hidden' : ' bl';
+      classes += CONFIG.hide_nl ? ' nl_hidden' : ' nl';
     }
-    
+    else if (included) {
+      classes += ' il';
+      INCLUDED_ALERTS(included, hit);
+    }
+    else {
+      classes += CONFIG.hide_nl ? ' nl_hidden' : ' nl';
+    }
+    if (hit.masters === 'Y') {
+      classes += CONFIG.hide_m ? ' m_hidden' : ' m';
+      log = false;
+    }
+    if (Number(CONFIG.min_avail) > Number(hit.avail) || Number(CONFIG.min_to) > Number(data[hit.reqid].attrs.pay)) {
+      log = false;
+    }
+        
     found_html += 
       `<tr class="${tr_color}${classes}">` +
       // Requester
@@ -358,9 +389,9 @@ const HITS_WRITE = (keys, data) => {
       `</tr>`
     ;
     
-    if (hit.new && !blocked) {
+    if (hit.new && !blocked && log) {
       logged_html += 
-        `<tr class="${tr_color}">` +
+        `<tr class="${tr_color}${classes}">` +
         // Time
         `  <td>${time}</td>` +
         // Requester
@@ -420,6 +451,10 @@ const SET_CONFIG = () => {
   $('#hide_m').prop('checked', CONFIG.hide_m);
   $('#new_hit').prop('checked', CONFIG.new_hit);
   $('#pushbullet').prop('checked', CONFIG.pushbullet);
+  
+  $('#pushbullet_token').val(CONFIG.pushbullet_token);
+  $('#include_voice').val(CONFIG.include_voice);
+  $('#include_sound').val(CONFIG.include_sound);
 };
 
 const SAVE_CONFIG = () => {
@@ -437,6 +472,10 @@ const SAVE_CONFIG = () => {
   CONFIG.hide_m = $('#hide_m').prop('checked');
   CONFIG.new_hit = $('#new_hit').prop('checked');
   CONFIG.pushbullet = $('#pushbullet').prop('checked');
+  
+  CONFIG.pushbullet_token = $('#pushbullet_token').val();
+  CONFIG.include_voice = $('#include_voice').val();
+  CONFIG.include_sound = $('#include_sound').val();
   
   localStorage.setItem('CONFIG', JSON.stringify(CONFIG));
 
@@ -468,7 +507,7 @@ const IS_BLOCKED = (hit) => {
   for (let key in BLOCK_LIST) {
     const bl = BLOCK_LIST[key];
     if (bl.term.toLowerCase() === hit.reqname.toLowerCase() || bl.term.toLowerCase() === hit.title.toLowerCase() || bl.term.toLowerCase() === hit.reqid.toLowerCase() || bl.term.toLowerCase() === hit.groupid.toLowerCase()) {
-      return true;
+      return bl;
     }
   }
 };
@@ -589,89 +628,105 @@ const BLOCK_LIST_WRITE = () => {
 };
 
 //Incude List Stuff
+const IS_INCLUDED = (hit) => {
+  for (let key in INCLUDE_LIST) {
+    const il = INCLUDE_LIST[key];
+    if (il.term.toLowerCase() === hit.reqname.toLowerCase() || il.term.toLowerCase() === hit.title.toLowerCase() || il.term.toLowerCase() === hit.reqid.toLowerCase() || il.term.toLowerCase() === hit.groupid.toLowerCase()) {
+      return il;
+    }
+  }
+};
+
 const INCLUDED_ALERTS_TEST = (test) => {
   if (test.sound) {
-    if (test.type = 'voice') {
+    if (test.type === `sound`) {
+      const audio = new Audio();
+      audio.src = `sounds/include_list_${$('#include_sound').val()}.mp3`;
+      audio.play();
+    }
+    else {
       const msg = new SpeechSynthesisUtterance();
       msg.text = `HIT found for ${test.name}`;
-      msg.voice = window.speechSynthesis.getVoices()[$('#voices').val()];
+      msg.voice = window.speechSynthesis.getVoices()[$(`#include_voice`).val()];
       window.speechSynthesis.speak(msg);
     }
   }
   if (test.notification) {
     Notification.requestPermission();
-    var n = new Notification('Requester | $0.00', {
-      icon : '/icon_128.png',
-      body : 'Title',
+    var n = new Notification(`Requester | $0.00`, {
+      icon: `/icon_128.png`,
+      body: `Title`,
     });
     setTimeout(n.close.bind(n), 5000);
   }
-  /*
-  if (obj.pushbullet) {
-    push_delay.unshift(hit.key);
-    setTimeout(function () { push_delay.pop(); }, 900000);
-
-    var push = {};
-
-    push['type'] = 'note';
-    push['title'] = 'HIT Finder';
-    push['body'] = '[' + hit.reqname + ']\n[' + hit.title + ']\n[' + hit.reward + ']\n[' + hit.prevlink + ']';
-
-    $.ajax({
-      type    : 'POST',
-      headers : {'Authorization': 'Bearer ' + config.push},
-      url     : 'https://api.pushbullet.com/v2/pushes',
-      data    : push
-    });
-
-  }
-  */
-};
-
-const INCLUDED_ALERTS = (obj, hit) => {
-  var check = noti_delay.indexOf(hit.key) !== -1;
-  var pushcheck = push_delay.indexOf(hit.key) !== -1;
-
-  if (!check) {
-    noti_delay.unshift(hit.key);
-    setTimeout(function () { noti_delay.pop(); }, config.alert * 1000);
-  }
-  if (obj.noti_cb && !check) {
-    Notification.requestPermission();
-    var n = new Notification(hit.reqname + ' | ' + hit.reward, {
-      icon : 'http://kadauchi.com/avatar4.jpg',
-      body : hit.title,
-    });
-    setTimeout(n.close.bind(n), 5000);
-
-    n.onclick = function(e) {
-      e.preventDefault();
-      window.open(hit.prevlink, '_blank');
+  if (test.pushbullet) {
+    const push = {
+      type: `note`,
+      title: `HIT Finder`,
+      body: `[Requester]\n[Title]\n[$0.00]\n[link]`
     };
 
-  }
-  if (obj.sound_cb && !check) {
-    $('#audio_' + obj.sound)[0].play();
-  }
-  if (obj.push_cb && !pushcheck && config.pb) {
-    push_delay.unshift(hit.key);
-    setTimeout(function () { push_delay.pop(); }, 900000);
-
-    var push = {};
-
-    push['type'] = 'note';
-    push['title'] = 'HIT Finder';
-    push['body'] = '[' + hit.reqname + ']\n[' + hit.title + ']\n[' + hit.reward + ']\n[' + hit.prevlink + ']';
-
     $.ajax({
-      type    : 'POST',
-      headers : {'Authorization': 'Bearer ' + config.push},
-      url     : 'https://api.pushbullet.com/v2/pushes',
-      data    : push
+      type: `POST`,
+      headers: {'Authorization': `Bearer ${CONFIG.pushbullet_token}`},
+      url: `https://api.pushbullet.com/v2/pushes`,
+      data: push
     });
-
   }
-}
+};
+
+const INCLUDED_ALERTS = (il, hit) => {
+  var delay_alerts = DELAY_ALERTS.indexOf(hit.key) !== -1;
+  var delay_pushbullet = DELAY_PUSHBULLET.indexOf(hit.key) !== -1;
+  
+  if (!delay_alerts) {
+    if (il.sound) {
+      if (il.type === `sound`) {
+        const audio = new Audio();
+        audio.src = `sounds/include_list_${$('#include_sound').val()}.mp3`;
+        audio.play();
+      }
+      else {
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = `HIT found for ${il.name}`;
+        msg.voice = window.speechSynthesis.getVoices()[$(`#include_voice`).val()];
+        window.speechSynthesis.speak(msg);
+      }
+    }
+    if (il.notification) {
+      Notification.requestPermission();
+      var n = new Notification(`${hit.reqname} | ${hit.reward}`, {
+        icon: `/icon_128.png`,
+        body: `${hit.title}`,
+      });
+      n.onclick = (e) => {
+        e.preventDefault();
+        window.open(hit.prevlink, '_blank');
+      };
+      setTimeout(n.close.bind(n), 5000);
+    }
+    if (il.pushbullet && !delay_pushbullet) {
+      const push = {
+        type: `note`,
+        title: `HIT Finder`,
+        body: `[${hit.reqname}]\n[${hit.title}]\n[${hit.reward}]\n[${hit.prevlink}]`
+      };
+
+      $.ajax({
+        type: `POST`,
+        headers: {'Authorization': `Bearer ${CONFIG.pushbullet_token}`},
+        url: `https://api.pushbullet.com/v2/pushes`,
+        data: push
+      });
+      
+      DELAY_PUSHBULLET.unshift(hit.key);
+      setTimeout( () => { DELAY_PUSHBULLET.pop(); }, 900000);
+    }
+    
+    DELAY_ALERTS.unshift(hit.key);
+    setTimeout( () => { DELAY_ALERTS.pop(); }, 60 * 1000);
+  }
+};
 
 const SHOW_INCLUDE_LIST = () => {
   $('#include_list_modal').modal('show');
@@ -809,13 +864,9 @@ const INCLUDE_LIST_WRITE = () => {
   localStorage.setItem('INCLUDE_LIST', JSON.stringify(INCLUDE_LIST));
 };
 
-// Settings Stuff
-const SHOW_SETTINGS = () => {
-  $('#settings_modal').modal('show');
-};
-
-const SETTINGS_WRITE = () => {
-
+// Advanced Settings Stuff
+const SHOW_ADVANCED_SETTINGS = () => {
+  $('#advanced_settings_modal').modal('show');
 };
 
 // Export Stuff
