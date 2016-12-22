@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 chrome.extension.onMessage.addListener( (request) => {
   if (request.msg == 'turkopticon.js') {
-    console.log(request.data);
     HITS_WRITE(keys, request.data);
   }
   if (request.msg == 'hitexport.js') {
@@ -15,11 +14,10 @@ chrome.extension.onMessage.addListener( (request) => {
   }
 });
 
-let hitlog = {};
 let keys = [];
+const hitlog = {};
 const DELAY_ALERTS = [];
 const DELAY_PUSHBULLET = [];
-
 
 const BLOCK_LIST = JSON.parse(localStorage.getItem('BLOCK_LIST')) || {};
 const INCLUDE_LIST = JSON.parse(localStorage.getItem('INCLUDE_LIST')) || {};
@@ -206,6 +204,7 @@ $('html').on('click', '.vb_mtc', function () {
   chrome.runtime.sendMessage({msg: 'hitexport', data: hitlog[key].reqid});
 });
 
+// Modal Stuff
 $(document).on('show.bs.modal', '.modal', function (event) {
   const zindex = 1040 + (10 * $('.modal:visible').length);
   $(this).css('z-index', zindex);
@@ -495,10 +494,10 @@ const TO_COLOR = (rating) => {
 
 const TIME = () => {
   const date = new Date();
-  let hours = date.getHours(), minutes = date.getMinutes(), ampm = hours >= 12 ? 'pm' : 'am';
+  let hours = date.getHours(), minutes = date.getMinutes(), ampm = hours >= 12 ? `pm` : `am`;
   hours = hours % 12;
   hours = hours ? hours : 12;
-  minutes = minutes < 10 ? '0' + minutes : minutes;
+  minutes = minutes < 10 ? `0` + minutes : minutes;
   return `${hours}:${minutes}${ampm}`;
 };
 
