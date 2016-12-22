@@ -546,11 +546,7 @@ const SHOW_SETTINGS = () => {
 };
 
 const SETTINGS_WRITE = () => {
-  speechSynthesis.onvoiceschanged = () => {
-    speechSynthesis.getVoices().forEach( (voice, index) => {
-      $('#voices').append(`<option value="${index}">${(voice.name + (voice.default ? ' (default)' :''))}</option>`);
-    });
-  }
+
 };
 
 // Export Stuff

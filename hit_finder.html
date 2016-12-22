@@ -142,7 +142,7 @@
     
     <br>
     
-    <div class="panel panel-default">
+    <div class="panel panel-primary">
       <!-- Default panel contents -->
       <div class="panel-heading">Found HITs</div>
       <!-- Found HITs -->      
@@ -164,7 +164,7 @@
     
     <br>
     
-    <div class="panel panel-default">
+    <div class="panel panel-primary">
       <!-- Default panel contents -->
       <div class="panel-heading">Logged HITs</div>
       <!-- Table -->
@@ -187,7 +187,7 @@
     <div class="modal fade modal" id="block_list_modal">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Block List</h4>
           </div>
@@ -205,7 +205,7 @@
     <div class="modal fade" id="block_list_add">
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Add To Block List</h4>
           </div>
@@ -230,7 +230,7 @@
     <div class="modal fade" id="block_list_edit">
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Edit Block List Item</h4>
           </div>
@@ -256,7 +256,7 @@
     <div class="modal fade modal" id="include_list_modal">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Include List</h4>
           </div>
@@ -274,11 +274,11 @@
     <div class="modal fade" id="include_list_add">
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Add To Include List</h4>
           </div>
-          <div class="modal-body">
+          <div class="modal-body bg-default">
             <div class="input-group input-group-sm" style="width: 100%;">
               <div class="input-group-addon" style="width: 60px;">Term</div>
               <input id="save_include_list_term" type="text" class="form-control">
@@ -294,6 +294,36 @@
                 <option value="sound">Sound</option>
               </select>
             </label>
+            <div class="form-group">
+                <input id="qualified" name="qualified" type="checkbox" autocomplete="off" />
+                <div class="btn-group btn-group-sm">
+                  <label for="qualified" class="btn btn-default">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    <span> </span>
+                  </label>
+                  <label for="qualified" class="btn btn-default active">Qualified</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <input id="qualified" name="qualified" type="checkbox" autocomplete="off" />
+                <div class="btn-group btn-group-sm">
+                  <label for="qualified" class="btn btn-default">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    <span> </span>
+                  </label>
+                  <label for="qualified" class="btn btn-default active">Qualified</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <input id="qualified" name="qualified" type="checkbox" autocomplete="off" />
+                <div class="btn-group btn-group-sm">
+                  <label for="qualified" class="btn btn-default">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    <span> </span>
+                  </label>
+                  <label for="qualified" class="btn btn-default active">Qualified</label>
+                </div>
+              </div>
           </div>
           <div class="modal-footer">
             <button id="save_include_list" class="btn btn-primary">Save</button>
@@ -306,7 +336,7 @@
     <div class="modal fade" id="include_list_edit">
       <div class="modal-dialog modal-sm">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Edit Include List Item</h4>
           </div>
@@ -332,7 +362,7 @@
     <div class="modal fade" id="settings_modal">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-primary">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Settings</h4>
           </div>
@@ -340,8 +370,8 @@
             <label style="font-weight: 400;">
               Voice:
               <select id="voices">
-              <!--  <option value="0">Male</option>
-                <option value="1">Female</option> -->
+                <option value="0">Male</option>
+                <option value="2">Female</option>
               </select>
             </label>
           </div>
