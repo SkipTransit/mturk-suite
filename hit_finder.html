@@ -278,7 +278,7 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Add To Include List</h4>
           </div>
-          <div class="modal-body bg-default">
+          <div class="modal-body bg-default text-center">
             <div class="input-group input-group-sm" style="width: 100%;">
               <div class="input-group-addon" style="width: 60px;">Term</div>
               <input id="save_include_list_term" type="text" class="form-control">
@@ -287,45 +287,49 @@
               <div class="input-group-addon" style="width: 60px;">Name</div>
               <input id="save_include_list_name" type="text" class="form-control">
             </div>
-            <label style="font-weight: 400;">
-              Sound on match:
-              <select id="sort_by" value="voice">
-                <option value="voice">Voice</option>
-                <option value="sound">Sound</option>
-              </select>
-            </label>
+            <br>
             <div class="form-group">
-                <input id="qualified" name="qualified" type="checkbox" autocomplete="off" />
-                <div class="btn-group btn-group-sm">
-                  <label for="qualified" class="btn btn-default">
-                    <span class="glyphicon glyphicon-ok"></span>
-                    <span> </span>
-                  </label>
-                  <label for="qualified" class="btn btn-default active">Qualified</label>
-                </div>
+              <label style="font-weight: 400;">
+                Type of sound on match:
+                <select id="save_include_list_type">
+                  <option value="voice">Voice</option>
+                  <option value="sound">Sound</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-group">
+              <input id="save_include_list_sound" name="save_include_list_sound" type="checkbox" autocomplete="off" checked />
+              <div class="btn-group btn-group-sm">
+                <label for="save_include_list_sound" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="save_include_list_sound" class="btn btn-default active" style="width: 100px;">Play Sound</label>
               </div>
-              <div class="form-group">
-                <input id="qualified" name="qualified" type="checkbox" autocomplete="off" />
-                <div class="btn-group btn-group-sm">
-                  <label for="qualified" class="btn btn-default">
-                    <span class="glyphicon glyphicon-ok"></span>
-                    <span> </span>
-                  </label>
-                  <label for="qualified" class="btn btn-default active">Qualified</label>
-                </div>
+            </div>
+            <div class="form-group">
+              <input id="save_include_list_notification" name="save_include_list_notification" type="checkbox" autocomplete="off" checked />
+              <div class="btn-group btn-group-sm">
+                <label for="save_include_list_notification" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="save_include_list_notification" class="btn btn-default active" style="width: 100px;">Notification</label>
               </div>
-              <div class="form-group">
-                <input id="qualified" name="qualified" type="checkbox" autocomplete="off" />
-                <div class="btn-group btn-group-sm">
-                  <label for="qualified" class="btn btn-default">
-                    <span class="glyphicon glyphicon-ok"></span>
-                    <span> </span>
-                  </label>
-                  <label for="qualified" class="btn btn-default active">Qualified</label>
-                </div>
+            </div>
+            <div class="form-group">
+              <input id="save_include_list_pushbullet" name="save_include_list_pushbullet" type="checkbox" autocomplete="off" checked />
+              <div class="btn-group btn-group-sm">
+                <label for="save_include_list_pushbullet" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="save_include_list_pushbullet" class="btn btn-default active" style="width: 100px;">Pushbullet</label>
               </div>
+            </div>
           </div>
           <div class="modal-footer">
+            <button id="test_include_list" class="btn btn-primary pull-left">Test</button>
             <button id="save_include_list" class="btn btn-primary">Save</button>
           </div>
         </div>
@@ -340,7 +344,7 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Edit Include List Item</h4>
           </div>
-          <div class="modal-body">
+          <div class="modal-body bg-default text-center">
             <div class="input-group input-group-sm" style="width: 100%;">
               <div class="input-group-addon" style="width: 60px;">Term</div>
               <input id="edit_include_list_term" type="text" class="form-control" disabled>
@@ -349,8 +353,49 @@
               <div class="input-group-addon" style="width: 60px;">Name</div>
               <input id="edit_include_list_name" type="text" class="form-control">
             </div>
+            <br>
+            <div class="form-group">
+              <label style="font-weight: 400;">
+                Type of sound on match:
+                <select id="edit_include_list_type">
+                  <option value="voice">Voice</option>
+                  <option value="sound">Sound</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-group">
+              <input id="edit_include_list_sound" name="edit_include_list_sound" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="edit_include_list_sound" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="edit_include_list_sound" class="btn btn-default active" style="width: 100px;">Play Sound</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <input id="edit_include_list_notification" name="edit_include_list_notification" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="edit_include_list_notification" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="edit_include_list_notification" class="btn btn-default active" style="width: 100px;">Notification</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <input id="edit_include_list_pushbullet" name="edit_include_list_pushbullet" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="edit_include_list_pushbullet" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="edit_include_list_pushbullet" class="btn btn-default active" style="width: 100px;">Pushbullet</label>
+              </div>
+            </div>
           </div>
           <div class="modal-footer">
+            <button id="test_edit_include_list" class="btn btn-primary pull-left">Test</button>
             <button id="save_edit_include_list" class="btn btn-primary">Save</button>
             <button id="delete_edit_include_list" class="btn btn-primary">Delete</button>
           </div>

@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
   SET_CONFIG();
   SETTINGS_WRITE();
   BLOCK_LIST_WRITE();
+  INCLUDE_LIST_WRITE();
+  window.speechSynthesis.getVoices();
 });
 
 chrome.extension.onMessage.addListener( (request) => {
@@ -18,6 +20,7 @@ let hitlog = {};
 let keys = [];
 
 const BLOCK_LIST = JSON.parse(localStorage.getItem('BLOCK_LIST')) || {};
+const INCLUDE_LIST = JSON.parse(localStorage.getItem('INCLUDE_LIST')) || {};
 
 const EXPORT = {key: null, type: null};
 
@@ -95,6 +98,54 @@ $('html').on('click', '#include_list', function () {
 
 $('html').on('click', '#add_include_list', function () {
   ADD_INCLUDE_LIST();
+});
+
+$('html').on('click', '#save_include_list', function () {
+  SAVE_INCLUDE_LIST();
+});
+
+$('html').on('click', '.il_item', function () {
+  EDIT_INCLUDE_LIST($(this).data('key'));
+});
+
+$('html').on('click', '#save_edit_include_list', function () {
+  SAVE_EDIT_INCLUDE_LIST();
+});
+
+$('html').on('click', '#delete_edit_include_list', function () {
+  DELETE_EDIT_INCLUDE_LIST();
+});
+
+$('html').on('click', '#import_include_list', function () {
+  IMPORT_INCLUDE_LIST();
+});
+
+$('html').on('click', '#export_include_list', function () {
+  EXPORT_INCLUDE_LIST();
+});
+
+$('html').on('click', '#test_include_list', function () {
+  const test = {
+    term: $('#save_include_list_term').val(),
+    name: $('#save_include_list_name').val() === '' ? $('#save_include_list_term').val() : $('#save_include_list_name').val(),
+    type: $('#save_include_list_type').val(),
+    sound: $('#save_include_list_sound').prop('checked'),
+    notification: $('#save_include_list_notification').prop('checked'),
+    pushbullet: $('#save_include_list_pushbullet').prop('checked')
+  };
+  INCLUDED_ALERTS_TEST(test);
+});
+
+$('html').on('click', '#test_edit_include_list', function () {
+  const test = {
+    term: $('#edit_include_list_term').val(),
+    name: $('#edit_include_list_name').val() === '' ? $('#edit_include_list_term').val() : $('#edit_include_list_name').val(),
+    type: $('#edit_include_list_type').val(),
+    sound: $('#edit_include_list_sound').prop('checked'),
+    notification: $('#edit_include_list_notification').prop('checked'),
+    pushbullet: $('#edit_include_list_pushbullet').prop('checked')
+  };
+  INCLUDED_ALERTS_TEST(test);
 });
 
 // Setting Stuff
@@ -420,7 +471,7 @@ const IS_BLOCKED = (hit) => {
       return true;
     }
   }
-}
+};
 
 const SHOW_BLOCK_LIST = () => {
   $('#block_list_modal').modal('show');
@@ -433,6 +484,7 @@ const ADD_BLOCK_LIST = () => {
 const RT_ADD_BLOCK_LIST = (term, name) => {
   $('#save_block_list_term').val(term);
   $('#save_block_list_name').val(name);
+  
   $('#block_list_add').modal('show');
 };
 
@@ -444,6 +496,7 @@ const SAVE_BLOCK_LIST = () => {
     BLOCK_LIST[term] = {term: term, name: name};
     BLOCK_LIST_WRITE();
   }
+  
   $('#block_list_add').modal('hide');
   $('#save_block_list_term, #save_block_list_name').val('');
 };
@@ -451,14 +504,17 @@ const SAVE_BLOCK_LIST = () => {
 const EDIT_BLOCK_LIST = (key) => {
   $('#edit_block_list_term').val(BLOCK_LIST[key].term);
   $('#edit_block_list_name').val(BLOCK_LIST[key].name);
+  
   $('#block_list_edit').modal('show');
 };
 
 const SAVE_EDIT_BLOCK_LIST = () => {
   const term = $('#edit_block_list_term').val();
   const name = $('#edit_block_list_name').val() === '' ? $('#edit_block_list_term').val() : $('#edit_block_list_name').val();
+  
   BLOCK_LIST[term].name = name;
   BLOCK_LIST_WRITE();
+  
   $('#block_list_edit').modal('hide');
 };
 
@@ -466,30 +522,8 @@ const DELETE_EDIT_BLOCK_LIST = () => {
   const term = $('#edit_block_list_term').val();
   delete BLOCK_LIST[term];
   BLOCK_LIST_WRITE();
+  
   $('#block_list_edit').modal('hide');
-};
-
-const BLOCK_LIST_WRITE = () => {
-  let block_list_sorted = [], html = '';
-  
-  for (let key in BLOCK_LIST) {
-    block_list_sorted.push([key, BLOCK_LIST[key].name]);
-  }
-  
-  block_list_sorted.sort( (a, b) => {
-    if (a[1].toLowerCase() < b[1].toLowerCase()) return -1;
-    if (a[1].toLowerCase() > b[1].toLowerCase()) return 1;
-    return 0;
-  });
-  
-  for (let i = 0; i < block_list_sorted.length; i ++) {
-    const bl = BLOCK_LIST[block_list_sorted[i][0]];
-    html += `<button type="button" class="btn btn-xs btn-danger bl_item" data-key="${bl.term}" style="margin: 2px;">${bl.name}</button>`;
-  }
-  
-  $('#block_list_modal').find('.modal-body').html(html);
-  
-  localStorage.setItem('BLOCK_LIST', JSON.stringify(BLOCK_LIST));
 };
 
 const IMPORT_BLOCK_LIST = () => {
@@ -531,13 +565,248 @@ const EXPORT_BLOCK_LIST = () => {
   COPY_TO_CLIP(localStorage.getItem('BLOCK_LIST'), 'Your block list has been copied to your clipboard.');
 };
 
+const BLOCK_LIST_WRITE = () => {
+  let block_list_sorted = [], html = '';
+  
+  for (let key in BLOCK_LIST) {
+    block_list_sorted.push([key, BLOCK_LIST[key].name]);
+  }
+  
+  block_list_sorted.sort( (a, b) => {
+    if (a[1].toLowerCase() < b[1].toLowerCase()) return -1;
+    if (a[1].toLowerCase() > b[1].toLowerCase()) return 1;
+    return 0;
+  });
+  
+  for (let i = 0; i < block_list_sorted.length; i ++) {
+    const bl = BLOCK_LIST[block_list_sorted[i][0]];
+    html += `<button type="button" class="btn btn-xs btn-danger bl_item" data-key="${bl.term}" style="margin: 2px;">${bl.name}</button>`;
+  }
+  
+  $('#block_list_modal').find('.modal-body').html(html);
+  
+  localStorage.setItem('BLOCK_LIST', JSON.stringify(BLOCK_LIST));
+};
+
 //Incude List Stuff
+const INCLUDED_ALERTS_TEST = (test) => {
+  if (test.sound) {
+    if (test.type = 'voice') {
+      const msg = new SpeechSynthesisUtterance();
+      msg.text = `HIT found for ${test.name}`;
+      msg.voice = window.speechSynthesis.getVoices()[$('#voices').val()];
+      window.speechSynthesis.speak(msg);
+    }
+  }
+  if (test.notification) {
+    Notification.requestPermission();
+    var n = new Notification('Requester | $0.00', {
+      icon : '/icon_128.png',
+      body : 'Title',
+    });
+    setTimeout(n.close.bind(n), 5000);
+  }
+  /*
+  if (obj.pushbullet) {
+    push_delay.unshift(hit.key);
+    setTimeout(function () { push_delay.pop(); }, 900000);
+
+    var push = {};
+
+    push['type'] = 'note';
+    push['title'] = 'HIT Finder';
+    push['body'] = '[' + hit.reqname + ']\n[' + hit.title + ']\n[' + hit.reward + ']\n[' + hit.prevlink + ']';
+
+    $.ajax({
+      type    : 'POST',
+      headers : {'Authorization': 'Bearer ' + config.push},
+      url     : 'https://api.pushbullet.com/v2/pushes',
+      data    : push
+    });
+
+  }
+  */
+};
+
+const INCLUDED_ALERTS = (obj, hit) => {
+  var check = noti_delay.indexOf(hit.key) !== -1;
+  var pushcheck = push_delay.indexOf(hit.key) !== -1;
+
+  if (!check) {
+    noti_delay.unshift(hit.key);
+    setTimeout(function () { noti_delay.pop(); }, config.alert * 1000);
+  }
+  if (obj.noti_cb && !check) {
+    Notification.requestPermission();
+    var n = new Notification(hit.reqname + ' | ' + hit.reward, {
+      icon : 'http://kadauchi.com/avatar4.jpg',
+      body : hit.title,
+    });
+    setTimeout(n.close.bind(n), 5000);
+
+    n.onclick = function(e) {
+      e.preventDefault();
+      window.open(hit.prevlink, '_blank');
+    };
+
+  }
+  if (obj.sound_cb && !check) {
+    $('#audio_' + obj.sound)[0].play();
+  }
+  if (obj.push_cb && !pushcheck && config.pb) {
+    push_delay.unshift(hit.key);
+    setTimeout(function () { push_delay.pop(); }, 900000);
+
+    var push = {};
+
+    push['type'] = 'note';
+    push['title'] = 'HIT Finder';
+    push['body'] = '[' + hit.reqname + ']\n[' + hit.title + ']\n[' + hit.reward + ']\n[' + hit.prevlink + ']';
+
+    $.ajax({
+      type    : 'POST',
+      headers : {'Authorization': 'Bearer ' + config.push},
+      url     : 'https://api.pushbullet.com/v2/pushes',
+      data    : push
+    });
+
+  }
+}
+
 const SHOW_INCLUDE_LIST = () => {
   $('#include_list_modal').modal('show');
 };
 
 const ADD_INCLUDE_LIST = () => {
   $('#include_list_add').modal('show');
+};
+
+const SAVE_INCLUDE_LIST = () => {
+  const term = $('#save_include_list_term').val();
+  const name = $('#save_include_list_name').val() === '' ? $('#save_include_list_term').val() : $('#save_include_list_name').val();
+  const type = $('#save_include_list_type').val();
+  const sound = $('#save_include_list_sound').prop('checked');
+  const notification = $('#save_include_list_notification').prop('checked');
+  const pushbullet = $('#save_include_list_pushbullet').prop('checked');
+  
+  if (!INCLUDE_LIST[term]) {
+    INCLUDE_LIST[term] = {
+      term: term,
+      name: name,
+      type: type,
+      sound: sound,
+      notification: notification,
+      pushbullet: pushbullet
+    };
+    INCLUDE_LIST_WRITE();
+  }
+  
+  $('#include_list_add').modal('hide');
+  $('#save_include_list_term, #save_include_list_name').val('');
+};
+
+const EDIT_INCLUDE_LIST = (key) => {
+  $('#edit_include_list_term').val(INCLUDE_LIST[key].term);
+  $('#edit_include_list_name').val(INCLUDE_LIST[key].name);
+  $('#edit_include_list_type').val(INCLUDE_LIST[key].type);
+  $('#edit_include_list_sound').prop('checked', INCLUDE_LIST[key].sound);
+  $('#edit_include_list_notification').prop('checked', INCLUDE_LIST[key].notification);
+  $('#edit_include_list_pushbullet').prop('checked', INCLUDE_LIST[key].pushbullet);
+  
+  $('#include_list_edit').modal('show');
+};
+
+const SAVE_EDIT_INCLUDE_LIST = () => {
+  const term = $('#edit_include_list_term').val();
+  const name = $('#edit_include_list_name').val() === '' ? $('#edit_include_list_term').val() : $('#edit_include_list_name').val();
+  const type = $('#edit_include_list_type').val();
+  const sound = $('#edit_include_list_sound').prop('checked');
+  const notification = $('#edit_include_list_notification').prop('checked');
+  const pushbullet = $('#edit_include_list_pushbullet').prop('checked');
+
+  INCLUDE_LIST[term].name = name;
+  INCLUDE_LIST[term].type = type;
+  INCLUDE_LIST[term].sound = sound;
+  INCLUDE_LIST[term].notification = notification;
+  INCLUDE_LIST[term].pushbullet = pushbullet;
+  INCLUDE_LIST_WRITE();
+  
+  $('#include_list_edit').modal('hide');
+};
+
+const DELETE_EDIT_INCLUDE_LIST = () => {
+  const term = $('#edit_include_list_term').val();
+  delete INCLUDE_LIST[term];
+  INCLUDE_LIST_WRITE();
+  
+  $('#include_list_edit').modal('hide');
+};
+
+const IMPORT_INCLUDE_LIST = () => {
+  var import_include_list  = prompt(
+    'Include List Import\n\n' +
+    'This will not delete your current include list, only add to it.\n\n' +
+    'Please enter your include list here.',
+    ''
+  );
+
+  if (import_include_list) {
+    const json = VALID_JSON(import_include_list);
+
+    if (json) {
+      var il = JSON.parse(import_include_list);
+
+      for (let key in il) {
+        if (il[key].hasOwnProperty('term') && il[key].hasOwnProperty('name') && il[key].hasOwnProperty('sound')) {
+          if (!INCLUDE_LIST[key]) {
+            INCLUDE_LIST[key] = {
+              term: il[key].term,
+              name: il[key].name,
+              type: il[key].type || 0,
+              sound: il[key].sound || true,
+              notification: il[key].notification || true,
+              pushbullet: il[key].pushbullet || true
+            };
+          }
+        }
+        else {
+          alert('An error occured while importing.\n\n Please check that you have a valid import and try again.');
+          break;
+        }
+      }
+      INCLUDE_LIST_WRITE();
+    }
+  }
+  else {
+    alert('An error occured while importing.\n\n Please check that you have a valid import and try again.');
+  }
+};
+
+const EXPORT_INCLUDE_LIST = () => {
+  COPY_TO_CLIP(localStorage.getItem('INCLUDE_LIST'), 'Your include list has been copied to your clipboard.');
+};
+
+const INCLUDE_LIST_WRITE = () => {
+  let include_list_sorted = [], html = '';
+  
+  for (let key in INCLUDE_LIST) {
+    include_list_sorted.push([key, INCLUDE_LIST[key].name]);
+  }
+  
+  include_list_sorted.sort( (a, b) => {
+    if (a[1].toLowerCase() < b[1].toLowerCase()) return -1;
+    if (a[1].toLowerCase() > b[1].toLowerCase()) return 1;
+    return 0;
+  });
+  
+  for (let i = 0; i < include_list_sorted.length; i ++) {
+    const il = INCLUDE_LIST[include_list_sorted[i][0]];
+    html += `<button type="button" class="btn btn-xs btn-success il_item" data-key="${il.term}" style="margin: 2px;">${il.name}</button>`;
+  }
+  
+  $('#include_list_modal').find('.modal-body').html(html);
+  
+  localStorage.setItem('INCLUDE_LIST', JSON.stringify(INCLUDE_LIST));
 };
 
 // Settings Stuff
