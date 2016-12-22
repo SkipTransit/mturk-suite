@@ -1,28 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener(`DOMContentLoaded`, () => {
     WORKSPACE();
 });
 
 chrome.storage.onChanged.addListener( (changes) => {
   for (let key in changes) {
-    if (key === 'user') {
+    if (key === `user`) {
       WORKSPACE();
     }
   }
 });
 
 const WORKSPACE = () => {
-  chrome.storage.local.get('user', (data) => {
+  chrome.storage.local.get(`user`, (data) => {
     const user = data.user || {workspace: true};
     
     let $workspace;
-    const $iframe = $('iframe');
-    const $wrapper = $('#hit-wrapper');
-    const $timer = $('#theTime');
+    const $iframe = $(`iframe`);
+    const $wrapper = $(`#hit-wrapper`);
+    const $timer = $(`#theTime`);
 
-    if (user.workspace && !$('[name="userCaptchaResponse"]').length) {
-      if ($('input[name="isAccepted"][value="true"]').length) {
+    if (user.workspace && !$(`[name="userCaptchaResponse"]`).length) {
+      if ($(`input[name="isAccepted"][value="true"]`).length) {
         if ($iframe.length) {
-          $iframe.height('100vh');
+          $iframe.height(`100vh`);
           $iframe.focus();
           $workspace = $iframe;
         }
@@ -37,8 +37,8 @@ const WORKSPACE = () => {
     }
     else {
       if ($iframe.length) {
-        $iframe.height('600px');
-        $('html, body').scrollTop(0);
+        $iframe.height(`600px`);
+        $(`html, body`).scrollTop(0);
       }
     }
   });

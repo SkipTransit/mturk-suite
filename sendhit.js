@@ -1,20 +1,20 @@
-document.addEventListener('DOMContentLoaded', () => {
-  if ($('input[name="isAccepted"]').length) {
+document.addEventListener(`DOMContentLoaded`, () => {
+  if ($(`input[name="isAccepted"]`).length) {
     SEND_HIT();
   }
 });
 
 const SEND_HIT = () => {
-  const reqname  = $('input[name="prevRequester"]').val() || null;
-  const reqid    = $('input[name="requesterId"]').val() || reqname;
-  const title    = $('.capsulelink_bold').text().trim();
-  const reward   = $('input[name="prevReward"]').val().replace(/USD/, '$');
-  const autoapp  = $('input[name="hitAutoAppDelayInSeconds"]').val();
-  const hitid    = $('.popup-header > input[name="hitId"]').val();
-  const assignid = $('.popup-header > input[name="assignmentId"]').val();
-  const status   = $('.popup-header > input[name="isAccepted"]').val() === 'true' ? 'Accepted' : 'Previewed';
-  const source = $('iframe').prop('src') || null;
-  const timer    = $('#theTime').text().trim();
+  const reqname  = $(`input[name="prevRequester"]`).val() || null;
+  const reqid    = $(`input[name="requesterId"]`).val() || reqname;
+  const title    = $(`.capsulelink_bold`).text().trim();
+  const reward   = $(`input[name="prevReward"]`).val().replace(/USD/, `$`);
+  const autoapp  = $(`input[name="hitAutoAppDelayInSeconds"]`).val();
+  const hitid    = $(`.popup-header > input[name="hitId"]`).val();
+  const assignid = $(`.popup-header > input[name="assignmentId"]`).val();
+  const status   = $(`.popup-header > input[name="isAccepted"]`).val() === `true` ? `Accepted` : `Previewed`;
+  const source   = $(`iframe`).prop(`src`) || null;
+  const timer    = $(`#theTime`).text().trim();
   const accepted = WHEN_ACCEPTED(timer);
   const date     = MTURK_DATE(accepted);
   
@@ -33,7 +33,7 @@ const SEND_HIT = () => {
     submitted : null
   };
 
-  chrome.runtime.sendMessage({msg: 'sendhit', data: data});
+  chrome.runtime.sendMessage({msg: `sendhit`, data: data});
 };
 
 const WHEN_ACCEPTED = (time) => {
@@ -61,10 +61,10 @@ const WHEN_ACCEPTED = (time) => {
 const MTURK_DATE = (time) => {
   const given = new Date(time);
   const utc = given.getTime() + (given.getTimezoneOffset() * 60000);
-  const offset = DST() === true ? '-7' : '-8';
+  const offset = DST() === true ? `-7` : `-8`;
   const amz = new Date(utc + (3600000 * offset));
-  const day = (amz.getDate()) < 10 ? '0' + (amz.getDate()).toString() : (amz.getDate()).toString();
-  const month = (amz.getMonth() + 1) < 10 ? '0' + (amz.getMonth() + 1).toString() : ((amz.getMonth() + 1)).toString();
+  const day = (amz.getDate()) < 10 ? `0` + (amz.getDate()).toString() : (amz.getDate()).toString();
+  const month = (amz.getMonth() + 1) < 10 ? `0` + (amz.getMonth() + 1).toString() : ((amz.getMonth() + 1)).toString();
   const year = (amz.getFullYear()).toString();
   return month + day + year;
 };

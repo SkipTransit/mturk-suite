@@ -1,21 +1,21 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener(`DOMContentLoaded`, () => {
   DEFAULT_JS();
 });
 
 let user;
 
 const DEFAULT_JS = () => {
-  chrome.storage.local.get('user', (data) => {
+  chrome.storage.local.get(`user`, (data) => {
     user = data.user || {dark: true, goal: 20};
     
-    $('#options').append(
+    $(`#options`).append(
       GOAL_WRITE(user.goal || 20),
-      SWITCH_WRITE('darktheme', user.dark, 'Dark Theme'),
-      SWITCH_WRITE('vb', user.vb, 'Forum Export'),
-      SWITCH_WRITE('vb_th', user.vb_th, 'TH Direct Export'),
-      SWITCH_WRITE('vb_mtc', user.vb_mtc, 'MTC Direct Export'),
-      SWITCH_WRITE('accept_next', user.accept_next, 'Accept Next Checked'),
-      SWITCH_WRITE('workspace', user.workspace, 'Workspace Expand + Scroll')
+      SWITCH_WRITE(`darktheme`, user.dark, `Dark Theme`),
+      SWITCH_WRITE(`vb`, user.vb, `Forum Export`),
+      SWITCH_WRITE(`vb_th`, user.vb_th, `TH Direct Export`),
+      SWITCH_WRITE(`vb_mtc`, user.vb_mtc, `MTC Direct Export`),
+      SWITCH_WRITE(`accept_next`, user.accept_next, `Accept Next Checked`),
+      SWITCH_WRITE(`workspace`, user.workspace, `Workspace Expand + Scroll`)
     );
   });
 };
@@ -36,25 +36,26 @@ const SWITCH_WRITE = (id, prop, name) => {
   const html =
         `<div class="checkbox" style="padding: 2px; margin: 1px;">` +
         `  <label>` +
-        `    <input id="${id}" type="checkbox" data-toggle="toggle" data-size="mini" data-onstyle="success" ${(prop ? 'checked' : '')}>` +
+        `    <input id="${id}" type="checkbox" data-toggle="toggle" data-size="mini" data-onstyle="success" ${(prop ? `checked` : ``)}>` +
         `${name}` +
         `  </label>` +
         `</div>`
+  ;
   return html;
 };
 
-$('html').on('click', '.checkbox, label', function (e) {
+$(`html`).on(`click`, `.checkbox, label`, function (e) {
   if (e.target !== this) return;
-  $(this).find('input[type="checkbox"]').bootstrapToggle('toggle')  
+  $(this).find(`input[type="checkbox"]`).bootstrapToggle(`toggle`);
 });
 
-$('html').on('change', 'input', function () {
-  user.goal = $('#goal').val();
-  user.dark = $('#darktheme').prop('checked');
-  user.vb = $('#vb').prop('checked');
-  user.vb_th = $('#vb_th').prop('checked');
-  user.vb_mtc = $('#vb_mtc').prop('checked');
-  user.accept_next = $('#accept_next').prop('checked');
-  user.workspace = $('#workspace').prop('checked');
-  chrome.runtime.sendMessage({msg: 'user', data: user});
+$(`html`).on(`change`, `input`, function () {
+  user.goal = $(`#goal`).val();
+  user.dark = $(`#darktheme`).prop(`checked`);
+  user.vb = $(`#vb`).prop(`checked`);
+  user.vb_th = $(`#vb_th`).prop(`checked`);
+  user.vb_mtc = $(`#vb_mtc`).prop(`checked`);
+  user.accept_next = $(`#accept_next`).prop(`checked`);
+  user.workspace = $(`#workspace`).prop(`checked`);
+  chrome.runtime.sendMessage({msg: `user`, data: user});
 });

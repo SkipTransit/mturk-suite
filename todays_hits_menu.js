@@ -1,9 +1,9 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener(`DOMContentLoaded`, () => {
   WRITE();
 });
 
 chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
-  if (request.msg == 'sync_tpe_running') {
+  if (request.msg == `sync_tpe_running`) {
     SYNC_PROGRESS(request.data.current, request.data.total);
   }
 });
@@ -11,43 +11,43 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
 // Toggle to hide what was worked on
 const testing = false;
 
-let tpeexport = '';
+let tpeexport = ``;
 
 const WRITE = () => {
-  $('#overview').html(
-    '<h3>Loading Information.....</h3>'
+  $(`#overview`).html(
+    `<h3>Loading Information.....</h3>`
   );
   
-  $('#requester').html(
-    '    <table class="table table-striped table-condensed table-bordered table-fixed table-requester">' +
-    '      <thead>' +
-    '        <tr>' +
-    '          <th>Requester</th>' +
-    '          <th>HITs</th>' +
-    '          <th>Reward</th>' +
-    '        </tr>' +
-    '      </thead>' +
-    '      <tbody id="requester_tbody"></tbody>' +
-    '    </table>'
+  $(`#requester`).html(
+    `    <table class="table table-striped table-condensed table-bordered table-fixed table-requester">` +
+    `      <thead>` +
+    `        <tr>` +
+    `          <th>Requester</th>` +
+    `          <th>HITs</th>` +
+    `          <th>Reward</th>` +
+    `        </tr>` +
+    `      </thead>` +
+    `      <tbody id="requester_tbody"></tbody>` +
+    `    </table>`
   );
   
-  $('#detailed').html(
-    '    <table class="table table-striped table-condensed table-bordered table-fixed table-detailed">' +
-    '      <thead>' +
-    '        <tr>' +
-    '          <th>Requester</th>' +
-    '          <th>Title</th>' +
-    '          <th>Reward</th>' +
-    '          <th>Status</th>' +
-    '        </tr>' +
-    '      </thead>' +
-    '      <tbody id="detailed_tbody"></tbody>' +
-    '    </table>'
+  $(`#detailed`).html(
+    `    <table class="table table-striped table-condensed table-bordered table-fixed table-detailed">` +
+    `      <thead>` +
+    `        <tr>` +
+    `          <th>Requester</th>` +
+    `          <th>Title</th>` +
+    `          <th>Reward</th>` +
+    `          <th>Status</th>` +
+    `        </tr>` +
+    `      </thead>` +
+    `      <tbody id="detailed_tbody"></tbody>` +
+    `    </table>`
   );
   
-  chrome.storage.local.get('hits', (data) => {
+  chrome.storage.local.get(`hits`, (data) => {
     const hits = data.hits || {};
-    let breakdown = {}, breakdown_html = '', detailed_html = '';
+    let breakdown = {}, breakdown_html = ``, detailed_html = ``;
     
     const total = Object.keys(hits).length;
     let submitted = 0, submitted_pe = 0;
@@ -56,25 +56,25 @@ const WRITE = () => {
     for (let key in hits) {
       if (hits[key].status.match(/Submitted|Paid|Approved|Pending/)) {
         submitted ++;
-        submitted_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
+        submitted_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
         
         if (hits[key].status.match(/Paid|Approved/)) {
           approved ++;
-          approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
+          approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
         }
       
         if (hits[key].status.match(/Submitted|Pending/)) {
           const apped = IS_APPROVED(hits[key].autoapp, hits[key].submitted);
           if (apped) {
             approved ++;
-            approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
+            approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
           }
         }
       }
     }
     
     if (testing) {submitted_pe = 295; approved_pe = 295;}
-    $('#overview').html(
+    $(`#overview`).html(
       `<div style="font-size: 20px; line-height: normal;">` +
       `  <br>` +
       `  <span><b>${total}</b> HITs have been viewed, submitted or returned today.</span>` +
@@ -88,7 +88,7 @@ const WRITE = () => {
     );
     
     tpeexport =
-      `[b]Today\'s Projected Earnings: $${submitted_pe.toFixed(2)}[/b] (Exported from Mturk Suite)\n` +
+      `[b]Today\`s Projected Earnings: $${submitted_pe.toFixed(2)}[/b] (Exported from Mturk Suite)\n` +
       `[spoiler=Today's Projected Earnings Full Details][table][tr][th][b]Requester[/b][/th][th][b]HITs[/b][/th][th][b]Projected[/b][/th][/tr]` +
       `[tr][td]Total[/td][td]${submitted}[/td][td]$${submitted_pe.toFixed(2)}[/td][/tr]\n`
     ;
@@ -102,19 +102,19 @@ const WRITE = () => {
             reqname : hits[key].reqname,
             reqid   : hits[key].reqid,
             hits    : 1,
-            reward  : Number(hits[key].reward.replace(/[^0-9.]/g, ''))
+            reward  : Number(hits[key].reward.replace(/[^0-9.]/g, ``))
           };
         }
         else {
           breakdown[id].hits   += 1;
-          breakdown[id].reward += Number(hits[key].reward.replace(/[^0-9.]/g, ''));
+          breakdown[id].reward += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
         }
       }
     }
     
     const breakdown_sorted = Object.keys(breakdown).sort( (a, b) => { return breakdown[a].reward - breakdown[b].reward;});
     for (let i = breakdown_sorted.length - 1; i > -1; i --) {
-      let hit = breakdown[breakdown_sorted[i]], reqlink = '';
+      let hit = breakdown[breakdown_sorted[i]], reqlink = ``;
       
       if (hit.reqname !== hit.reqid) {
         reqlink =
@@ -123,11 +123,11 @@ const WRITE = () => {
       }
       else {
         reqlink =
-          `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.reqid.replace(/ /, '+')}`
+          `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.reqid.replace(/ /, `+`)}`
         ;
       }
 
-      if (testing) {hit.reqname = 'Kadauchi'; hit.reward = 295;}
+      if (testing) {hit.reqname = `Kadauchi`; hit.reward = 295;}
       breakdown_html +=
         `<tr>` +
         `  <td><a href="${reqlink}" target="_blank">${hit.reqname}</td>` +
@@ -145,20 +145,20 @@ const WRITE = () => {
       ;
     }
     
-    $('#requester_tbody').html(breakdown_html);
+    $(`#requester_tbody`).html(breakdown_html);
     
     const sorted = Object.keys(hits).sort( (a, b) => {return hits[a].viewed - hits[b].viewed;});
     for (let i = 0; i < sorted.length; i ++) {
-      let hit = hits[sorted[i]], contact = '', reqlink = '', color = '', source = '', autoapp = '', pend = false, trclass = '';
+      let hit = hits[sorted[i]], contact = ``, reqlink = ``, color = ``, source = ``, autoapp = ``, pend = false, trclass = ``;
       
       if (hit.status.match(/Paid|Approved/)) {
-        color = 'green';  trclass = 'success';
+        color = `green`;  trclass = `success`;
       }
       else if (hit.status.match(/Pending|Submitted/)) {
-        color = 'orange'; pend = true;  trclass = 'warning';
+        color = `orange`; pend = true;  trclass = `warning`;
       }
       else if (hit.status.match(/Rejected/)) {
-        color = 'red'; trclass = 'danger';
+        color = `red`; trclass = `danger`;
       }
       else if (hit.status.match(/Accepted|Previewed/)) {
       }
@@ -170,12 +170,12 @@ const WRITE = () => {
           autoapp = APPROVES_WHEN(hit.autoapp, hit.submitted);
         }
         else {
-          autoapp = 'There is no AA data for this HIT.';
+          autoapp = `There is no AA data for this HIT.`;
         }
       }
       
       if (hit.reqname !== hit.reqid) {
-        if (testing) {hit.reqname = 'Kadauchi';}
+        if (testing) {hit.reqname = `Kadauchi`;}
         contact =
           `<a href="https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}&hitId=${hit.hitid}&requesterName=${hit.reqname}&subject=Regarding+Amazon+Mechanical+Turk+HIT+${hit.hitid}" target="_blank">` +
           `  <span class="glyphicon glyphicon-envelope" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Contact the requester about this HIT."></span>` +
@@ -186,16 +186,16 @@ const WRITE = () => {
         ;
       }
       else {
-        if (testing) {hit.reqname = 'Kadauchi';}
+        if (testing) {hit.reqname = `Kadauchi`;}
         contact =
           `<span class="glyphicon glyphicon-envelope text-muted" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Sync to be able to contact requester."></span>`
         ;
         reqlink =
-          `<a href="https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.reqid.replace(/ /, '+')}" target="_blank">${hit.reqname}</a>`
+          `<a href="https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.reqid.replace(/ /, `+`)}" target="_blank">${hit.reqname}</a>`
         ;
       }
 
-      if (testing) {hit.title = 'Go Away!'; hit.reward = '$295.00';}
+      if (testing) {hit.title = `Go Away!`; hit.reward = `$295.00`;}
       detailed_html +=
         `<tr class="${status} ${trclass}">` +
         `  <td>${contact} ${reqlink}</div></td>` +
@@ -206,8 +206,8 @@ const WRITE = () => {
       ;
     }
   
-    $('#detailed_tbody').html(detailed_html);
-    $('[data-toggle="tooltip"]').tooltip();
+    $(`#detailed_tbody`).html(detailed_html);
+    $(`[data-toggle="tooltip"]`).tooltip();
   });  
 };
 
@@ -220,7 +220,7 @@ const IS_APPROVED = (aa, sub) => {
 };
 
 const APPROVES_WHEN = (aa, sub) => {
-  let willapp = 'This HIT will approve in ';
+  let willapp = `This HIT will approve in `;
   const autoapp = Number(aa);
   const submit  = Number(sub);
   const current = new Date().getTime() / 1000;
@@ -233,21 +233,21 @@ const APPROVES_WHEN = (aa, sub) => {
     const ss = remain % 60;
         
     willapp +=
-      (dd === 0 ? '' : dd + (dd > 1 ? ' days ' : ' day ')) +
-      (hh === 0 ? '' : hh + (hh > 1 ? ' hours ' : ' hour ')) +
-      (mm === 0 ? '' : mm + (mm > 1 ? ' minutes ' : ' minute ')) +
-      (ss === 0 ? '' : ss + (ss > 1 ? ' seconds ' : ' second '))
+      (dd === 0 ? `` : dd + (dd > 1 ? ` days ` : ` day `)) +
+      (hh === 0 ? `` : hh + (hh > 1 ? ` hours ` : ` hour `)) +
+      (mm === 0 ? `` : mm + (mm > 1 ? ` minutes ` : ` minute `)) +
+      (ss === 0 ? `` : ss + (ss > 1 ? ` seconds ` : ` second `))
     ;
   }
   else {
-    willapp = 'This HIT should be approved.';
+    willapp = `This HIT should be approved.`;
   }
   return willapp;
 };
 
 const SYNC_PROGRESS = (current, total) => {
-  const width = total === '???' ? 0 : Math.round(current / total * 100);
-  $('#overview, #requester, #detailed').html(
+  const width = total === `???` ? 0 : Math.round(current / total * 100);
+  $(`#overview, #requester, #detailed`).html(
     `<div class="text-center">` +
     `  <h1>Syncing page ${current} of ${total}</h1>` +
     `</div>` +
@@ -258,23 +258,23 @@ const SYNC_PROGRESS = (current, total) => {
 };
 
 const COPY_TO_CLIPBOARD = (template) => {
-  $('body').append(`<textarea id="COPY_TO_CLIPBOARD" style="opacity: 0;">${template}</textarea>`);
-  $('#COPY_TO_CLIPBOARD').select();
-  document.execCommand('Copy');
-  $('#COPY_TO_CLIPBOARD').remove();
+  $(`body`).append(`<textarea id="COPY_TO_CLIPBOARD" style="opacity: 0;">${template}</textarea>`);
+  $(`#COPY_TO_CLIPBOARD`).select();
+  document.execCommand(`Copy`);
+  $(`#COPY_TO_CLIPBOARD`).remove();
   alert(`Today's HITs Breakdown has been copied to your clipboard.`);
 };
 
-$('html').on('click', '#export', function () {
+$(`html`).on(`click`, `#export`, function () {
   COPY_TO_CLIPBOARD(tpeexport);
 });
 
-$('html').on('click', '#sync', function () {
-  SYNC_PROGRESS(1, '???');
-  chrome.runtime.sendMessage({msg: 'sync_tpe'});
+$(`html`).on(`click`, `#sync`, function () {
+  SYNC_PROGRESS(1, `???`);
+  chrome.runtime.sendMessage({msg: `sync_tpe`});
 });
 
-$('html').on('click', '#close', function () {
-  chrome.runtime.sendMessage({msg: 'close_tpe_menu'});
+$(`html`).on(`click`, `#close`, function () {
+  chrome.runtime.sendMessage({msg: `close_tpe_menu`});
 });
 

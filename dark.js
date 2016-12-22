@@ -1,14 +1,14 @@
 chrome.storage.onChanged.addListener( (changes) => {
   for (let change in changes) {
-    if (change === 'user') {
-      inject();
+    if (change === `user`) {
+      INJECT();
     }
   }
 });
 
 const css_all = () => {
-  const css = document.createElement('style');
-  css.className = 'dark';
+  const css = document.createElement(`style`);
+  css.className = `dark`;
   css.innerHTML = `
 
 html > body {
@@ -187,8 +187,8 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
 };
 
 const css_dash = () => {
-  const css = document.createElement('style');
-  css.className = 'dark';
+  const css = document.createElement(`style`);
+  css.className = `dark`;
   css.innerHTML = `
 .container-content,
 td[bgcolor="#7fb4cf"],
@@ -240,8 +240,8 @@ span#lnk_hide_earnings_details {
 };
 
 const css_1 = () => {
-  const css = document.createElement('style');
-  css.className = 'dark';
+  const css = document.createElement(`style`);
+  css.className = `dark`;
   css.innerHTML = `
 iframe {
     background-color : #BDBDBD !important;
@@ -339,8 +339,8 @@ a.capsulelink
 };
 
 const css_2 = () => {
-  const css = document.createElement('style');
-  css.className = 'dark';
+  const css = document.createElement(`style`);
+  css.className = `dark`;
   css.innerHTML = `
 table:nth-of-type(3) > tbody > tr > td {
     color            : #FFFFFF !important;
@@ -385,8 +385,8 @@ td[width="10"] {
 };
 
 const css_3 = () => {
-  const css = document.createElement('style');
-  css.className = 'dark';
+  const css = document.createElement(`style`);
+  css.className = `dark`;
   css.innerHTML = `
 /* Table just underneath the navigation table */
 #subtabs_and_searchbar:first-of-type + table td,
@@ -441,8 +441,8 @@ const css_3 = () => {
 };
 
 const css_4 = () => {
-  const css = document.createElement('style');
-  css.className = 'dark';
+  const css = document.createElement(`style`);
+  css.className = `dark`;
   css.innerHTML = `
 #subtabs_and_searchbar:first-of-type + table  > tbody > tr:nth-child(4) {
     background-color: #0b0c0f !important;
@@ -467,8 +467,8 @@ td.greyBox {
 };
 
 const css_5 = () => {
-  const css = document.createElement('style');
-  css.className = 'dark';
+  const css = document.createElement(`style`);
+  css.className = `dark`;
   css.innerHTML = `
 .black_text {
   color : #FFFFFF !important;   
@@ -522,8 +522,8 @@ const css_5 = () => {
   document.documentElement.insertBefore(css, null);
 };
 
-const inject = () => {
-  chrome.storage.local.get('user', (data) => {
+const INJECT = () => {
+  chrome.storage.local.get(`user`, (data) => {
     const user = data.user || {dark: true};
   
     if (user.dark) {
@@ -550,9 +550,9 @@ const inject = () => {
       } 
     }
     else {
-      $('style.dark').remove();
+      $(`style.dark`).remove();
     }
   });
 };
 
-inject();
+INJECT();
