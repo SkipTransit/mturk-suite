@@ -350,6 +350,7 @@ const HITS_WRITE = (keys, data) => {
       log = false;
     }
     if (Number(CONFIG.min_avail) > Number(hit.avail) || Number(CONFIG.min_to) > Number(data[hit.reqid].attrs.pay)) {
+      classes += ' hidden';
       log = false;
     }
         
