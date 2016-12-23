@@ -211,6 +211,7 @@ $(document).on('show.bs.modal', '.modal', function (event) {
   setTimeout( () => { $('.modal-backdrop').not('.modal-stack').css('z-index', zindex - 1).addClass('modal-stack'); }, 0);
 });
 
+// Find HITs Stuff
 const FIND = () => {
   let url = '';
   //if () {
@@ -352,6 +353,8 @@ const HITS_WRITE = (keys, data) => {
       classes += ' hidden';
       log = false;
     }
+    
+    const qualtip = hit.quals.replace(/; /g, `;<br>`);
         
     found_html += 
       `<tr class="${tr_color}${classes}">` +
@@ -375,7 +378,7 @@ const HITS_WRITE = (keys, data) => {
       `        <li><a class="vb_mtc" data-key="${hit.key}">MTC Direct</a></li>` +
       `      </ul>` +
       `    </div>` +
-        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" title="${hit.quals}">${hit.title}</a>` +
+        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${qualtip}">${hit.title}</a>` +
       `  </td>` +
       // Tasks
       `  <td>${hit.avail}</td>` +
@@ -415,7 +418,7 @@ const HITS_WRITE = (keys, data) => {
         `        <li><a class="vb_mtc" data-key="${hit.key}">MTC Direct</a></li>` +
         `      </ul>` +
         `    </div>` +
-        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" title="${hit.quals}">${hit.title}</a>` +
+        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${qualtip}">${hit.title}</a>` +
         `  </td>` +
         // Accept and Reward
         `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
@@ -431,60 +434,11 @@ const HITS_WRITE = (keys, data) => {
   }
   $('#found_tbody').html(found_html);
   $('#logged_tbody').prepend(logged_html);
-  $('[role="tooltip"]').remove();
-  $('[data-toggle="tooltip"]').tooltip({container: 'body'});
+  $('[data-toggle="tooltip"]').tooltip();
   
   if ($('#scan').text() === 'Stop') {
     setTimeout( () => { FIND(); }, CONFIG.scan_delay * 1000);
   }
-};
-
-const SET_CONFIG = () => {
-  $('#scan_delay').val(CONFIG.scan_delay);
-  $('#min_reward').val(CONFIG.min_reward.toFixed(2));
-  $('#min_avail').val(CONFIG.min_avail);
-  $('#min_to').val(CONFIG.min_to.toFixed(2));
-  $('#size').val(CONFIG.size);
-  $('#sort_by').val(CONFIG.sort_by);
-  
-  $('#qualified').prop('checked', CONFIG.qualified);
-  $('#enable_to').prop('checked', CONFIG.enable_to);
-  $('#hide_nl').prop('checked', CONFIG.hide_nl);
-  $('#hide_bl').prop('checked', CONFIG.hide_bl);
-  $('#hide_m').prop('checked', CONFIG.hide_m);
-  $('#new_hit').prop('checked', CONFIG.new_hit);
-  $('#pushbullet').prop('checked', CONFIG.pushbullet);
-  
-  $('#pushbullet_token').val(CONFIG.pushbullet_token);
-  $('#include_voice').val(CONFIG.include_voice);
-  $('#include_sound').val(CONFIG.include_sound);
-};
-
-const SAVE_CONFIG = () => {
-  CONFIG.scan_delay = $('#scan_delay').val();
-  CONFIG.min_reward = $('#min_reward').val();
-  CONFIG.min_avail = $('#min_avail').val();
-  CONFIG.min_to = $('#min_to').val();
-  CONFIG.size = $('#size').val();
-  CONFIG.sort_by = $('#sort_by').val();
-  
-  CONFIG.qualified = $('#qualified').prop('checked');
-  CONFIG.enable_to = $('#enable_to').prop('checked');
-  CONFIG.hide_nl = $('#hide_nl').prop('checked');
-  CONFIG.hide_bl = $('#hide_bl').prop('checked');
-  CONFIG.hide_m = $('#hide_m').prop('checked');
-  CONFIG.new_hit = $('#new_hit').prop('checked');
-  CONFIG.pushbullet = $('#pushbullet').prop('checked');
-  
-  CONFIG.pushbullet_token = $('#pushbullet_token').val();
-  CONFIG.include_voice = $('#include_voice').val();
-  CONFIG.include_sound = $('#include_sound').val();
-  
-  localStorage.setItem('CONFIG', JSON.stringify(CONFIG));
-
-  $(CONFIG.hide_nl ? '.nl' : '.nl_hidden').toggleClass('nl nl_hidden');
-  $(CONFIG.hide_bl ? '.bl' : '.bl_hidden').toggleClass('bl bl_hidden');
-  $(CONFIG.hide_m ? '.m' : '.m_hidden').toggleClass('m m_hidden');
 };
 
 const TO_COLOR = (rating) => {
@@ -867,7 +821,56 @@ const INCLUDE_LIST_WRITE = () => {
   localStorage.setItem('INCLUDE_LIST', JSON.stringify(INCLUDE_LIST));
 };
 
-// Advanced Settings Stuff
+// Settings Stuff
+const SET_CONFIG = () => {
+  $('#scan_delay').val(CONFIG.scan_delay);
+  $('#min_reward').val(Number(CONFIG.min_reward).toFixed(2));
+  $('#min_avail').val(CONFIG.min_avail);
+  $('#min_to').val(Number(CONFIG.min_to).toFixed(2));
+  $('#size').val(CONFIG.size);
+  $('#sort_by').val(CONFIG.sort_by);
+  
+  $('#qualified').prop('checked', CONFIG.qualified);
+  $('#enable_to').prop('checked', CONFIG.enable_to);
+  $('#hide_nl').prop('checked', CONFIG.hide_nl);
+  $('#hide_bl').prop('checked', CONFIG.hide_bl);
+  $('#hide_m').prop('checked', CONFIG.hide_m);
+  $('#new_hit').prop('checked', CONFIG.new_hit);
+  $('#pushbullet').prop('checked', CONFIG.pushbullet);
+  
+  
+  $('#pushbullet_token').val(CONFIG.pushbullet_token);
+  $('#include_voice').val(CONFIG.include_voice);
+  $('#include_sound').val(CONFIG.include_sound);
+};
+
+const SAVE_CONFIG = () => {
+  CONFIG.scan_delay = $('#scan_delay').val();
+  CONFIG.min_reward = $('#min_reward').val();
+  CONFIG.min_avail = $('#min_avail').val();
+  CONFIG.min_to = $('#min_to').val();
+  CONFIG.size = $('#size').val();
+  CONFIG.sort_by = $('#sort_by').val();
+  
+  CONFIG.qualified = $('#qualified').prop('checked');
+  CONFIG.enable_to = $('#enable_to').prop('checked');
+  CONFIG.hide_nl = $('#hide_nl').prop('checked');
+  CONFIG.hide_bl = $('#hide_bl').prop('checked');
+  CONFIG.hide_m = $('#hide_m').prop('checked');
+  CONFIG.new_hit = $('#new_hit').prop('checked');
+  CONFIG.pushbullet = $('#pushbullet').prop('checked');
+  
+  CONFIG.pushbullet_token = $('#pushbullet_token').val();
+  CONFIG.include_voice = $('#include_voice').val();
+  CONFIG.include_sound = $('#include_sound').val();
+  
+  localStorage.setItem('CONFIG', JSON.stringify(CONFIG));
+
+  $(CONFIG.hide_nl ? '.nl' : '.nl_hidden').toggleClass('nl nl_hidden');
+  $(CONFIG.hide_bl ? '.bl' : '.bl_hidden').toggleClass('bl bl_hidden');
+  $(CONFIG.hide_m ? '.m' : '.m_hidden').toggleClass('m m_hidden');
+};
+
 const SHOW_ADVANCED_SETTINGS = () => {
   $('#advanced_settings_modal').modal('show');
 };
