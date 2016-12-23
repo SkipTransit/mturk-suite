@@ -64,3 +64,7 @@ a:link, a:visited {
 .vb, .vb_th, .vb_mtc {
   cursor: pointer;
 }
+
+div.tooltip-inner {
+    max-width: 50vw;
+}
