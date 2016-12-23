@@ -124,7 +124,6 @@ const TODB_turkopticon = (tab, ids) => {
         }
     
         transaction.oncomplete = (event) => {
-          console.log('to requested');
           chrome.tabs.sendMessage(tab, {msg: `turkopticon.js`, data: to}); 
         };
       });
@@ -147,7 +146,6 @@ const TODB_turkopticon = (tab, ids) => {
       }
     
       transaction.oncomplete = (event) => {
-        console.log('to not requested');
         chrome.tabs.sendMessage(tab, {msg: `turkopticon.js`, data: to}); 
       };
     }
