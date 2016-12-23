@@ -96,7 +96,7 @@ const TODB_turkopticon = (tab, ids) => {
   }
   
   transaction.oncomplete = (event) => {
-    if (grab) {
+    if (grab) { console.log('Grab');
       $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`, (data) => {
         const transaction = TODB.transaction([`requester`], `readwrite`);
         const objectStore = transaction.objectStore(`requester`);
@@ -128,7 +128,7 @@ const TODB_turkopticon = (tab, ids) => {
         };
       });
     }
-    else {
+    else { console.log('No Grab');
       const transaction = TODB.transaction([`requester`], `readwrite`);
       const objectStore = transaction.objectStore(`requester`);
 
