@@ -250,16 +250,16 @@ const FIND_OLD = (data) => {
     let req_id, req_name, req_link, to_link;
     var req = $hit.find('a[href*="requesterId="]');
     if (req.length) {
-      req_id    = req.prop('href').split('requesterId=')[1];
-      req_name  = $hit.find('span.requesterIdentity').text().trim();
-      req_link  = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=' + req_id;
-      to_link   = 'https://turkopticon.ucsd.edu/' + req_id;
+      req_id   = req.prop('href').split('requesterId=')[1];
+      req_name = $hit.find('span.requesterIdentity').text().trim();
+      req_link = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=' + req_id;
+      to_link  = 'https://turkopticon.ucsd.edu/' + req_id;
     }
     else {
-      req_name  = $hit.find('span.requesterIdentity').text().trim();
-      req_id    = $hit.find('span.requesterIdentity').text().trim();
-      req_link  = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=' + req_id.replace(/ /g, '+');
-      to_link   = 'https://turkopticon.ucsd.edu/main/php_search?field=name&query=' + req_id.replace(/ /g, '+');
+      req_name = $hit.find('span.requesterIdentity').text().trim();
+      req_id   = $hit.find('span.requesterIdentity').text().trim();
+      req_link = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=' + req_id.replace(/ /g, '+');
+      to_link  = 'https://turkopticon.ucsd.edu/main/php_search?field=name&query=' + req_id.replace(/ /g, '+');
     }
 
     const group_id = $hit.find('a[href*="roupId="]').length ? $hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1] : null;
@@ -316,7 +316,6 @@ const FIND_OLD = (data) => {
   }
   if ($hits.length) {
     chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
-    //HITS_WRITE(keys);
   }
   else {
     setTimeout( () => { FIND(); }, 2500);
@@ -376,14 +375,16 @@ const HITS_WRITE = (keys, data) => {
       `        <li><a class="vb_mtc" data-key="${hit.key}">MTC Direct</a></li>` +
       `      </ul>` +
       `    </div>` +
-      `    <a href="${hit.prevlink}" target="_blank">${hit.title}</a>` +
+        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" title="${hit.quals}">${hit.title}</a>` +
       `  </td>` +
       // Tasks
       `  <td>${hit.avail}</td>` +
       // Accept and Reward
       `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
       // TO
-      `  <td>${data[hit.reqid].attrs.pay}</td>` +
+      `  <td>` +
+      `    <a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" title="Pay: ${data[hit.reqid].attrs.pay} Fair: ${data[hit.reqid].attrs.fair}<br />Comm: ${data[hit.reqid].attrs.comm} Fast: ${data[hit.reqid].attrs.fast}<br />Reviews: ${data[hit.reqid].reviews} ToS: ${data[hit.reqid].tos_flags}">${data[hit.reqid].attrs.pay}</a>` +
+      `  </td>` +
       // Masters
       `  <td>${hit.masters}</td>` +
       `</tr>`
@@ -414,12 +415,14 @@ const HITS_WRITE = (keys, data) => {
         `        <li><a class="vb_mtc" data-key="${hit.key}">MTC Direct</a></li>` +
         `      </ul>` +
         `    </div>` +
-        `    <a href="${hit.prevlink}" target="_blank">${hit.title}</a>` +
+        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" title="${hit.quals}">${hit.title}</a>` +
         `  </td>` +
         // Accept and Reward
         `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
         // TO
-        `  <td>${data[hit.reqid].attrs.pay}</td>` +
+        `  <td>` +
+        `    <a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" title="Pay: ${data[hit.reqid].attrs.pay} Fair: ${data[hit.reqid].attrs.fair}<br />Comm: ${data[hit.reqid].attrs.comm} Fast: ${data[hit.reqid].attrs.fast}<br />Reviews: ${data[hit.reqid].reviews} ToS: ${data[hit.reqid].tos_flags}">${data[hit.reqid].attrs.pay}</a>` +
+        `  </td>` +
         // Masters
         `  <td>${hit.masters}</td>` +
         `</tr>`
@@ -438,9 +441,9 @@ const HITS_WRITE = (keys, data) => {
 
 const SET_CONFIG = () => {
   $('#scan_delay').val(CONFIG.scan_delay);
-  $('#min_reward').val(CONFIG.min_reward);
+  $('#min_reward').val(CONFIG.min_reward.toFixed(2));
   $('#min_avail').val(CONFIG.min_avail);
-  $('#min_to').val(CONFIG.min_to);
+  $('#min_to').val(CONFIG.min_to.toFixed(2));
   $('#size').val(CONFIG.size);
   $('#sort_by').val(CONFIG.sort_by);
   
