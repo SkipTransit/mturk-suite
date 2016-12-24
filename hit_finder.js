@@ -14,8 +14,8 @@ chrome.extension.onMessage.addListener( (request) => {
   }
 });
 
-let keys = [];
-const HITS = {};
+let KEYS = [];
+let HITS = {};
 let LOGGED_IN = true;
 let TOTAL_SCANS = 0;
 let LOGGED_HITS = 0;
@@ -241,7 +241,7 @@ const SEARCH_TYPE = () => {
 };
 
 const FIND_OLD = (data) => {
-  let ids = []; keys = [];
+  let ids = []; KEYS = [];
 
   const hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
   const logged_in = $(data).find(`a[href="/mturk/beginsignout"]`).length;
@@ -303,7 +303,7 @@ const FIND_OLD = (data) => {
     };
     
     const key = obj.groupid !== `null` ? obj.groupid : obj.reqid + obj.title + obj.reward;
-    keys.push(key); ids.push(obj.reqid);
+    KEYS.push(key); ids.push(obj.reqid);
     
     if (obj.quals.indexOf('Masters has been granted') !== -1) {
       obj.masters = 'Y';
@@ -339,10 +339,10 @@ const FIND_OLD = (data) => {
 };
 
 const HITS_WRITE_LOGGED_IN = (data) => {
-  let found_html = '', logged_html = '';
+  let found_html = '', logged_html = '', hits_hidden = 0
   
-  for (let i = 0; i < keys.length; i ++) {
-    const hit = HITS[keys[i]];
+  for (let i = 0; i < KEYS.length; i ++) {
+    const hit = HITS[KEYS[i]];
     const time = TIME();
     const tr_color = TO_COLOR(data[hit.reqid].attrs.pay);
     const blocked = IS_BLOCKED(hit);
@@ -368,6 +368,9 @@ const HITS_WRITE_LOGGED_IN = (data) => {
       classes += ' hidden';
       log = false;
     }
+    if (classes.indexOf(`hidden`) !== -1) {
+      hits_hidden ++;
+    }
     
     const qualtip = hit.quals.replace(/; /g, `;<br>`);
         
@@ -388,9 +391,9 @@ const HITS_WRITE_LOGGED_IN = (data) => {
       `        Export <span class="caret"></span>` +
       `      </button>` +
       `      <ul class="dropdown-menu">` +
-      `        <li><a class="vb" data-key="${hit.key}">Forum</a></li>` +
-      `        <li><a class="vb_th" data-key="${hit.key}">TH Direct</a></li>` +
-      `        <li><a class="vb_mtc" data-key="${hit.key}">MTC Direct</a></li>` +
+      `        <li><a class="vb" data-key="${KEYS[i]}">Forum</a></li>` +
+      `        <li><a class="vb_th" data-key="${KEYS[i]}">TH Direct</a></li>` +
+      `        <li><a class="vb_mtc" data-key="${KEYS[i]}">MTC Direct</a></li>` +
       `      </ul>` +
       `    </div>` +
         `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${qualtip}">${hit.title}</a>` +
@@ -430,9 +433,9 @@ const HITS_WRITE_LOGGED_IN = (data) => {
         `        Export <span class="caret"></span>` +
         `      </button>` +
         `      <ul class="dropdown-menu">` +
-        `        <li><a class="vb" data-key="${hit.key}">Forum</a></li>` +
-        `        <li><a class="vb_th" data-key="${hit.key}">TH Direct</a></li>` +
-        `        <li><a class="vb_mtc" data-key="${hit.key}">MTC Direct</a></li>` +
+        `        <li><a class="vb" data-key="${KEYS[i]}">Forum</a></li>` +
+        `        <li><a class="vb_th" data-key="${KEYS[i]}">TH Direct</a></li>` +
+        `        <li><a class="vb_mtc" data-key="${KEYS[i]}">MTC Direct</a></li>` +
         `      </ul>` +
         `    </div>` +
         `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${qualtip}">${hit.title}</a>` +
@@ -449,7 +452,8 @@ const HITS_WRITE_LOGGED_IN = (data) => {
       ;
     }
   }
-  $('#hits_found').text(keys.length);
+  $('#hits_found').text(KEYS.length);
+  $('#hits_hidden').text(hits_hidden);
   $('#total_scans').text(TOTAL_SCANS);
   $('#hits_logged').text(LOGGED_HITS);
   $('#found_tbody').html(found_html);
@@ -464,8 +468,8 @@ const HITS_WRITE_LOGGED_IN = (data) => {
 const HITS_WRITE_LOGGED_OUT = () => {
   let found_html = '', logged_html = '';
   
-  for (let i = 0; i < keys.length; i ++) {
-    const hit = HITS[keys[i]];
+  for (let i = 0; i < KEYS.length; i ++) {
+    const hit = HITS[KEYS[i]];
     const time = TIME();
     const tr_color = TO_COLOR(0);
     const blocked = IS_BLOCKED(hit);
@@ -552,7 +556,7 @@ const HITS_WRITE_LOGGED_OUT = () => {
       ;
     }
   }
-  $('#hits_found').text(keys.length);
+  $('#hits_found').text(KEYS.length);
   $('#total_scans').text(TOTAL_SCANS);
   $('#hits_logged').text(LOGGED_HITS);
   $('#found_tbody').html(found_html);
@@ -1008,7 +1012,7 @@ const VB_EXPORT = (data) => {
   const template =
         `[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]\n` +
         `[b]Requester:[/b] [URL=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/URL] [${hit.reqid}] ([URL=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/URL])\n` +
-        `([URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]): ` +
+        `[b][URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]:[/b] ` +
         `${attr('Pay', data.attrs.pay)} ${attr('Fair', data.attrs.fair)} ` +
         `${attr('Comm', data.attrs.comm)} ${attr('Fast', data.attrs.fast)} ` +
         `[b][Reviews: ${data.reviews}][/b] ` +
@@ -1017,14 +1021,14 @@ const VB_EXPORT = (data) => {
         `[b]Time:[/b] ${hit.time}\n` +
         `[b]HITs Available:[/b] ${hit.avail}\n` +
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
-        `[b]Qualifications:[/b] ${hit.quals}\n` +
+        `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`)}\n` +
         `[/td][/tr][/table]`
   ;
   
   const direct_template =
         `<p>[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]</p>` +
         `<p>[b]Requester:[/b] [URL=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/URL] [${hit.reqid}] ([URL=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/URL])</p>` +
-        `<p>([URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]): ` +
+        `<p>[b][URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]:[/b] ` +
         `${attr('Pay', data.attrs.pay)} ${attr('Fair', data.attrs.fair)} ` +
         `${attr('Comm', data.attrs.comm)} ${attr('Fast', data.attrs.fast)} ` +
         `[b][Reviews: ${data.reviews}][/b] ` +
@@ -1033,7 +1037,7 @@ const VB_EXPORT = (data) => {
         `<p>[b]Time:[/b] ${hit.time}</p>` +
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
-        `<p>[b]Qualifications:[/b] ${hit.quals}[/td][/tr]</p>` +
+        `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`)}[/td][/tr]</p>` +
         `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`
   ;
 
