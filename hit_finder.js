@@ -15,8 +15,8 @@ chrome.extension.onMessage.addListener( (request) => {
 });
 
 let keys = [];
-const hitlog = {};
-let LOGGED = true;
+const HITS = {};
+let LOGGED_IN = true;
 let TOTAL_SCANS = 0;
 let LOGGED_HITS = 0;
 const DELAY_ALERTS = [];
@@ -173,10 +173,7 @@ $('html').on('click', '#save_advanced_settings', function () {
 });
 
 $('html').on('change', '#include_voice', function () {
-  const msg = new SpeechSynthesisUtterance();
-  msg.text = 'This is my voice.';
-  msg.voice = window.speechSynthesis.getVoices()[$('#include_voice').val()];
-  window.speechSynthesis.speak(msg);
+  SPEAK(`This is my voice.`);
 });
 
 $('html').on('change', '#include_sound', function () {
@@ -190,21 +187,21 @@ $('html').on('click', '.vb', function () {
   const key = $(this).data('key');
   EXPORT.key = key;
   EXPORT.type = 'vb';
-  chrome.runtime.sendMessage({msg: 'hitexport', data: hitlog[key].reqid});
+  chrome.runtime.sendMessage({msg: 'hitexport', data: HITS[key].reqid});
 });
 
 $('html').on('click', '.vb_th', function () {
   const key = $(this).data('key');
   EXPORT.key = key;
   EXPORT.type = 'vb_th';
-  chrome.runtime.sendMessage({msg: 'hitexport', data: hitlog[key].reqid});
+  chrome.runtime.sendMessage({msg: 'hitexport', data: HITS[key].reqid});
 });
 
 $('html').on('click', '.vb_mtc', function () {
   const key = $(this).data('key');
   EXPORT.key = key;
   EXPORT.type = 'vb_mtc';
-  chrome.runtime.sendMessage({msg: 'hitexport', data: hitlog[key].reqid});
+  chrome.runtime.sendMessage({msg: 'hitexport', data: HITS[key].reqid});
 });
 
 // Modal Stuff
@@ -248,6 +245,15 @@ const FIND_OLD = (data) => {
 
   const hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
   const logged_in = $(data).find(`a[href="/mturk/beginsignout"]`).length;
+  
+  if (LOGGED_IN && !logged_in) {
+    LOGGED_IN = false;
+    SPEAK(`Attention, You are logged out.`);
+  }
+  else if (!LOGGED_IN && logged_in) {
+    LOGGED_IN = true;
+    SPEAK(`Attention, You are logged in.`);
+  };
   
   for (let i = 0; i < hits.length; i ++) {
     const hit = hits.eq(i);
@@ -311,10 +317,10 @@ const FIND_OLD = (data) => {
     if (obj.quals.indexOf('Masters has been granted') !== -1) {
       obj.masters = 'Y';
     }
-    if (hitlog[key]) {
+    if (HITS[key]) {
       obj.new = false;
     }
-    hitlog[key] = obj;
+    HITS[key] = obj;
   }
   
   if (hits.length) {
@@ -334,7 +340,7 @@ const HITS_WRITE_LOGGED_IN = (data) => {
   let found_html = '', logged_html = '';
   
   for (let i = 0; i < keys.length; i ++) {
-    const hit = hitlog[keys[i]];
+    const hit = HITS[keys[i]];
     const time = TIME();
     const tr_color = TO_COLOR(data[hit.reqid].attrs.pay);
     const blocked = IS_BLOCKED(hit);
@@ -448,11 +454,6 @@ const HITS_WRITE_LOGGED_IN = (data) => {
   $('#logged_tbody').prepend(logged_html);
   $('[data-toggle="tooltip"]').tooltip();
   
-  if (!LOGGED) {
-    LOGGED = true;
-    SPEAK(`Attention, You are logged in.`);
-  }
-  
   if ($('#scan').text() === 'Stop') {
     setTimeout( () => { FIND(); }, CONFIG.scan_delay * 1000);
   }
@@ -462,7 +463,7 @@ const HITS_WRITE_LOGGED_OUT = () => {
   let found_html = '', logged_html = '';
   
   for (let i = 0; i < keys.length; i ++) {
-    const hit = hitlog[keys[i]];
+    const hit = HITS[keys[i]];
     const time = TIME();
     const tr_color = TO_COLOR(0);
     const blocked = IS_BLOCKED(hit);
@@ -555,11 +556,6 @@ const HITS_WRITE_LOGGED_OUT = () => {
   $('#found_tbody').html(found_html);
   $('#logged_tbody').prepend(logged_html);
   $('[data-toggle="tooltip"]').tooltip();
-  
-  if (LOGGED) {
-    LOGGED = false;
-    SPEAK(`Attention, You are logged out.`);
-  }
   
   if ($('#scan').text() === 'Stop') {
     setTimeout( () => { FIND(); }, CONFIG.scan_delay * 1000);
@@ -727,10 +723,7 @@ const INCLUDED_ALERTS_TEST = (test) => {
       audio.play();
     }
     else {
-      const msg = new SpeechSynthesisUtterance();
-      msg.text = `HIT found for ${test.name}`;
-      msg.voice = window.speechSynthesis.getVoices()[$(`#include_voice`).val()];
-      window.speechSynthesis.speak(msg);
+      SPEAK(`ATTENTION, HIT found for ${test.name}`);
     }
   }
   if (test.notification) {
@@ -769,10 +762,7 @@ const INCLUDED_ALERTS = (il, hit) => {
         audio.play();
       }
       else {
-        const msg = new SpeechSynthesisUtterance();
-        msg.text = `HIT found for ${il.name}`;
-        msg.voice = window.speechSynthesis.getVoices()[$(`#include_voice`).val()];
-        window.speechSynthesis.speak(msg);
+        SPEAK(`ATTENTION, HIT found for ${il.name}`);
       }
     }
     if (il.notification) {
@@ -1002,7 +992,7 @@ const SHOW_ADVANCED_SETTINGS = () => {
 
 // Export Stuff
 const VB_EXPORT = (data) => {
-  const hit = hitlog[EXPORT.key];
+  const hit = HITS[EXPORT.key];
   
   const attr = (type, rating) => {
     let color = '#B30000';
