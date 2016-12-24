@@ -246,15 +246,6 @@ const FIND_OLD = (data) => {
   const hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
   const logged_in = $(data).find(`a[href="/mturk/beginsignout"]`).length;
   
-  if (LOGGED_IN && !logged_in) {
-    LOGGED_IN = false;
-    SPEAK(`Attention, You are logged out.`);
-  }
-  else if (!LOGGED_IN && logged_in) {
-    LOGGED_IN = true;
-    SPEAK(`Attention, You are logged in.`);
-  };
-  
   for (let i = 0; i < hits.length; i ++) {
     const hit = hits.eq(i);
     
@@ -334,6 +325,17 @@ const FIND_OLD = (data) => {
   else {
     setTimeout( () => { FIND(); }, 2500);
   }
+  
+  if (LOGGED_IN && !logged_in) {
+    LOGGED_IN = false;
+    SPEAK(`Attention, You are logged out.`);
+    $('.panel').removeClass('panel-primary').addClass('panel-danger');
+  }
+  else if (!LOGGED_IN && logged_in) {
+    LOGGED_IN = true;
+    SPEAK(`Attention, You are logged in.`);
+    $('.panel').removeClass('panel-danger').addClass('panel-primary');
+  };
 };
 
 const HITS_WRITE_LOGGED_IN = (data) => {
