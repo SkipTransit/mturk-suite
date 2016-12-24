@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 chrome.extension.onMessage.addListener( (request) => {
   if (request.msg == 'turkopticon.js') {
-    HITS_WRITE(keys, request.data);
+    HITS_WRITE_LOGGED_IN(request.data);
   }
   if (request.msg == 'hitexport.js') {
     VB_EXPORT(request.data);
@@ -16,6 +16,9 @@ chrome.extension.onMessage.addListener( (request) => {
 
 let keys = [];
 const hitlog = {};
+let LOGGED = true;
+let TOTAL_SCANS = 0;
+let LOGGED_HITS = 0;
 const DELAY_ALERTS = [];
 const DELAY_PUSHBULLET = [];
 
@@ -224,7 +227,7 @@ const FIND = () => {
     ;  
   //}
   if ($('#scan').text() === 'Stop') {
-    $.get(url, (data) => { FIND_OLD(data); });
+    $.get(url, (data) => { TOTAL_SCANS++; FIND_OLD(data); });
   }
 };
 
@@ -243,87 +246,91 @@ const SEARCH_TYPE = () => {
 const FIND_OLD = (data) => {
   let ids = []; keys = [];
 
-  var $hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"]').eq(0).children('tbody').children('tr');
+  const hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
+  const logged_in = $(data).find(`a[href="/mturk/beginsignout"]`).length;
   
-  for (let i = 0; i < $hits.length; i ++) {
-    var $hit = $hits.eq(i);
-
-    let req_id, req_name, req_link, to_link;
-    var req = $hit.find('a[href*="requesterId="]');
-    if (req.length) {
-      req_id   = req.prop('href').split('requesterId=')[1];
-      req_name = $hit.find('span.requesterIdentity').text().trim();
-      req_link = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=' + req_id;
-      to_link  = 'https://turkopticon.ucsd.edu/' + req_id;
+  for (let i = 0; i < hits.length; i ++) {
+    const hit = hits.eq(i);
+    
+    const obj = {
+      reqid:
+      logged_in ?
+      hit.find('a[href*="requesterId="]').prop('href').split('requesterId=')[1]:
+      hit.find('.requesterIdentity').text().trim(),
+          
+      reqname: 
+      hit.find('.requesterIdentity').text().trim(),
+          
+      reqlink:
+      logged_in ?
+      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit.find('a[href*="requesterId="]').prop('href').split('requesterId=')[1]}`:
+      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.find('.requesterIdentity').text().trim().replace(/ /g, `+`)}`,
+          
+      title:
+      hit.find('a.capsulelink').text().trim(),
+          
+      desc:
+      hit.find('.capsule_field_title:contains(Description:)').next().text().trim(),
+          
+      time:
+      hit.find('.capsule_field_title:contains(Time Allotted:)').next().text().trim(),
+          
+      reward:
+      hit.find('.capsule_field_title:contains(Reward:)').next().text().trim(),
+          
+      avail:
+      hit.find('.capsule_field_title:contains(HITs Available:)').next().text().trim() || 'N/A',
+          
+      groupid:
+      hit.find('a[href*="roupId="]').length ?
+      hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1]:
+      `null`,
+          
+      prevlink:
+      hit.find('a[href*="roupId="]').length ?
+      `https://www.mturk.com/mturk/preview?groupId=${hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1]}`:
+      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.find('a.capsulelink').text().trim()}`,
+          
+      pandlink:
+      hit.find('a[href*="roupId="]').length ?
+      `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1]}`:
+      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.find('a.capsulelink').text().trim()}`,
+  
+      quals: 
+      hit.find('td[style="padding-right: 2em; white-space: nowrap;"]').length ?
+      hit.find('td[style="padding-right: 2em; white-space: nowrap;"]').map(function () { return $(this).text().trim().replace(/\s+/g, ' ') + `;`; }).get().join(` `):
+      `None;`,
+      
+      masters: 'N',
+      new: true
+    };
+    
+    const key = obj.groupid !== `null` ? obj.groupid : obj.reqid + obj.title + obj.reward;
+    keys.push(key); ids.push(obj.reqid);
+    
+    if (obj.quals.indexOf('Masters has been granted') !== -1) {
+      obj.masters = 'Y';
     }
-    else {
-      req_name = $hit.find('span.requesterIdentity').text().trim();
-      req_id   = $hit.find('span.requesterIdentity').text().trim();
-      req_link = 'https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=' + req_id.replace(/ /g, '+');
-      to_link  = 'https://turkopticon.ucsd.edu/main/php_search?field=name&query=' + req_id.replace(/ /g, '+');
+    if (hitlog[key]) {
+      obj.new = false;
     }
-
-    const group_id = $hit.find('a[href*="roupId="]').length ? $hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1] : null;
-    const prev_link = `https://www.mturk.com/mturk/preview?groupId=${group_id}`;
-    const pand_link = `https://www.mturk.com/mturk/previewandaccept?groupId=${group_id}`;
-
-    const title  = $hit.find('a.capsulelink').text();
-    const desc   = $hit.find('.capsule_field_title:contains(Description:)').next().text();
-    const time   = $hit.find('.capsule_field_title:contains(Time Allotted:)').next().text();
-    const reward = $hit.find('.capsule_field_title:contains(Reward:)').next().text();
-    const avail  = $hit.find('.capsule_field_title:contains(HITs Available:)').next().text() || 'N/A';
-
-    const quals   = $hit.find('td[style="padding-right: 2em; white-space: nowrap;"]');
-    let	qualif  = 'None;', masters = 'N';
-    if (quals.length) {
-      qualif = '';
-      for (var j = 0; j < quals.length; j ++) {
-        qualif += quals.eq(j).text().trim().replace(/\s+/g, ' ') + '; ';
-      }
-      if (qualif.indexOf('Masters has been granted') !== -1) {
-        masters = 'Y';
-      }
-    }
-
-    var key = group_id || req_id.trim() + title.trim() + reward.trim();
-    keys.push(key);
-
-    if (!hitlog[key]) {
-      hitlog[key] = {
-        reqid    : req_id.trim(),
-        reqname  : req_name.trim(),
-        reqlink  : req_link.trim(),
-        groupid  : group_id.trim(),
-        prevlink : prev_link.trim(),
-        pandlink : pand_link.trim(),
-        title    : title.trim(),
-        desc     : desc.trim(),
-        time     : time.trim(),
-        reward   : reward.trim(),
-        avail    : avail.trim(),
-        quals    : qualif.trim(),
-        masters  : masters.trim(),
-        key      : key.trim(),
-        tolink   : to_link.trim(),
-        to       : {comm: 0, fair: 0, fast: 0, pay : 0},
-        new      : true
-      };
-    }
-    else {
-      hitlog[key].avail = avail.trim();
-      hitlog[key].new = false;
-    }
-    ids.push(req_id);
+    hitlog[key] = obj;
   }
-  if ($hits.length) {
-    chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
+  
+  if (hits.length) {
+    if (logged_in) {
+      chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
+    }
+    else {
+      HITS_WRITE_LOGGED_OUT();
+    }
   }
   else {
     setTimeout( () => { FIND(); }, 2500);
   }
 };
 
-const HITS_WRITE = (keys, data) => {
+const HITS_WRITE_LOGGED_IN = (data) => {
   let found_html = '', logged_html = '';
   
   for (let i = 0; i < keys.length; i ++) {
@@ -394,6 +401,8 @@ const HITS_WRITE = (keys, data) => {
     ;
     
     if (hit.new && !blocked && log) {
+      LOGGED_HITS ++;
+      
       logged_html += 
         `<tr class="${tr_color}${classes}">` +
         // Time
@@ -432,9 +441,125 @@ const HITS_WRITE = (keys, data) => {
       ;
     }
   }
+  $('#hits_found').text(keys.length);
+  $('#total_scans').text(TOTAL_SCANS);
+  $('#hits_logged').text(LOGGED_HITS);
   $('#found_tbody').html(found_html);
   $('#logged_tbody').prepend(logged_html);
   $('[data-toggle="tooltip"]').tooltip();
+  
+  if (!LOGGED) {
+    LOGGED = true;
+    SPEAK(`Attention, You are logged in.`);
+  }
+  
+  if ($('#scan').text() === 'Stop') {
+    setTimeout( () => { FIND(); }, CONFIG.scan_delay * 1000);
+  }
+};
+
+const HITS_WRITE_LOGGED_OUT = () => {
+  let found_html = '', logged_html = '';
+  
+  for (let i = 0; i < keys.length; i ++) {
+    const hit = hitlog[keys[i]];
+    const time = TIME();
+    const tr_color = TO_COLOR(0);
+    const blocked = IS_BLOCKED(hit);
+    const included = IS_INCLUDED(hit);
+    
+    let classes = '', log = true;
+    if (blocked) {
+      classes += CONFIG.hide_bl ? ' bl_hidden' : ' bl';
+      classes += CONFIG.hide_nl ? ' nl_hidden' : ' nl';
+    }
+    else if (included) {
+      classes += ' il';
+      INCLUDED_ALERTS(included, hit);
+    }
+    else {
+      classes += CONFIG.hide_nl ? ' nl_hidden' : ' nl';
+    }
+    if (hit.masters === 'Y') {
+      classes += CONFIG.hide_m ? ' m_hidden' : ' m';
+      log = false;
+    }
+    if (Number(CONFIG.min_avail) > Number(hit.avail)) {
+      classes += ' hidden';
+      log = false;
+    }
+    
+    const qualtip = hit.quals.replace(/; /g, `;<br>`);
+        
+    found_html += 
+      `<tr class="${tr_color}${classes}">` +
+      // Requester
+      `  <td>` +
+      `    <div class="btn-group btn-group-xs">` +
+      `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this requester." data-term="${hit.reqid}" data-name="${hit.reqname}">R</button>` +
+      `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this HIT." data-term="${hit.groupid}" data-name="${hit.title}">T</button>` +
+      `    </div>` +
+      `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
+      `  </td>` +
+      // Project
+      `  <td>` +
+      `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${qualtip}">${hit.title}</a>` +
+      `  </td>` +
+      // Tasks
+      `  <td>${hit.avail}</td>` +
+      // Accept and Reward
+      `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+      // TO
+      `  <td>` +
+      `    <a href="https://turkopticon.ucsd.edu/main/php_search?field=name&query=${hit.reqname}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" title="Logged Out">N/A</a>` +
+      `  </td>` +
+      // Masters
+      `  <td>${hit.masters}</td>` +
+      `</tr>`
+    ;
+    
+    if (hit.new && !blocked && log) {
+      LOGGED_HITS ++;
+      
+      logged_html += 
+        `<tr class="${tr_color}${classes}">` +
+        // Time
+        `  <td>${time}</td>` +
+        // Requester
+        `  <td>` +
+        `    <div class="btn-group btn-group-xs">` +
+        `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this requester." data-term="${hit.reqid}" data-name="${hit.reqname}">R</button>` +
+        `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this HIT." data-term="${hit.groupid}" data-name="${hit.title}">T</button>` +
+        `    </div>` +
+        `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
+        `  </td>` +
+        // Project
+        `  <td>` +
+        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${qualtip}">${hit.title}</a>` +
+        `  </td>` +
+        // Accept and Reward
+        `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+        // TO
+        `  <td>` +
+        `    <a href="https://turkopticon.ucsd.edu/main/php_search?field=name&query=${hit.reqname}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" title="Logged Out">N/A</a>` +
+        `  </td>` +
+        // Masters
+        `  <td>${hit.masters}</td>` +
+        `</tr>`
+      ;
+    }
+  }
+  $('#hits_found').text(keys.length);
+  $('#total_scans').text(TOTAL_SCANS);
+  $('#hits_logged').text(LOGGED_HITS);
+  $('#found_tbody').html(found_html);
+  $('#logged_tbody').prepend(logged_html);
+  $('[data-toggle="tooltip"]').tooltip();
+  
+  if (LOGGED) {
+    LOGGED = false;
+    SPEAK(`Attention, You are logged out.`);
+  }
   
   if ($('#scan').text() === 'Stop') {
     setTimeout( () => { FIND(); }, CONFIG.scan_delay * 1000);
@@ -962,4 +1087,11 @@ const VALID_JSON = (data) => {
   catch (e) {
     return false;
   }
+};
+
+const SPEAK = (phrase) => {
+  const msg = new SpeechSynthesisUtterance();
+  msg.text = phrase;
+  msg.voice = window.speechSynthesis.getVoices()[$(`#include_voice`).val()];
+  window.speechSynthesis.speak(msg);
 };
