@@ -303,7 +303,8 @@ const FIND_OLD = (data) => {
     };
     
     const key = obj.groupid !== `null` ? obj.groupid : obj.reqid + obj.title + obj.reward;
-    KEYS.push(key); ids.push(obj.reqid);
+    KEYS.push(key);
+    if (ids.indexOf(obj.reqid) == -1) { ids.push(obj.reqid); } 
     
     if (obj.quals.indexOf('Masters has been granted') !== -1) {
       obj.masters = 'Y';
@@ -316,7 +317,8 @@ const FIND_OLD = (data) => {
   
   if (hits.length) {
     if (logged_in) {
-      chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
+      TURKOPTICON(ids);
+      //chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
     }
     else {
       HITS_WRITE_LOGGED_OUT();
@@ -1090,4 +1092,63 @@ const SPEAK = (phrase) => {
   msg.text = phrase;
   msg.voice = window.speechSynthesis.getVoices()[$(`#include_voice`).val()];
   window.speechSynthesis.speak(msg);
+};
+
+
+// Turkopticon IndexedDB
+let TODB;
+const request = indexedDB.open(`TODB`, 1);
+request.onsuccess = (event) => {
+  TODB = event.target.result;
+};
+request.onupgradeneeded = (event) => {
+  const TODB = event.target.result;
+  TODB.createObjectStore(`requester`, {keyPath: `id`});
+};
+
+const TURKOPTICON = (ids) => {
+  let grab = false;
+  const to = {};
+  const time = new Date().getTime();
+  const transaction = TODB.transaction([`requester`], `readwrite`);
+  const objectStore = transaction.objectStore(`requester`);
+  
+  for (let i = 0; i < ids.length; i ++) {
+    const request = objectStore.get(ids[i]);
+    request.onsuccess = (event) => {
+      if (request.result && request.result.edited > time - 21600000) {
+        to[ids[i]] = request.result;
+      }
+      else {
+        grab = true;
+      }
+    };
+  }
+  
+  transaction.oncomplete = (event) => {
+    if (grab) {
+      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`, (data) => {
+        const transaction = TODB.transaction([`requester`], `readwrite`);
+        const objectStore = transaction.objectStore(`requester`);
+
+        const json = JSON.parse(data);
+        for (let i = 0; i < ids.length; i ++) {
+          const id = ids[i];
+          if (json[id]) {
+            to[id] = json[id];
+            json[id].id = id;
+            json[id].edited = time;
+            objectStore.put(json[id]);
+          }
+          else {
+            to[id] = {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0};
+          }
+        }
+        HITS_WRITE_LOGGED_IN(to);
+      });
+    }
+    else {
+      HITS_WRITE_LOGGED_IN(to);
+    }
+  };
 };
