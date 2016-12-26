@@ -47,7 +47,8 @@ let CONFIG = {
   
   pushbullet_token : LOADED_CONFIG.pushbullet_token || 'access_token_here',
   include_voice    : LOADED_CONFIG.include_voice    || '0',
-  include_sound    : LOADED_CONFIG.include_sound    || '1'
+  include_sound    : LOADED_CONFIG.include_sound    || '1',
+  new_hit_sound    : LOADED_CONFIG.new_hit_sound    || '1'
 };
 
 $('html').on('click', '#scan', function () {
@@ -156,7 +157,7 @@ $('html').on('click', '#test_edit_include_list', function () {
 });
 
 // Setting Stuff
-$('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet, #include_voice, #include_sound', function () {
+$('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet, #include_voice, #include_sound, #new_hit_sound', function () {
   SAVE_CONFIG();
 });
 
@@ -180,6 +181,10 @@ $('html').on('change', '#include_sound', function () {
   const audio = new Audio();
   audio.src = `sounds/include_list_${$('#include_sound').val()}.mp3`;
   audio.play();
+});
+
+$('html').on('change', '#new_hit_sound', function () {
+  NEW_HIT_SOUND();
 });
 
 // Export Stuff
@@ -317,8 +322,8 @@ const FIND_OLD = (data) => {
   
   if (hits.length) {
     if (logged_in) {
-      TURKOPTICON(ids);
-      //chrome.runtime.sendMessage({msg: 'turkopticon', data: ids});
+      HIT_FINDER_DB();
+      TURKOPTICON_DB(ids);
     }
     else {
       HITS_WRITE_LOGGED_OUT();
@@ -337,11 +342,11 @@ const FIND_OLD = (data) => {
     LOGGED_IN = true;
     SPEAK(`Attention, You are logged in.`);
     $('.panel').removeClass('panel-danger').addClass('panel-primary');
-  };
+  }
 };
 
 const HITS_WRITE_LOGGED_IN = (data) => {
-  let found_html = '', logged_html = '', hits_hidden = 0
+  let found_html = '', logged_html = '', hits_hidden = 0, logged = false;
   
   for (let i = 0; i < KEYS.length; i ++) {
     const hit = HITS[KEYS[i]];
@@ -414,7 +419,7 @@ const HITS_WRITE_LOGGED_IN = (data) => {
     ;
     
     if (hit.new && !blocked && log) {
-      LOGGED_HITS ++;
+      LOGGED_HITS ++; logged = true;
       
       logged_html += 
         `<tr class="${tr_color}${classes}">` +
@@ -454,6 +459,7 @@ const HITS_WRITE_LOGGED_IN = (data) => {
       ;
     }
   }
+  if (logged && CONFIG.new_hit) { NEW_HIT_SOUND(); };
   $('#hits_found').text(KEYS.length);
   $('#hits_hidden').text(hits_hidden);
   $('#total_scans').text(TOTAL_SCANS);
@@ -965,6 +971,7 @@ const SET_CONFIG = () => {
   $('#pushbullet_token').val(CONFIG.pushbullet_token);
   $('#include_voice').val(CONFIG.include_voice);
   $('#include_sound').val(CONFIG.include_sound);
+  $('#new_hit_sound').val(CONFIG.new_hit_sound);
 };
 
 const SAVE_CONFIG = () => {
@@ -986,6 +993,7 @@ const SAVE_CONFIG = () => {
   CONFIG.pushbullet_token = $('#pushbullet_token').val();
   CONFIG.include_voice = $('#include_voice').val();
   CONFIG.include_sound = $('#include_sound').val();
+  CONFIG.new_hit_sound = $('#new_hit_sound').val();
   
   localStorage.setItem('CONFIG', JSON.stringify(CONFIG));
 
@@ -1094,23 +1102,28 @@ const SPEAK = (phrase) => {
   window.speechSynthesis.speak(msg);
 };
 
+const NEW_HIT_SOUND = () => {
+  const audio = new Audio();
+  audio.src = `sounds/new_hit_${$('#new_hit_sound').val()}.mp3`;
+  audio.play();
+};
 
 // Turkopticon IndexedDB
 let TODB;
-const request = indexedDB.open(`TODB`, 1);
-request.onsuccess = (event) => {
+const TODB_request = indexedDB.open(`TODB`, 1);
+TODB_request.onsuccess = (event) => {
   TODB = event.target.result;
 };
-request.onupgradeneeded = (event) => {
+TODB_request.onupgradeneeded = (event) => {
   const TODB = event.target.result;
   TODB.createObjectStore(`requester`, {keyPath: `id`});
 };
 
-const TURKOPTICON = (ids) => {
+const TURKOPTICON_DB = (ids) => {
   let grab = false;
   const to = {};
   const time = new Date().getTime();
-  const transaction = TODB.transaction([`requester`], `readwrite`);
+  const transaction = TODB.transaction([`requester`], `readonly`);
   const objectStore = transaction.objectStore(`requester`);
   
   for (let i = 0; i < ids.length; i ++) {
@@ -1151,4 +1164,28 @@ const TURKOPTICON = (ids) => {
       HITS_WRITE_LOGGED_IN(to);
     }
   };
+};
+
+// HIT Finder IndexedDB
+let HFDB;
+const HFDB_request = indexedDB.open(`HFDB`, 1);
+HFDB_request.onsuccess = (event) => {
+  HFDB = event.target.result;
+};
+HFDB_request.onupgradeneeded = (event) => {
+  const HFDB = event.target.result;
+  const createObjectStore = HFDB.createObjectStore(`hit`, {keyPath: `groupid`});
+  for (let index of [`reqid`, `reqname`, `title`, `reward`]) {
+    createObjectStore.createIndex(index, index, { unique: false });
+  }
+};
+
+const HIT_FINDER_DB = () => {
+  const transaction = HFDB.transaction([`hit`], `readwrite`);
+  const objectStore = transaction.objectStore(`hit`);
+
+  for (let i = 0; i < KEYS.length; i ++) {
+    const key = KEYS[i];
+    objectStore.put(HITS[key]);
+  }
 };
