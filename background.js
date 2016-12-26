@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     chrome.storage.local.set({'dashboard': dashboard});
   }
   if (request.msg == `turkopticon`) {
-    TODB_turkopticon(sender.tab.id, request.data);
+    TURKOPTICON_DB(sender.tab.id, request.data);
   }
   if (request.msg == `hitexport`) {
     TODB_hitexport(sender.tab.id, request.data);
@@ -48,8 +48,7 @@ chrome.contextMenus.create({
   onclick: (info, tab) => {
     chrome.tabs.executeScript(tab.id, {
         frameId: info.frameId,
-        code: `// This code runs in one frame, specified via frameId \n` +
-              `document.activeElement.value += '${dashboard.id}';`
+        code: `document.activeElement.value += '${dashboard.id}';`
     });
   }
 });
@@ -66,28 +65,27 @@ chrome.contextMenus.create({
 
 // Turkopticon IndexedDB
 let TODB;
-const request = indexedDB.open(`TODB`, 1);
-request.onsuccess = (event) => {
+const TODB_request = indexedDB.open(`TODB`, 1);
+TODB_request.onsuccess = (event) => {
   TODB = event.target.result;
 };
-request.onupgradeneeded = (event) => {
+TODB_request.onupgradeneeded = (event) => {
   const TODB = event.target.result;
   TODB.createObjectStore(`requester`, {keyPath: `id`});
 };
 
-const TODB_turkopticon = (tab, ids) => {
+const TURKOPTICON_DB = (tab, ids) => {
   let grab = false;
+  const to = {};
   const time = new Date().getTime();
-  const transaction = TODB.transaction([`requester`], `readwrite`);
+  const transaction = TODB.transaction([`requester`], `readonly`);
   const objectStore = transaction.objectStore(`requester`);
   
   for (let i = 0; i < ids.length; i ++) {
     const request = objectStore.get(ids[i]);
     request.onsuccess = (event) => {
-      if (request.result) {
-        if (request.result.edited < time - 21600000) {
-          grab = true;
-        }
+      if (request.result && request.result.edited > time - 21600000) {
+        to[ids[i]] = request.result;
       }
       else {
         grab = true;
@@ -96,58 +94,29 @@ const TODB_turkopticon = (tab, ids) => {
   }
   
   transaction.oncomplete = (event) => {
-    if (grab) { console.log('Grab');
+    if (grab) {
       $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`, (data) => {
         const transaction = TODB.transaction([`requester`], `readwrite`);
         const objectStore = transaction.objectStore(`requester`);
 
         const json = JSON.parse(data);
-        for (let obj in json) {
-          if (json[obj]) {
-            json[obj].id = obj;
-            json[obj].edited = time;
-            objectStore.put(json[obj]);
-          }
-        }
-    
-        const to = {};
         for (let i = 0; i < ids.length; i ++) {
-          const request = objectStore.get(ids[i]);
-          request.onsuccess = (event) => {
-            if (request.result) {
-              to[ids[i]] = request.result;
-            }
-            else {
-              to[ids[i]] = {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0};
-            }
-          };
-        }
-    
-        transaction.oncomplete = (event) => {
-          chrome.tabs.sendMessage(tab, {msg: `turkopticon.js`, data: to}); 
-        };
-      });
-    }
-    else { console.log('No Grab');
-      const transaction = TODB.transaction([`requester`], `readwrite`);
-      const objectStore = transaction.objectStore(`requester`);
-
-      const to = {};
-      for (let i = 0; i < ids.length; i ++) {
-        const request = objectStore.get(ids[i]);
-        request.onsuccess = (event) => {
-          if (request.result) {
-            to[ids[i]] = request.result;
+          const id = ids[i];
+          if (json[id]) {
+            to[id] = json[id];
+            json[id].id = id;
+            json[id].edited = time;
+            objectStore.put(json[id]);
           }
           else {
-            to[ids[i]] = {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0};
+            to[id] = {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0};
           }
-        };
-      }
-    
-      transaction.oncomplete = (event) => {
+        }
         chrome.tabs.sendMessage(tab, {msg: `turkopticon.js`, data: to}); 
-      };
+      });
+    }
+    else {
+      chrome.tabs.sendMessage(tab, {msg: `turkopticon.js`, data: to}); 
     }
   };
 };
