@@ -19,6 +19,7 @@ let HITS = {};
 let LOGGED_IN = true;
 let TOTAL_SCANS = 0;
 let LOGGED_HITS = 0;
+let REQUEST_ERRORS = 0;
 const DELAY_ALERTS = [];
 const DELAY_PUSHBULLET = [];
 
@@ -250,7 +251,8 @@ const FIND_OLD = (data) => {
 
   const hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
   const logged_in = $(data).find(`a[href="/mturk/beginsignout"]`).length;
-  
+  const request_error = $(data).find(`.error_title:contains(You have exceeded)`).length;
+
   for (let i = 0; i < hits.length; i ++) {
     const hit = hits.eq(i);
     
@@ -333,15 +335,18 @@ const FIND_OLD = (data) => {
     setTimeout( () => { FIND(); }, 2500);
   }
   
-  if (LOGGED_IN && !logged_in) {
+  if (!request_error && LOGGED_IN && !logged_in) {
     LOGGED_IN = false;
     SPEAK(`Attention, You are logged out.`);
     $('.panel').removeClass('panel-primary').addClass('panel-danger');
   }
-  else if (!LOGGED_IN && logged_in) {
+  if (!request_error && !LOGGED_IN && logged_in) {
     LOGGED_IN = true;
     SPEAK(`Attention, You are logged in.`);
     $('.panel').removeClass('panel-danger').addClass('panel-primary');
+  }
+  if (!request_error) {
+    $('#request_errors').text(REQUEST_ERRORS ++);
   }
 };
 
