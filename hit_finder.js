@@ -345,7 +345,7 @@ const FIND_OLD = (data) => {
     SPEAK(`Attention, You are logged in.`);
     $('.panel').removeClass('panel-danger').addClass('panel-primary');
   }
-  if (!request_error) {
+  if (request_error) {
     $('#request_errors').text(REQUEST_ERRORS ++);
   }
 };
