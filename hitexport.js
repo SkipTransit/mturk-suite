@@ -1,6 +1,9 @@
 document.addEventListener(`DOMContentLoaded`, () => {
-  if ($(`a:contains(View a HIT in this group)`).length) {
-    HIT_EXPORT();
+  if ($(`a[href*="roupId="]`).length) {
+    HIT_EXPORT_MAIN();
+  }
+  if ($('[name="groupId"]').length && $('[name="groupId"]').val() !== '') {
+    HIT_EXPORT_CAPSULE();
   }
 });
 
@@ -21,20 +24,17 @@ chrome.storage.onChanged.addListener( (changes) => {
 const hits = {};
 const EXPORT = {key: null, type: null};
 
-const HIT_EXPORT = () => {
+const HIT_EXPORT_MAIN = () => {
   for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
     const hit = $(element);
 
     const requesterIdentity = hit.find(`.requesterIdentity`).text();
     const requesterId = hit.find(`a[href*="&requesterId="]`).prop(`href`).split(`&requesterId=`)[1];
 
-    let groupId = `na`, preview = ``, panda = ``;
-    if (hit.find(`a[href*="?groupId="]`).length) {
-      groupId = hit.find(`a[href*="?groupId="]`).prop(`href`).split(`groupId=`)[1];
-      preview = `https://www.mturk.com/mturk/preview?groupId=${groupId}`;
-      panda = `https://www.mturk.com/mturk/previewandaccept?groupId=${groupId}`;
-    }
-
+    const groupId = hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1];
+    const preview = `https://www.mturk.com/mturk/preview?groupId=${groupId}`;
+    const panda = `https://www.mturk.com/mturk/previewandaccept?groupId=${groupId}`;
+  
     const title = hit.find(`a.capsulelink`).text();
     const description = hit.find(`.capsule_field_title:contains(Description:)`).next().text();
     const time = hit.find(`.capsule_field_title:contains(Time Allotted:)`).next().text();
@@ -46,7 +46,7 @@ const HIT_EXPORT = () => {
       qualifications += qual.textContent.trim().replace(/\s+/g, ` `) + `; `;
     }
 
-    const key = requesterId + groupId + reward;
+    const key = groupId;
 
     hits[key] = {
       reqname  : requesterIdentity.trim(),
@@ -63,19 +63,16 @@ const HIT_EXPORT = () => {
     };
   }
   
-  EXPORTS_WRITE();
+  EXPORTS_WRITE_MAIN();
 };
 
-const EXPORTS_WRITE = () => {
+const EXPORTS_WRITE_MAIN = () => {
   chrome.storage.local.get(`user`, (data) => {
     const user = data.user || {hit_export: true};
     
     for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
       const hit = $(element);
-      const requesterId = hit.find(`a[href*="&requesterId="]`).prop(`href`).split(`&requesterId=`)[1];
-      const groupId = hit.find(`a[href*="?groupId="]`).length ? hit.find(`a[href*="?groupId="]`).prop(`href`).split(`groupId=`)[1] : `na`;
-      const reward = hit.find(`.capsule_field_title:contains(Reward:)`).next().text();
-      const key = requesterId + groupId + reward;
+      const key = hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1];
       
       const html = 
             user.hit_export ?
@@ -96,6 +93,84 @@ const EXPORTS_WRITE = () => {
         hit.find(`a[id^="capsule"]`).before(`<span class="exports">${html}</span>`);
       }
     }
+  });
+};
+
+const HIT_EXPORT_CAPSULE = () => {
+  const key = $(`input[name="groupId"]`).val();
+  
+  const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).eq(0).val();
+  const days = Math.floor((aa / (60 * 60 * 24)));
+  const hours = Math.floor((aa / (60 * 60)) % 24);
+  const mins = Math.floor((aa / 60) % 60);
+  const secs = aa % 60;
+  
+  let aa_time = 
+      (days  === 0 ? `` : days  + ` day(s)`) +
+      (hours === 0 ? `` : hours + ` hour(s)`) +
+      (mins  === 0 ? `` : mins  + ` minute(s)`) +
+      (secs  === 0 ? `` : secs  + ` seconds(s)`);
+
+  if (aa === 0) {
+    aa_time = `0 seconds`;
+  }
+
+  hits[key] = {
+    reqname:
+    $(`.capsule_field_title:contains(Requester:)`).next().text().trim(),
+      
+    reqid:
+    $(`input[name="requesterId"]`).val(),
+      
+    groupid: 
+    $(`input[name="groupId"]`).val(),
+      
+    prevlink:
+    `https://www.mturk.com/mturk/preview?groupId=${$(`input[name="groupId"]`).val()}`,
+      
+    pandlink:
+    `https://www.mturk.com/mturk/previewandaccept?groupId=${$(`input[name="groupId"]`).val()}`,
+      
+    title:
+    $(`.capsulelink_bold`).text().trim(),
+      
+    aa: aa_time,
+      
+    time:
+    $(`.capsule_field_title:contains(Duration:)`).next().text().trim(),
+      
+    reward:
+    $(`.capsule_field_title:contains(Reward:)`).next().text().trim().split(` `)[0],
+      
+    avail:
+    $(`.capsule_field_title:contains(HITs Available:)`).next().text().trim(),
+      
+    quals:
+    $(`.capsule_field_title:contains(Qualifications Required:)`).next().text().trim() + `;`,
+  };
+  
+  EXPORTS_WRITE_CAPSULE();
+};
+
+const EXPORTS_WRITE_CAPSULE = () => {
+  chrome.storage.local.get(`user`, (data) => {
+    const user = data.user || {hit_export: true};
+    
+      const key = $(`input[name="groupId"]`).val();
+      
+      const html = 
+            user.hit_export ?
+            `<div class="dropdown">` +
+            `  <button type="button" class="dropbtn export">Export <span style="font-size: 75%;">▼</span></button>` +
+            `  <div id="myDropdown" class="dropdown-content">` +
+            `    <a class="vb" data-key="${key}">Forum</a>` +
+            `    <a class="vb_th" data-key="${key}">TH Direct</a>` +
+            `    <a class="vb_mtc" data-key="${key}">MTC Direct</a>` +
+            `  </div>` +
+            `</div>` : ``
+      ;
+      
+    $(`.capsulelink_bold`).before(`<span class="exports">${html}</span>`);
   });
 };
 
@@ -140,7 +215,7 @@ const VB_EXPORT = (data) => {
         `${attr(`Comm`, data.attrs.comm)} ${attr(`Fast`, data.attrs.fast)} ` +
         `[b][Reviews: ${data.reviews}][/b] ` +
         `[b][ToS: ${data.tos_flags === 0 ? `[color=green]` + data.tos_flags : `[color=red]` + data.tos_flags}[/color]][/b]\n` +
-        `[b]Description:[/b] ${hit.desc}\n` +
+        (data.desc ? `[b]Description:[/b] ${hit.desc}\n` : `[b]Auto Approval:[/b] ${hit.aa}\n`) +
         `[b]Time:[/b] ${hit.time}\n` +
         `[b]HITs Available:[/b] ${hit.avail}\n` +
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
@@ -156,7 +231,7 @@ const VB_EXPORT = (data) => {
         `${attr(`Comm`, data.attrs.comm)} ${attr(`Fast`, data.attrs.fast)} ` +
         `[b][Reviews: ${data.reviews}][/b] ` +
         `[b][ToS: ${data.tos_flags === 0 ? `[color=green]` + data.tos_flags : `[color=red]` + data.tos_flags}[/color]][/b]\n</p>` +
-        `<p>[b]Description:[/b] ${hit.desc}</p>` +
+        (data.desc ? `<p>[b]Description:[/b] ${hit.desc}</p>` : `<p>[b]Auto Approval:[/b] ${hit.aa}</p>`) +
         `<p>[b]Time:[/b] ${hit.time}</p>` +
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
