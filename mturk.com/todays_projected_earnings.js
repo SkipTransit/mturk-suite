@@ -1,6 +1,6 @@
 document.addEventListener(`DOMContentLoaded`, () => {
   if ($(`a[href="/mturk/beginsignout"]`).length) {
-    GLOBAL_JS();
+    GLOBAL();
   }
 });
 
@@ -24,7 +24,7 @@ chrome.storage.onChanged.addListener( (changes) => {
   }
 });
 
-const GLOBAL_JS = () => {
+const GLOBAL = () => {
   chrome.storage.local.get(`tpe`, (data) => {
     TPE_WRITE(data.tpe.tpe || 0, data.tpe.goal || 20);
   });

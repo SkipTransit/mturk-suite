@@ -1,0 +1,26 @@
+.circle {
+  cursor: default;
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  font-size: 9px;
+  color: #000;
+  line-height: 18px;
+  text-align: center;
+  font-weight: bold;
+  margin-right: 2px;
+}
+
+.circle:hover + .ratings, .ratings:hover {
+  display: block;
+}
+
+.ratings {
+  width: 300px;
+  position:absolute;
+  display: none;
+  border: 1px solid;
+  border-color: #336699;
+  background-color: rgb(240, 246, 249);
+  padding: 3px;
+}

@@ -1,10 +1,10 @@
 document.addEventListener(`DOMContentLoaded`, () => {
-  POPUP_JS();
+  POPUP();
 });
 
 let user;
 
-const POPUP_JS = () => {
+const POPUP = () => {
   chrome.storage.local.get(`user`, (data) => {
     user = data.user || {dark: true, goal: 20};
     

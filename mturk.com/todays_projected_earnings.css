@@ -1,0 +1,39 @@
+#tpe {
+  position: absolute;
+  right: 8px;
+  margin-top: -15px;
+  font-weight: bold;
+  cursor: pointer; 
+}
+
+#tpe_goal_outer {
+  float: left;
+  margin-right: 3px;
+  width: 150px;
+  height: 7px;
+  border: 1px solid #CC6600;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+#tpe_goal_inner {
+  height: 100%;
+  background-color: #CC6600; 
+}
+
+#tpe_earnings {
+  float: right;
+  color: #008000;
+  font-size: 10px;
+}
+
+#tpe_menu {
+  padding: 1px;
+  z-index: 99;
+  position: fixed;
+  width: 80%;
+  height: 600px;
+  left: 10%;
+  top: 300px;
+  margin-top: -250px;
+}

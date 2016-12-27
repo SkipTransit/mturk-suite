@@ -2,15 +2,15 @@
   "manifest_version": 2,
 
   "name": "Mturk Suite",
-  "version": "0.2.2.6",
+  "version": "0.3.0.0",
 
   "icons": {
-    "16": "icon_16.png",
-    "128": "icon_128.png"
+    "16": "media/icon_16.png",
+    "128": "media/icon_128.png"
   },
   
   "browser_action": {
-    "default_icon": "icon_128.png",
+    "default_icon": "media/icon_128.png",
     "default_title": "Mturk Suite",
     "default_popup": "popup.html"
   },
@@ -29,20 +29,22 @@
         "https://www.mturk.com/*"
       ],
       "css": [
-        "css.css"
+        "mturk.com/hit_export.css",
+        "mturk.com/todays_projected_earnings.css",
+        "mturk.com/turkopticon.css"
       ],
       "js": [
         "jquery-3.1.1.min.js",
-        "dark.js",
-        "global.js",
-        "sendhit.js",
-        "hitexport.js",
-        "workspace.js",
-        "queue_value.js",
-        "accept_next.js",
-        "accept_links.js",
-        "hitcapsule.js",
-        "turkopticon.js"
+        "mturk.com/accept_links.js",
+        "mturk.com/accept_next.js",
+        "mturk.com/dark_theme.js",
+        "mturk.com/hit_capsule.js",
+        "mturk.com/hit_export.js",
+        "mturk.com/queue_value.js",
+        "mturk.com/send_hit.js",
+        "mturk.com/todays_projected_earnings.js",
+        "mturk.com/turkopticon.js",
+        "mturk.com/workspace.js"
       ],
       "run_at": "document_start"
     },
@@ -53,7 +55,7 @@
       ],
       "js": [
         "jquery-3.1.1.min.js", 
-        "dashboard.js"
+        "mturk.com/dashboard.js"
       ],
       "run_at": "document_start"
     }

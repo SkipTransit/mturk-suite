@@ -1,16 +1,16 @@
 document.addEventListener(`DOMContentLoaded`, () => {
   if ($(`a[href*="requesterId="]`).length) {
-    TURKOPTICON_JS();
+    TURKOPTICON();
   }
 });
 
 chrome.runtime.onMessage.addListener( (request) => {
   if (request.msg == `turkopticon.js`) {
-    RATINGS_WRITE(request.data);
+    TURKOPTICON_WRITE(request.data);
   }
 });
 
-const TURKOPTICON_JS = () => {
+const TURKOPTICON = () => {
   const ids = [];
 
   for (let element of $(`a[href*="requesterId="]`)) {
@@ -22,7 +22,7 @@ const TURKOPTICON_JS = () => {
   chrome.runtime.sendMessage({msg: `turkopticon`, data: ids});
 };
 
-const RATINGS_WRITE = (data) => {
+const TURKOPTICON_WRITE = (data) => {
   const to = (id) => {
     const html = 
           `<div style="float:left;">` +
@@ -33,10 +33,10 @@ const RATINGS_WRITE = (data) => {
                rating(`Pay`, data[id].attrs.pay) +
                rating(`Comm`, data[id].attrs.comm) +
           `    <br>` +
-          `    <div>Scores based on <a href="https://turkopticon.ucsd.edu/${id}" target="_blank" style="color: #FFFFFF;">${data[id].reviews} review(s)</a></div>` +
+          `    <div>Scores based on <a href="https://turkopticon.ucsd.edu/${id}" target="_blank">${data[id].reviews} review(s)</a></div>` +
           `    <div>Terms of Service violation flags: ${data[id].tos_flags}</div>` +
           `    <div>` +
-          `      <a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}" target="_blank" style="color: #FFFFFF;">Report your experience with this requester »</a>` +
+          `      <a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}" target="_blank">Report your experience with this requester »</a>` +
           `    </div>` +
           `  </div>` +
           `</div>`;
@@ -48,10 +48,10 @@ const RATINGS_WRITE = (data) => {
     if (rating > 0.01) {
       html =
         `<div style="display: table; width: 100%; cursor: default; height: 25px;">` +
-        `  <div style="display: table-cell; width:20%;">${type}:</div>` +
+        `  <div class="capsule_field_title" style="display: table-cell; width:20%;">${type}:</div>` +
         `  <div style="display: table-cell; width:20%;">${rating} / 5</div>` +
         `  <div style="display: table-cell; width:60%;">` +
-        `    <div style="width: 100%; height: 12px; border: 1px solid ${color(rating)}; border-radius: 3px;">` +
+        `    <div style="width: 100%; height: 12px; border: 1px solid; border-radius: 3px; overflow: hidden;">` +
         `      <div style="height: 100%; background-color: ${color(rating)}; user-select: none; width: ${rating / 5 * 100}%;"></div>` +
         `    </div>` +
         `  </div>` +
@@ -60,10 +60,10 @@ const RATINGS_WRITE = (data) => {
     else {
       html =
         `<div style="display: table; width: 100%; cursor: default; height: 25px;">` +
-        `  <div style="display: table-cell; width:20%;">${type}:</div>` +
+        `  <div class="capsule_field_title" style="display: table-cell; width:20%;">${type}:</div>` +
         `  <div style="display: table-cell; width:20%;">No Data</div>` +
         `  <div style="display: table-cell; width:60%;">` +
-        `    <div style="width: 100%; height: 12px; border: 1px solid rgba(160, 160, 160, 0.6); border-radius: 3px;"></div>` +
+        `    <div style="width: 100%; height: 12px; border: 1px solid; border-radius: 3px;"></div>` +
         `  </div>` +
         `</div>`;
     }
@@ -71,11 +71,11 @@ const RATINGS_WRITE = (data) => {
   };
   
   const color = (rating) => {
-    let color = `255, 0, 0, 0.6`;
-    if (rating > 1.99) {color = `255, 140, 0, 0.6`;}
-    if (rating > 2.99) {color = `255, 255, 0, 0.6`;}
-    if (rating > 3.99) {color = `0, 255, 0, 0.6`;}
-    if (rating < 0.01) {color = `160, 160, 160, 0.6`;}
+    let color = `255, 0, 0, 0.65`;
+    if (rating > 1.99) {color = `255, 140, 0, 0.65`;}
+    if (rating > 2.99) {color = `255, 255, 0, 0.65`;}
+    if (rating > 3.99) {color = `0, 255, 0, 0.65`;}
+    if (rating < 0.01) {color = `160, 160, 160, 0.65`;}
     return `rgba(${color})`;
   };
   
@@ -88,10 +88,10 @@ const RATINGS_WRITE = (data) => {
     }
     else {
       $(element).before(to(id));
-    }
+    } 
   }
   if ($(`input[name="requesterId"]`).length) {
-    const id = $(`input[name="requesterId"]`).eq(0).val();
+    const id = $(`input[name="requesterId"]`).val();
     $(`.capsule_field_text`).eq(0).before(to(id));
   }
 };

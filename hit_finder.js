@@ -179,9 +179,7 @@ $('html').on('change', '#include_voice', function () {
 });
 
 $('html').on('change', '#include_sound', function () {
-  const audio = new Audio();
-  audio.src = `sounds/include_list_${$('#include_sound').val()}.mp3`;
-  audio.play();
+  INCLUDE_SOUND();
 });
 
 $('html').on('change', '#new_hit_sound', function () {
@@ -737,9 +735,7 @@ const IS_INCLUDED = (hit) => {
 const INCLUDED_ALERTS_TEST = (test) => {
   if (test.sound) {
     if (test.type === `sound`) {
-      const audio = new Audio();
-      audio.src = `sounds/include_list_${$('#include_sound').val()}.mp3`;
-      audio.play();
+      INCLUDE_SOUND();
     }
     else {
       SPEAK(`ATTENTION, HIT found for ${test.name}`);
@@ -776,9 +772,7 @@ const INCLUDED_ALERTS = (il, hit) => {
   if (!delay_alerts) {
     if (il.sound) {
       if (il.type === `sound`) {
-        const audio = new Audio();
-        audio.src = `sounds/include_list_${$('#include_sound').val()}.mp3`;
-        audio.play();
+        INCLUDE_SOUND();
       }
       else {
         SPEAK(`ATTENTION, HIT found for ${il.name}`);
@@ -1107,9 +1101,15 @@ const SPEAK = (phrase) => {
   window.speechSynthesis.speak(msg);
 };
 
+const INCLUDE_SOUND = () => {
+  const audio = new Audio();
+  audio.src = `media/include_list_${$('#include_sound').val()}.mp3`;
+  audio.play();
+};
+
 const NEW_HIT_SOUND = () => {
   const audio = new Audio();
-  audio.src = `sounds/new_hit_${$('#new_hit_sound').val()}.mp3`;
+  audio.src = `media/new_hit_${$('#new_hit_sound').val()}.mp3`;
   audio.play();
 };
 

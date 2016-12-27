@@ -1,7 +1,7 @@
 chrome.storage.onChanged.addListener( (changes) => {
   for (let change in changes) {
     if (change === `user`) {
-      INJECT();
+      DARK_THEME_WRITE();
     }
   }
 });
@@ -101,9 +101,9 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
     height       : 0;
     width        : 0;
     border       : 0;
-    padding-left : 114px                                         !important;
-    padding-top  : 32px                                          !important;
-    background   : url(http://i.imgur.com/ipvzrR2.png) no-repeat !important;
+    padding-left : 114px !important;
+    padding-top  : 32px !important;
+    background   : url(${chrome.runtime.getURL(`media/nav_youraccount_active.png`)}) no-repeat !important;
 }
 
 /* Navigation "Your Account" Inactive */
@@ -112,9 +112,9 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
     height       : 0;
     width        : 0;
     border       : 0;
-    padding-left : 114px                                         !important;
-    padding-top  : 32px                                          !important;
-    background   : url(http://i.imgur.com/6IttohB.png) no-repeat !important;
+    padding-left : 114px !important;
+    padding-top  : 32px !important;
+    background   : url(${chrome.runtime.getURL(`media/nav_youraccount_inactive.png`)}) no-repeat !important;
 }
 
 /* Navigation "HITs" Active */
@@ -123,9 +123,9 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
     height       : 0;
     width        : 0;
     border       : 0;
-    padding-left : 89px                                          !important;
-    padding-top  : 32px                                          !important;
-    background   : url(http://i.imgur.com/Z1rRfbS.png) no-repeat !important;
+    padding-left : 89px !important;
+    padding-top  : 32px !important;
+    background   : url(${chrome.runtime.getURL(`media/nav_hits_active.png`)}) no-repeat !important;
 }
 
 
@@ -134,9 +134,9 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
     height       : 0;
     width        : 0;
     border       : 0;
-    padding-left : 89px                                          !important;
-    padding-top  : 32px                                          !important;
-    background   : url(http://i.imgur.com/mouLSBV.png) no-repeat !important;
+    padding-left : 89px !important;
+    padding-top  : 32px !important;
+    background   : url(${chrome.runtime.getURL(`media/nav_hits_inactive.png`)}) no-repeat !important;
 }
 
 /* Navigation "Qualifications" Active */
@@ -145,9 +145,9 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
     height       : 0;
     width        : 0;
     border       : 0;
-    padding-left : 114px                                         !important;
-    padding-top  : 32px                                          !important;
-    background   : url(http://i.imgur.com/fcaM0SP.png) no-repeat !important;
+    padding-left : 114px !important;
+    padding-top  : 32px !important;
+    background   : url(${chrome.runtime.getURL(`media/nav_quals_active.png`)}) no-repeat !important;
 }
 
 /* Navigation "Qualifications" Inactive */
@@ -155,9 +155,9 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
     height       : 0;
     width        : 0;
     border       : 0;
-    padding-left : 114px                                         !important;
-    padding-top  : 32px                                          !important;
-    background   : url(http://i.imgur.com/nTDxw4t.png) no-repeat !important;
+    padding-left : 114px !important;
+    padding-top  : 32px !important;
+    background   : url(${chrome.runtime.getURL(`media/nav_quals_inactive.png`)}) no-repeat !important;
 }
 
 [type="image"] {
@@ -522,7 +522,7 @@ const css_5 = () => {
   document.documentElement.insertBefore(css, null);
 };
 
-const INJECT = () => {
+const DARK_THEME_WRITE = () => {
   chrome.storage.local.get(`user`, (data) => {
     const user = data.user || {dark: true};
   
@@ -555,4 +555,4 @@ const INJECT = () => {
   });
 };
 
-INJECT();
+DARK_THEME_WRITE();

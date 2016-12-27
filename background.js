@@ -18,8 +18,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     chrome.storage.local.set({'tpe': tpe});
   }
   if (request.msg == `dashboard`) {
-    dashboard = request.data;
-    chrome.storage.local.set({'dashboard': dashboard});
+    chrome.storage.local.set({'dashboard': request.data});
   }
   if (request.msg == `turkopticon`) {
     TURKOPTICON_DB(sender.tab.id, request.data);
