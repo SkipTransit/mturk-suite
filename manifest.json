@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "Mturk Suite",
-  "version": "0.2.2.5",
+  "version": "0.2.2.6",
 
   "icons": {
     "16": "icon_16.png",
@@ -65,6 +65,7 @@
     "storage",
     "webRequest",
     "contextMenus",
+    "clipboardWrite",
     "<all_urls>"
   ],
   
