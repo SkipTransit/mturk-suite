@@ -12,9 +12,6 @@ const POPUP_JS = () => {
       GOAL_WRITE(user.goal || 20),
       SWITCH_WRITE(`darktheme`, user.dark, `Dark Theme`),
       SWITCH_WRITE(`hit_export`, user.hit_export, `HIT Export`),
-      //SWITCH_WRITE(`vb`, user.vb, `Forum Export`),
-      //SWITCH_WRITE(`vb_th`, user.vb_th, `TH Direct Export`),
-      //SWITCH_WRITE(`vb_mtc`, user.vb_mtc, `MTC Direct Export`),
       SWITCH_WRITE(`accept_next`, user.accept_next, `Accept Next Checked`),
       SWITCH_WRITE(`workspace`, user.workspace, `Workspace Expand + Scroll`)
     );
@@ -54,9 +51,6 @@ $(`html`).on(`change`, `input`, function () {
   user.goal = $(`#goal`).val();
   user.dark = $(`#darktheme`).prop(`checked`);
   user.hit_export = $(`#hit_export`).prop(`checked`);
-  //user.vb = $(`#vb`).prop(`checked`);
-  //user.vb_th = $(`#vb_th`).prop(`checked`);
-  //user.vb_mtc = $(`#vb_mtc`).prop(`checked`);
   user.accept_next = $(`#accept_next`).prop(`checked`);
   user.workspace = $(`#workspace`).prop(`checked`);
   chrome.runtime.sendMessage({msg: `user`, data: user});
