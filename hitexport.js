@@ -1,105 +1,84 @@
 document.addEventListener(`DOMContentLoaded`, () => {
-  if ($(`a[href*="roupId="]`).length) {
+  if ($(`a[href*="roupId="]`).length ) {
     HIT_EXPORT_MAIN();
   }
-  if ($('[name="groupId"]').length && $('[name="groupId"]').val() !== '') {
+  if ($(`input[name="groupId"]`).length && $(`input[name="groupId"]`).val() !== ``) {
     HIT_EXPORT_CAPSULE();
   }
 });
 
 chrome.extension.onMessage.addListener( (request) => {
   if (request.msg == `hitexport.js`) {
-    VB_EXPORT(request.data);
+    EXPORT_HIT(request.data);
   }
 });
 
 chrome.storage.onChanged.addListener( (changes) => {
   for (let key in changes) {
     if (key === `user`) {
-      EXPORTS_WRITE();
+      if ($(`a[href*="roupId="]`).length ) {
+        HIT_EXPORT_MAIN();
+      }
+      if ($(`input[name="groupId"]`).length && $(`input[name="groupId"]`).val() !== ``) {
+        HIT_EXPORT_CAPSULE();
+      }
     }
   }
 });
 
-const hits = {};
+const HITS = {};
 const EXPORT = {key: null, type: null};
 
 const HIT_EXPORT_MAIN = () => {
   for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
     const hit = $(element);
-
-    const requesterIdentity = hit.find(`.requesterIdentity`).text();
-    const requesterId = hit.find(`a[href*="&requesterId="]`).prop(`href`).split(`&requesterId=`)[1];
-
-    const groupId = hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1];
-    const preview = `https://www.mturk.com/mturk/preview?groupId=${groupId}`;
-    const panda = `https://www.mturk.com/mturk/previewandaccept?groupId=${groupId}`;
-  
-    const title = hit.find(`a.capsulelink`).text();
-    const description = hit.find(`.capsule_field_title:contains(Description:)`).next().text();
-    const time = hit.find(`.capsule_field_title:contains(Time Allotted:)`).next().text();
-    const reward = hit.find(`.capsule_field_title:contains(Reward:)`).next().text();
-    const available = hit.find(`.capsule_field_title:contains(HITs Available:)`).next().text();
-
-    let qualifications = ``;
-    for (let qual of hit.find(`td[style="padding-right: 2em; white-space: nowrap;"]`)) {
-      qualifications += qual.textContent.trim().replace(/\s+/g, ` `) + `; `;
-    }
-
-    const key = groupId;
-
-    hits[key] = {
-      reqname  : requesterIdentity.trim(),
-      reqid    : requesterId.trim(),
-      groupid  : groupId.trim(),
-      prevlink : preview !== `` ? preview.trim() : `https://www.mturk.com/mturk/searchbar?requesterId=${requesterId}`,
-      pandlink : panda !== `` ? panda.trim() : `https://www.mturk.com/mturk/searchbar?requesterId=${requesterId}`,
-      title    : title.trim(),
-      desc     : description.trim(),
-      time     : time.trim(),
-      reward   : reward.trim(),
-      avail    : available.trim(),
-      quals    : qualifications !== `` ? qualifications.trim() : `None;`,
+    const key = hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1];
+    
+    HITS[key] = {
+      reqname:
+      hit.find(`.capsule_field_title:contains(Requester:)`).next().text().trim(),
+      
+      reqid:
+      hit.find(`a[href*="requesterId="]`).prop(`href`).split(`requesterId=`)[1],
+      
+      groupid: 
+      hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1],
+      
+      prevlink:
+      `https://www.mturk.com/mturk/preview?groupId=${hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1]}`,
+      
+      pandlink:
+      `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1]}`,
+      
+      title:
+      hit.find(`a.capsulelink`).text().trim(),
+      
+      desc:
+      hit.find(`.capsule_field_title:contains(Description:)`).next().text().trim(),
+      
+      time:
+      hit.find(`.capsule_field_title:contains(Time Allotted:)`).next().text().trim(),
+      
+      reward:
+      hit.find(`.capsule_field_title:contains(Reward:)`).next().text().trim(),
+      
+      avail:
+      hit.find(`.capsule_field_title:contains(HITs Available:)`).next().text().trim(),
+      
+      quals: 
+      hit.find(`td[style="padding-right: 2em; white-space: nowrap;"]`).length ?
+      hit.find(`td[style="padding-right: 2em; white-space: nowrap;"]`).map( function () { return $(this).text().trim().replace(/\s+/g, ` `) + `;`; }).get().join(` `):
+      `None;`
     };
   }
   
   EXPORTS_WRITE_MAIN();
 };
 
-const EXPORTS_WRITE_MAIN = () => {
-  chrome.storage.local.get(`user`, (data) => {
-    const user = data.user || {hit_export: true};
-    
-    for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
-      const hit = $(element);
-      const key = hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1];
-      
-      const html = 
-            user.hit_export ?
-            `<div class="dropdown">` +
-            `  <button class="dropbtn export">Export <span style="font-size: 75%;">▼</span></button>` +
-            `  <div id="myDropdown" class="dropdown-content">` +
-            `    <a class="vb" data-key="${key}">Forum</a>` +
-            `    <a class="vb_th" data-key="${key}">TH Direct</a>` +
-            `    <a class="vb_mtc" data-key="${key}">MTC Direct</a>` +
-            `  </div>` +
-            `</div>` : ``
-      ;
-      
-      if (hit.find(`.exports`).length) {
-        hit.find(`.exports`).html(html);
-      }
-      else {
-        hit.find(`a[id^="capsule"]`).before(`<span class="exports">${html}</span>`);
-      }
-    }
-  });
-};
-
 const HIT_EXPORT_CAPSULE = () => {
   const key = $(`input[name="groupId"]`).val();
   
-  const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).eq(0).val();
+  const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).val();
   const days = Math.floor((aa / (60 * 60 * 24)));
   const hours = Math.floor((aa / (60 * 60)) % 24);
   const mins = Math.floor((aa / 60) % 60);
@@ -115,7 +94,7 @@ const HIT_EXPORT_CAPSULE = () => {
     aa_time = `0 seconds`;
   }
 
-  hits[key] = {
+  HITS[key] = {
     reqname:
     $(`.capsule_field_title:contains(Requester:)`).next().text().trim(),
       
@@ -148,10 +127,40 @@ const HIT_EXPORT_CAPSULE = () => {
     $(`.capsule_field_title:contains(HITs Available:)`).next().text().trim(),
       
     quals:
-    $(`.capsule_field_title:contains(Qualifications Required:)`).next().text().trim() + `;`,
+    `${$(`.capsule_field_title:contains(Qualifications Required:)`).next().text().trim()};`,
   };
   
   EXPORTS_WRITE_CAPSULE();
+};
+
+const EXPORTS_WRITE_MAIN = () => {
+  chrome.storage.local.get(`user`, (data) => {
+    const user = data.user || {hit_export: true};
+    
+    for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
+      const hit = $(element);
+      const key = hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1];
+      
+      const html = 
+            user.hit_export ?
+            `<div class="dropdown">` +
+            `  <button class="dropbtn export">Export <span style="font-size: 75%;">▼</span></button>` +
+            `  <div id="myDropdown" class="dropdown-content">` +
+            `    <a class="vb" data-key="${key}">Forum</a>` +
+            `    <a class="vb_th" data-key="${key}">TH Direct</a>` +
+            `    <a class="vb_mtc" data-key="${key}">MTC Direct</a>` +
+            `  </div>` +
+            `</div>` : ``
+      ;
+      
+      if (hit.find(`.exports`).length) {
+        hit.find(`.exports`).html(html);
+      }
+      else {
+        hit.find(`a[id^="capsule"]`).before(`<span class="exports">${html}</span>`);
+      }
+    }
+  });
 };
 
 const EXPORTS_WRITE_CAPSULE = () => {
@@ -172,33 +181,17 @@ const EXPORTS_WRITE_CAPSULE = () => {
             `</div>` : ``
       ;
       
-    $(`.capsulelink_bold`).before(`<span class="exports">${html}</span>`);
+    if ($(`.exports`).length) {
+      $(`.exports`).html(html);
+    }
+    else {
+      $(`.capsulelink_bold`).before(`<span class="exports">${html}</span>`);
+    }
   });
 };
 
-$(`html`).on(`click`, `.vb`, function () {
-  const key = $(this).data(`key`);
-  EXPORT.key = key;
-  EXPORT.type = `vb`;
-  chrome.runtime.sendMessage({msg: `hitexport`, data: hits[key].reqid});
-});
-
-$(`html`).on(`click`, `.vb_th`, function () {
-  const key = $(this).data(`key`);
-  EXPORT.key = key;
-  EXPORT.type = `vb_th`;
-  chrome.runtime.sendMessage({msg: `hitexport`, data: hits[key].reqid});
-});
-
-$(`html`).on(`click`, `.vb_mtc`, function () {
-  const key = $(this).data(`key`);
-  EXPORT.key = key;
-  EXPORT.type = `vb_mtc`;
-  chrome.runtime.sendMessage({msg: `hitexport`, data: hits[key].reqid});
-});
-
-const VB_EXPORT = (data) => {
-  const hit = hits[EXPORT.key];
+const EXPORT_HIT = (data) => {
+  const hit = HITS[EXPORT.key];
   
   const attr = (type, rating) => {
     let color = `#B30000`;
@@ -232,8 +225,8 @@ const VB_EXPORT = (data) => {
         `${attr(`Pay`, data.attrs.pay)} ${attr(`Fair`, data.attrs.fair)} ` +
         `${attr(`Comm`, data.attrs.comm)} ${attr(`Fast`, data.attrs.fast)} ` +
         `[b][Reviews: ${data.reviews}][/b] ` +
-        `[b][ToS: ${data.tos_flags === 0 ? `[color=green]` + data.tos_flags : `[color=red]` + data.tos_flags}[/color]][/b]\n</p>` +
-        (hit.desc ? `<p>[b]Description:[/b] ${hit.desc}</p>` : `<p>[b]Auto Approval:[/b] ${hit.aa}</p>`) +
+        `[b][ToS: ${data.tos_flags === 0 ? `[color=green]` + data.tos_flags : `[color=red]` + data.tos_flags}[/color]][/b]</p>` +
+        `<p>${(hit.desc ? `[b]Description:[/b] ${hit.desc}` : `[b]Auto Approval:[/b] ${hit.aa}`)}</p>` +
         `<p>[b]Time:[/b] ${hit.time}</p>` +
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
@@ -246,16 +239,26 @@ const VB_EXPORT = (data) => {
   }
   
   if (EXPORT.type === `vb_th`) {
-    const confirm_post = prompt(`Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"`, ``);
-    if (confirm_post !== null) {
-      SEND_TH(direct_template + `<p>${confirm_post}</p>`);
+    const confirm_post = prompt(
+      `Do you want to post this HIT to TurkerHub.com?\n\n` +
+      `To post a comment with this HIT, fill the box below.\n\n` +
+      `To post this HIT, click "Ok"`,
+      ``
+    );
+    if (confirm_post) {
+      EXPORT_TO_TH(`${direct_template}<p>${confirm_post}</p>`);
     }
   }
   
   if (EXPORT.type === `vb_mtc`) {
-    const confirm_post = prompt(`Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"`, ``);
-    if (confirm_post !== null) {
-      SEND_MTC(direct_template + `<p>${confirm_post}</p>`);
+    const confirm_post = prompt(
+      `Do you want to post this HIT to MturkCrowd.com?\n\n` +
+      `To post a comment with this HIT, fill the box below.\n\n` +
+      `To post this HIT, click "Ok"`,
+      ``
+    );
+    if (confirm_post) {
+      EXPORT_TO_MTC(`${direct_template}<p>${confirm_post}</p>`);
     }
   }
 };
@@ -268,22 +271,43 @@ const EXPORT_TO_CLIP = (template) => {
   alert(`HIT export has been copied to your clipboard.`);
 };
 
-const SEND_TH = (template) => {
+const EXPORT_TO_TH = (template) => {
   chrome.runtime.sendMessage({msg: `send_th`, data: template});
 };
 
-const SEND_MTC = (template) => {
+const EXPORT_TO_MTC = (template) => {
   chrome.runtime.sendMessage({msg: `send_mtc`, data: template});
 };
 
 document.onclick = (event) => {
   const e = event.target;
   
-  if (e.matches('.dropbtn')) {
-    $('.dropdown-content').hide();
+  if (e.matches(`.dropbtn`)) {
+    $(`.dropdown-content`).hide();
     $(e).next().show();
   } 
-  if (!e.matches('.dropbtn')) {
-    $('.dropdown-content').hide();
+  if (!e.matches(`.dropbtn`)) {
+    $(`.dropdown-content`).hide();
   }
-}
+};
+
+$(`html`).on(`click`, `.vb`, function () {
+  const key = $(this).data(`key`);
+  EXPORT.key = key;
+  EXPORT.type = `vb`;
+  chrome.runtime.sendMessage({msg: `hitexport`, data: HITS[key].reqid});
+});
+
+$(`html`).on(`click`, `.vb_th`, function () {
+  const key = $(this).data(`key`);
+  EXPORT.key = key;
+  EXPORT.type = `vb_th`;
+  chrome.runtime.sendMessage({msg: `hitexport`, data: HITS[key].reqid});
+});
+
+$(`html`).on(`click`, `.vb_mtc`, function () {
+  const key = $(this).data(`key`);
+  EXPORT.key = key;
+  EXPORT.type = `vb_mtc`;
+  chrome.runtime.sendMessage({msg: `hitexport`, data: HITS[key].reqid});
+});
