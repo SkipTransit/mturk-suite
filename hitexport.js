@@ -215,7 +215,7 @@ const VB_EXPORT = (data) => {
         `${attr(`Comm`, data.attrs.comm)} ${attr(`Fast`, data.attrs.fast)} ` +
         `[b][Reviews: ${data.reviews}][/b] ` +
         `[b][ToS: ${data.tos_flags === 0 ? `[color=green]` + data.tos_flags : `[color=red]` + data.tos_flags}[/color]][/b]\n` +
-        (data.desc ? `[b]Description:[/b] ${hit.desc}\n` : `[b]Auto Approval:[/b] ${hit.aa}\n`) +
+        (hit.desc ? `[b]Description:[/b] ${hit.desc}\n` : `[b]Auto Approval:[/b] ${hit.aa}\n`) +
         `[b]Time:[/b] ${hit.time}\n` +
         `[b]HITs Available:[/b] ${hit.avail}\n` +
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
@@ -231,7 +231,7 @@ const VB_EXPORT = (data) => {
         `${attr(`Comm`, data.attrs.comm)} ${attr(`Fast`, data.attrs.fast)} ` +
         `[b][Reviews: ${data.reviews}][/b] ` +
         `[b][ToS: ${data.tos_flags === 0 ? `[color=green]` + data.tos_flags : `[color=red]` + data.tos_flags}[/color]][/b]\n</p>` +
-        (data.desc ? `<p>[b]Description:[/b] ${hit.desc}</p>` : `<p>[b]Auto Approval:[/b] ${hit.aa}</p>`) +
+        (hit.desc ? `<p>[b]Description:[/b] ${hit.desc}</p>` : `<p>[b]Auto Approval:[/b] ${hit.aa}</p>`) +
         `<p>[b]Time:[/b] ${hit.time}</p>` +
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
