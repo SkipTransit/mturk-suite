@@ -19,7 +19,7 @@ chrome.storage.onChanged.addListener( (changes) => {
 });
 
 const hits = {};
-const stuff = {key: null, export: null};
+const EXPORT = {key: null, type: null};
 
 const HIT_EXPORT = () => {
   for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
@@ -68,7 +68,7 @@ const HIT_EXPORT = () => {
 
 const EXPORTS_WRITE = () => {
   chrome.storage.local.get(`user`, (data) => {
-    const user = data.user || {vb: true, vb_th: false, vb_mtc: false};
+    const user = data.user || {hit_export: true};
     
     for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
       const hit = $(element);
@@ -77,10 +77,17 @@ const EXPORTS_WRITE = () => {
       const reward = hit.find(`.capsule_field_title:contains(Reward:)`).next().text();
       const key = requesterId + groupId + reward;
       
-      let html = ``;
-      html += user.vb ? `<button class="vb export" data-key="${key}" type="button" style="height: 15px; width: 25px;">vB</button>` : ``;
-      html += user.vb_th ? `<button class="vb_th export" data-key="${key}" type="button" style="height: 15px; width: 25px;">TH</button>` : ``;
-      html += user.vb_mtc ? `<button class="vb_mtc export" data-key="${key}" type="button" style="height: 15px; width: 25px;">MTC</button>` : ``;
+      const html = 
+            user.hit_export ?
+            `<div class="dropdown">` +
+            `  <button class="dropbtn export">Export <span style="font-size: 75%;">▼</span></button>` +
+            `  <div id="myDropdown" class="dropdown-content">` +
+            `    <a class="vb" data-key="${key}">Forum</a>` +
+            `    <a class="vb_th" data-key="${key}">TH Direct</a>` +
+            `    <a class="vb_mtc" data-key="${key}">MTC Direct</a>` +
+            `  </div>` +
+            `</div>` : ``
+      ;
       
       if (hit.find(`.exports`).length) {
         hit.find(`.exports`).html(html);
@@ -94,27 +101,27 @@ const EXPORTS_WRITE = () => {
 
 $(`html`).on(`click`, `.vb`, function () {
   const key = $(this).data(`key`);
-  stuff.key = key;
-  stuff.export = `vb`;
+  EXPORT.key = key;
+  EXPORT.type = `vb`;
   chrome.runtime.sendMessage({msg: `hitexport`, data: hits[key].reqid});
 });
 
 $(`html`).on(`click`, `.vb_th`, function () {
   const key = $(this).data(`key`);
-  stuff.key = key;
-  stuff.export = `vb_th`;
+  EXPORT.key = key;
+  EXPORT.type = `vb_th`;
   chrome.runtime.sendMessage({msg: `hitexport`, data: hits[key].reqid});
 });
 
 $(`html`).on(`click`, `.vb_mtc`, function () {
   const key = $(this).data(`key`);
-  stuff.key = key;
-  stuff.export = `vb_mtc`;
+  EXPORT.key = key;
+  EXPORT.type = `vb_mtc`;
   chrome.runtime.sendMessage({msg: `hitexport`, data: hits[key].reqid});
 });
 
 const VB_EXPORT = (data) => {
-  const hit = hits[stuff.key];
+  const hit = hits[EXPORT.key];
   
   const attr = (type, rating) => {
     let color = `#B30000`;
@@ -138,7 +145,8 @@ const VB_EXPORT = (data) => {
         `[b]HITs Available:[/b] ${hit.avail}\n` +
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
         `[b]Qualifications:[/b] ${hit.quals}\n` +
-        `[/td][/tr][/table]`;
+        `[/td][/tr][/table]`
+  ;
   
   const direct_template =
         `<p>[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]</p>` +
@@ -153,22 +161,24 @@ const VB_EXPORT = (data) => {
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
         `<p>[b]Qualifications:[/b] ${hit.quals}[/td][/tr]</p>` +
-        `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`;
+        `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`
+  ;
 
-  if (stuff.export === `vb`) {
+  if (EXPORT.type === `vb`) {
     EXPORT_TO_CLIP(template);
   }
   
-  if (stuff.export === `vb_mtc`) {
-    const confirm_post = prompt(`Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"`, ``);
-    if (confirm_post !== null) {
-      SEND_MTC(direct_template + `<p>${confirm_post}</p>`);
-    }
-  }
-  if (stuff.export === `vb_th`) {
+  if (EXPORT.type === `vb_th`) {
     const confirm_post = prompt(`Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"`, ``);
     if (confirm_post !== null) {
       SEND_TH(direct_template + `<p>${confirm_post}</p>`);
+    }
+  }
+  
+  if (EXPORT.type === `vb_mtc`) {
+    const confirm_post = prompt(`Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"`, ``);
+    if (confirm_post !== null) {
+      SEND_MTC(direct_template + `<p>${confirm_post}</p>`);
     }
   }
 };
@@ -188,3 +198,15 @@ const SEND_TH = (template) => {
 const SEND_MTC = (template) => {
   chrome.runtime.sendMessage({msg: `send_mtc`, data: template});
 };
+
+document.onclick = (event) => {
+  const e = event.target;
+  
+  if (e.matches('.dropbtn')) {
+    $('.dropdown-content').hide();
+    $(e).next().show();
+  } 
+  if (!e.matches('.dropbtn')) {
+    $('.dropdown-content').hide();
+  }
+}
