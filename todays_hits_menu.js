@@ -88,7 +88,7 @@ const WRITE = () => {
     );
     
     tpeexport =
-      `[b]Today\`s Projected Earnings: $${submitted_pe.toFixed(2)}[/b] (Exported from Mturk Suite)\n` +
+      `[b]Today's Projected Earnings: $${submitted_pe.toFixed(2)}[/b] (Exported from Mturk Suite)\n` +
       `[spoiler=Today's Projected Earnings Full Details][table][tr][th][b]Requester[/b][/th][th][b]HITs[/b][/th][th][b]Projected[/b][/th][/tr]` +
       `[tr][td]Total[/td][td]${submitted}[/td][td]$${submitted_pe.toFixed(2)}[/td][/tr]\n`
     ;
