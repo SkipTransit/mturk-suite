@@ -120,7 +120,9 @@ const HIT_EXPORT_CAPSULE = () => {
     $(`.capsule_field_title:contains(Requester:)`).next().text().trim(),
       
     reqid:
-    $(`input[name="requesterId"]`).val(),
+    $(`input[name="requesterId"]`).length ?
+    $(`input[name="requesterId"]`).val():
+    $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1],
       
     groupid: 
     $(`input[name="groupId"]`).val(),
@@ -219,7 +221,7 @@ const VB_EXPORT = (data) => {
         `[b]Time:[/b] ${hit.time}\n` +
         `[b]HITs Available:[/b] ${hit.avail}\n` +
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
-        `[b]Qualifications:[/b] ${hit.quals}\n` +
+        `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`)}\n` +
         `[/td][/tr][/table]`
   ;
   
@@ -235,7 +237,7 @@ const VB_EXPORT = (data) => {
         `<p>[b]Time:[/b] ${hit.time}</p>` +
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
-        `<p>[b]Qualifications:[/b] ${hit.quals}[/td][/tr]</p>` +
+        `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`)}[/td][/tr]</p>` +
         `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`
   ;
 
