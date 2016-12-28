@@ -101,7 +101,9 @@ const HIT_EXPORT_CAPSULE = () => {
     reqid:
     $(`input[name="requesterId"]`).length ?
     $(`input[name="requesterId"]`).val():
-    $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1],
+    $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/) ?
+    $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1]:
+    null,
       
     groupid: 
     $(`input[name="groupId"]`).val(),
@@ -170,7 +172,7 @@ const EXPORTS_WRITE_CAPSULE = () => {
       const key = $(`input[name="groupId"]`).val();
       
       const html = 
-            user.hit_export ?
+            user.hit_export && HITS[key].reqid ?
             `<div class="dropdown">` +
             `  <button type="button" class="dropbtn export">Export <span style="font-size: 75%;">▼</span></button>` +
             `  <div id="myDropdown" class="dropdown-content">` +
@@ -201,7 +203,7 @@ const EXPORT_HIT = (data) => {
     if (rating < 0.01) {color = `grey`; rating = `N/A`;}
     return `[b][${type}: [color=${color}]${rating}[/color]][/b]`;
   };
-  
+
   const template =
         `[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]\n` +
         `[b]Requester:[/b] [URL=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/URL] [${hit.reqid}] ([URL=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/URL])\n` +
