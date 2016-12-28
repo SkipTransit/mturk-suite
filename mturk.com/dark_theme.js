@@ -160,6 +160,15 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
     background   : url(${chrome.runtime.getURL(`media/nav_quals_inactive.png`)}) no-repeat !important;
 }
 
+img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechanical-turk/logoAI3.gif"] {
+  height       : 0;
+  width        : 0;
+  border       : 0;
+  padding-left : 255px !important;
+  padding-top  : 41px !important;
+  background   : url(${chrome.runtime.getURL(`media/blank.gif`)}) no-repeat !important;
+}
+
 [type="image"] {
   border: none !important;
   background-color: transparent !important;
@@ -177,7 +186,6 @@ img[src="/media/top_left_corner.gif"],
 img[src="/media/bottom_left_corner.gif"],
 img[src="/media/top_right_corner.gif"],
 img[src="/media/bottom_right_corner.gif"],
-img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechanical-turk/logoAI3.gif"],
 img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechanical-turk/an_amazon_company-medium.gif"] {
     display : none;
 }
