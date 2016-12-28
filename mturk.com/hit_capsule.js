@@ -5,12 +5,13 @@ document.addEventListener(`DOMContentLoaded`, () => {
 });
 
 const HIT_CAPSULE = () => {
-  const reqid = 
+  const reqid =
         $(`input[name="requesterId"]`).length ?
         $(`input[name="requesterId"]`).val():
-  $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/) ?
+        $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/) ?
         $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1]:
-  null;
+        null
+  ;
   const reqname = $(`.capsule_field_text`).eq(0).text().trim();
 
   const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).eq(0).val();
