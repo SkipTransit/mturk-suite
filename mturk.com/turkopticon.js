@@ -90,8 +90,8 @@ const TURKOPTICON_WRITE = (data) => {
       $(element).before(to(id));
     } 
   }
-  if ($(`input[name="requesterId"]`).length) {
-    const id = $(`input[name="requesterId"]`).val();
+  if ($(`input[name="requesterId"]`).length || $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)) {
+    const id = $(`input[name="requesterId"]`).val() || $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1];
     $(`.capsule_field_text`).eq(0).before(to(id));
   }
 };
