@@ -247,7 +247,7 @@ const EXPORT_HIT = (data) => {
       `To post this HIT, click "Ok"`,
       ``
     );
-    if (confirm_post) {
+    if (confirm_post !== null) {
       EXPORT_TO_TH(`${direct_template}<p>${confirm_post}</p>`);
     }
   }
@@ -259,7 +259,7 @@ const EXPORT_HIT = (data) => {
       `To post this HIT, click "Ok"`,
       ``
     );
-    if (confirm_post) {
+    if (confirm_post !== null) {
       EXPORT_TO_MTC(`${direct_template}<p>${confirm_post}</p>`);
     }
   }
