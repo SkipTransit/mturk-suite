@@ -5,7 +5,7 @@ document.addEventListener(`DOMContentLoaded`, () => {
 });
 
 const HIT_CAPSULE = () => {
-  const reqid = $(`input[name="requesterId"]`).eq(0).val() || $(`a[href^="/mturk/return?"]`).eq(0).prop(`href`).match(/requesterId=\w+/);
+  const reqid = $(`input[name="requesterId"]`).eq(0).val() || $(`a[href^="/mturk/return?"]`).eq(0).prop(`href`).match(/requesterId=(\w+)/)[1];
   const reqname = $(`.capsule_field_text`).eq(0).text().trim();
 
   const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).eq(0).val();
@@ -34,6 +34,6 @@ const HIT_CAPSULE = () => {
 
   
   $(`.capsule_field_text`).eq(0).html(
-    `<a href="/mturk/searchbar?selectedSearchType=hitgroups&${reqid ? `requesterId=` + reqid.replace(`requesterId=`, ``) : `searchWords=` + reqname.replace(/ /g, `+`)}" target="_blank">${reqname}</a>`
+    `<a href="/mturk/searchbar?selectedSearchType=hitgroups&${(reqid ? `requesterId=${reqid}` : `searchWords=${reqname.replace(/ /g, `+`)}`)}" target="_blank">${reqname}</a>`
   );
 };
