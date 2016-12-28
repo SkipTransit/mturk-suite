@@ -17,10 +17,10 @@ chrome.storage.onChanged.addListener( (changes) => {
   for (let key in changes) {
     if (key === `user`) {
       if ($(`a[href*="roupId="]`).length ) {
-        HIT_EXPORT_MAIN();
+        EXPORTS_WRITE_MAIN();
       }
       if ($(`input[name="groupId"]`).length && $(`input[name="groupId"]`).val() !== ``) {
-        HIT_EXPORT_CAPSULE();
+        EXPORTS_WRITE_CAPSULE();
       }
     }
   }
@@ -34,44 +34,42 @@ const HIT_EXPORT_MAIN = () => {
     const hit = $(element);
     const key = hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1];
     
-    if (!HITS[key]) {
-      HITS[key] = {
-        reqname:
-        hit.find(`.capsule_field_title:contains(Requester:)`).next().text().trim(),
+    HITS[key] = {
+      reqname:
+      hit.find(`.capsule_field_title:contains(Requester:)`).next().text().trim(),
       
-        reqid:
-        hit.find(`a[href*="requesterId="]`).prop(`href`).split(`requesterId=`)[1],
+      reqid:
+      hit.find(`a[href*="requesterId="]`).prop(`href`).split(`requesterId=`)[1],
       
-        groupid: 
-        hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1],
+      groupid: 
+      hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1],
       
-        prevlink:
-        `https://www.mturk.com/mturk/preview?groupId=${hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1]}`,
+      prevlink:
+      `https://www.mturk.com/mturk/preview?groupId=${hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1]}`,
       
-        pandlink:
-        `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1]}`,
+      pandlink:
+      `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1]}`,
       
-        title:
-        hit.find(`a.capsulelink`).text().trim(),
+      title:
+      hit.find(`a.capsulelink`).text().trim(),
       
-        desc:
-        hit.find(`.capsule_field_title:contains(Description:)`).next().text().trim(),
+      desc:
+      hit.find(`.capsule_field_title:contains(Description:)`).next().text().trim(),
       
-        time:
-        hit.find(`.capsule_field_title:contains(Time Allotted:)`).next().text().trim(),
+      time:
+      hit.find(`.capsule_field_title:contains(Time Allotted:)`).next().text().trim(),
       
-        reward:
-        hit.find(`.capsule_field_title:contains(Reward:)`).next().text().trim(),
+      reward:
+      hit.find(`.capsule_field_title:contains(Reward:)`).next().text().trim(),
       
-        avail:
-        hit.find(`.capsule_field_title:contains(HITs Available:)`).next().text().trim(),
+      avail:
+      hit.find(`.capsule_field_title:contains(HITs Available:)`).next().text().trim(),
       
-        quals: 
-        hit.find(`td[style="padding-right: 2em; white-space: nowrap;"]`).length ?
-        hit.find(`td[style="padding-right: 2em; white-space: nowrap;"]`).map( function () { return $(this).text().trim().replace(/\s+/g, ` `) + `;`; }).get().join(` `):
-        `None;`
-      };
-    }
+      quals: 
+      hit.find(`td[style="padding-right: 2em; white-space: nowrap;"]`).length ?
+      hit.find(`td[style="padding-right: 2em; white-space: nowrap;"]`).map( function () { return $(this).text().trim().replace(/\s+/g, ` `) + `;`; }).get().join(` `):
+      `None;`
+    };
   }
   
   EXPORTS_WRITE_MAIN();
