@@ -61,7 +61,7 @@ a:link, a:visited {
   color : #224f77;
 }
 
-.vb, .vb_th, .vb_mtc {
+.vb, .vb_th, .vb_mtc, .rt_block, .rt_include {
   cursor: pointer;
 }
 

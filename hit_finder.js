@@ -157,6 +157,10 @@ $('html').on('click', '#test_edit_include_list', function () {
   INCLUDED_ALERTS_TEST(test);
 });
 
+$('html').on('click', '.rt_include', function () {
+  RT_ADD_INCLUDE_LIST($(this).data('term'), $(this).data('name'));
+});
+
 // Setting Stuff
 $('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet, #include_voice, #include_sound, #new_hit_sound', function () {
   SAVE_CONFIG();
@@ -308,6 +312,7 @@ const FIND_OLD = (data) => {
     };
     
     const key = obj.groupid !== `null` ? obj.groupid : obj.reqid + obj.title + obj.reward;
+    console.log(key);
     KEYS.push(key);
     if (ids.indexOf(obj.reqid) == -1) { ids.push(obj.reqid); } 
     
@@ -389,8 +394,16 @@ const HITS_WRITE_LOGGED_IN = (data) => {
       // Requester
       `  <td>` +
       `    <div class="btn-group btn-group-xs">` +
-      `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this requester." data-term="${hit.reqid}" data-name="${hit.reqname}">R</button>` +
-      `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this HIT." data-term="${hit.groupid}" data-name="${hit.title}">T</button>` +
+      `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
+      `        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>` +
+      `        <span class="caret"></span>` +
+      `      </button>` +
+      `      <ul class="dropdown-menu">` +
+      `        <li><a class="rt_block" data-term="${hit.reqid}" data-name="${hit.reqname}">Block List Requester</a></li>` +
+      `        <li><a class="rt_block" data-term="${hit.groupid}" data-name="${hit.title}">Block List HIT</a></li>` +
+      `        <li><a class="rt_include" data-term="${hit.reqid}" data-name="${hit.reqname}">Include List Requester</a></li>` +
+      `        <li><a class="rt_include" data-term="${hit.groupid}" data-name="${hit.title}">Include List HIT</a></li>` +
+      `      </ul>` +
       `    </div>` +
       `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
       `  </td>` +
@@ -431,8 +444,16 @@ const HITS_WRITE_LOGGED_IN = (data) => {
         // Requester
         `  <td>` +
         `    <div class="btn-group btn-group-xs">` +
-        `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this requester." data-term="${hit.reqid}" data-name="${hit.reqname}">R</button>` +
-        `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this HIT." data-term="${hit.groupid}" data-name="${hit.title}">T</button>` +
+        `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
+        `        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>` +
+        `        <span class="caret"></span>` +
+        `      </button>` +
+        `      <ul class="dropdown-menu">` +
+        `        <li><a class="rt_block" data-term="${hit.reqid}" data-name="${hit.reqname}">Block List Requester</a></li>` +
+        `        <li><a class="rt_block" data-term="${hit.groupid}" data-name="${hit.title}">Block List HIT</a></li>` +
+        `        <li><a class="rt_include" data-term="${hit.reqid}" data-name="${hit.reqname}">Include List Requester</a></li>` +
+        `        <li><a class="rt_include" data-term="${hit.groupid}" data-name="${hit.title}">Include List HIT</a></li>` +
+        `      </ul>` +
         `    </div>` +
         `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
         `  </td>` +
@@ -514,8 +535,16 @@ const HITS_WRITE_LOGGED_OUT = () => {
       // Requester
       `  <td>` +
       `    <div class="btn-group btn-group-xs">` +
-      `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this requester." data-term="${hit.reqid}" data-name="${hit.reqname}">R</button>` +
-      `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this HIT." data-term="${hit.groupid}" data-name="${hit.title}">T</button>` +
+      `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
+      `        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>` +
+      `        <span class="caret"></span>` +
+      `      </button>` +
+      `      <ul class="dropdown-menu">` +
+      `        <li><a class="rt_block" data-term="${hit.reqid}" data-name="${hit.reqname}">Block List Requester</a></li>` +
+      `        <li><a class="rt_block" data-term="${(hit.groupid !== `null` ? hit.groupid: hit.title)}" data-name="${hit.title}">Block List HIT</a></li>` +
+      `        <li><a class="rt_include" data-term="${hit.reqid}" data-name="${hit.reqname}">Include List Requester</a></li>` +
+      `        <li><a class="rt_include" data-term="${(hit.groupid !== `null` ? hit.groupid: hit.title)}" data-name="${hit.title}">Include List HIT</a></li>` +
+      `      </ul>` +
       `    </div>` +
       `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
       `  </td>` +
@@ -546,8 +575,16 @@ const HITS_WRITE_LOGGED_OUT = () => {
         // Requester
         `  <td>` +
         `    <div class="btn-group btn-group-xs">` +
-        `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this requester." data-term="${hit.reqid}" data-name="${hit.reqname}">R</button>` +
-        `      <button class="btn btn-danger rt_block" data-toggle="tooltip" data-placement="right" title="Block this HIT." data-term="${hit.groupid}" data-name="${hit.title}">T</button>` +
+        `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
+        `        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>` +
+        `        <span class="caret"></span>` +
+        `      </button>` +
+        `      <ul class="dropdown-menu">` +
+        `        <li><a class="rt_block" data-term="${hit.reqid}" data-name="${hit.reqname}">Block List Requester</a></li>` +
+        `        <li><a class="rt_block" data-term="${(hit.groupid !== `null` ? hit.groupid: hit.title)}" data-name="${hit.title}">Block List HIT</a></li>` +
+        `        <li><a class="rt_include" data-term="${hit.reqid}" data-name="${hit.reqname}">Include List Requester</a></li>` +
+        `        <li><a class="rt_include" data-term="${(hit.groupid !== `null` ? hit.groupid: hit.title)}" data-name="${hit.title}">Include List HIT</a></li>` +
+        `      </ul>` +
         `    </div>` +
         `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
         `  </td>` +
@@ -612,6 +649,9 @@ const SHOW_BLOCK_LIST = () => {
 };
 
 const ADD_BLOCK_LIST = () => {
+  $('#save_block_list_term').val('');
+  $('#save_block_list_name').val('');
+  
   $('#block_list_add').modal('show');
 };
 
@@ -818,6 +858,16 @@ const SHOW_INCLUDE_LIST = () => {
 };
 
 const ADD_INCLUDE_LIST = () => {
+  $('#save_include_list_term').val('');
+  $('#save_include_list_name').val('');
+  
+  $('#include_list_add').modal('show');
+};
+
+const RT_ADD_INCLUDE_LIST = (term, name) => {
+  $('#save_include_list_term').val(term);
+  $('#save_include_list_name').val(name);
+  
   $('#include_list_add').modal('show');
 };
 
