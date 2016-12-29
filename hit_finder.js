@@ -1103,13 +1103,13 @@ const SPEAK = (phrase) => {
 
 const INCLUDE_SOUND = () => {
   const audio = new Audio();
-  audio.src = `media/include_list_${$('#include_sound').val()}.mp3`;
+  audio.src = `media/audio/include_list_${$('#include_sound').val()}.ogg`;
   audio.play();
 };
 
 const NEW_HIT_SOUND = () => {
   const audio = new Audio();
-  audio.src = `media/new_hit_${$('#new_hit_sound').val()}.mp3`;
+  audio.src = `media/audio/new_hit_${$('#new_hit_sound').val()}.ogg`;
   audio.play();
 };
 
