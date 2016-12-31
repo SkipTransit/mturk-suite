@@ -1,10 +1,10 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   if ($(`input[name="isAccepted"]`).length) {
     HIT_CAPSULE();
   }
 });
 
-const HIT_CAPSULE = () => {
+function HIT_CAPSULE () {
   const reqid =
         $(`input[name="requesterId"]`).length ?
         $(`input[name="requesterId"]`).val():
@@ -12,9 +12,9 @@ const HIT_CAPSULE = () => {
         $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1]:
         null
   ;
-  const reqname = $(`.capsule_field_text`).eq(0).text().trim();
+  const reqname = $(`.capsule_field_text`).text().trim();
 
-  const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).eq(0).val();
+  const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).val();
   const days = Math.floor((aa / (60 * 60 * 24)));
   const hours = Math.floor((aa / (60 * 60)) % 24);
   const mins = Math.floor((aa / 60) % 60);
@@ -42,4 +42,4 @@ const HIT_CAPSULE = () => {
   $(`.capsule_field_text`).eq(0).html(
     `<a href="/mturk/searchbar?selectedSearchType=hitgroups&${(reqid ? `requesterId=${reqid}` : `searchWords=${reqname.replace(/ /g, `+`)}`)}" target="_blank">${reqname}</a>`
   );
-};
+}

@@ -1,4 +1,4 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   if ($(`a[href*="roupId="]`).length ) {
     HIT_EXPORT_MAIN();
   }
@@ -7,13 +7,13 @@ document.addEventListener(`DOMContentLoaded`, () => {
   }
 });
 
-chrome.extension.onMessage.addListener( (request) => {
+chrome.extension.onMessage.addListener( function (request) {
   if (request.msg == `hitexport.js`) {
     EXPORT_HIT(request.data);
   }
 });
 
-chrome.storage.onChanged.addListener( (changes) => {
+chrome.storage.onChanged.addListener( function (changes) {
   for (let key in changes) {
     if (key === `user`) {
       if ($(`a[href*="roupId="]`).length ) {
@@ -29,7 +29,7 @@ chrome.storage.onChanged.addListener( (changes) => {
 const HITS = {};
 const EXPORT = {key: null, type: null};
 
-const HIT_EXPORT_MAIN = () => {
+function HIT_EXPORT_MAIN () {
   for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
     const hit = $(element);
     const key = hit.find(`a[href*="roupId="]`).prop(`href`).match(/roupId=(.*)/)[1];
@@ -73,9 +73,9 @@ const HIT_EXPORT_MAIN = () => {
   }
   
   EXPORTS_WRITE_MAIN();
-};
+}
 
-const HIT_EXPORT_CAPSULE = () => {
+function HIT_EXPORT_CAPSULE () {
   const key = $(`input[name="groupId"]`).val();
   
   const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).val();
@@ -133,10 +133,10 @@ const HIT_EXPORT_CAPSULE = () => {
   };
   
   EXPORTS_WRITE_CAPSULE();
-};
+}
 
-const EXPORTS_WRITE_MAIN = () => {
-  chrome.storage.local.get(`user`, (data) => {
+function EXPORTS_WRITE_MAIN () {
+  chrome.storage.local.get(`user`, function (data) {
     const user = data.user || {hit_export: true};
     
     for (let element of $(`table[cellpadding="0"][cellspacing="5"][border="0"]`).children().children()) {
@@ -155,18 +155,14 @@ const EXPORTS_WRITE_MAIN = () => {
             `</div>` : ``
       ;
       
-      if (hit.find(`.exports`).length) {
-        hit.find(`.exports`).html(html);
-      }
-      else {
-        hit.find(`a[id^="capsule"]`).before(`<span class="exports">${html}</span>`);
-      }
+      if (hit.find(`.exports`).length) return hit.find(`.exports`).html(html);
+      hit.find(`a[id^="capsule"]`).before(`<span class="exports">${html}</span>`);
     }
   });
-};
+}
 
-const EXPORTS_WRITE_CAPSULE = () => {
-  chrome.storage.local.get(`user`, (data) => {
+function EXPORTS_WRITE_CAPSULE () {
+  chrome.storage.local.get(`user`, function (data) {
     const user = data.user || {hit_export: true};
     
       const key = $(`input[name="groupId"]`).val();
@@ -183,26 +179,22 @@ const EXPORTS_WRITE_CAPSULE = () => {
             `</div>` : ``
       ;
       
-    if ($(`.exports`).length) {
-      $(`.exports`).html(html);
-    }
-    else {
-      $(`.capsulelink_bold`).before(`<span class="exports">${html}</span>`);
-    }
+    if ($(`.exports`).length) return $(`.exports`).html(html);
+    $(`.capsulelink_bold`).before(`<span class="exports">${html}</span>`);
   });
-};
+}
 
-const EXPORT_HIT = (data) => {
+function EXPORT_HIT (data) {
   const hit = HITS[EXPORT.key];
   
-  const attr = (type, rating) => {
+  function attr (type, rating) {
     let color = `#B30000`;
     if (rating > 1.99) {color = `#B37400`;}
     if (rating > 2.99) {color = `#B3B300`;}
     if (rating > 3.99) {color = `#00B300`;}
     if (rating < 0.01) {color = `grey`; rating = `N/A`;}
     return `[b][${type}: [color=${color}]${rating}[/color]][/b]`;
-  };
+  }
 
   const template =
         `[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]\n` +
@@ -263,25 +255,25 @@ const EXPORT_HIT = (data) => {
       EXPORT_TO_MTC(`${direct_template}<p>${confirm_post}</p>`);
     }
   }
-};
+}
 
-const EXPORT_TO_CLIP = (template) => {
+function EXPORT_TO_CLIP (template) {
   $(`body`).append(`<textarea id="clipboard" style="opacity: 0;">${template}</textarea>`);
   $(`#clipboard`).select();
   document.execCommand(`Copy`);
   $(`#clipboard`).remove();
   alert(`HIT export has been copied to your clipboard.`);
-};
+}
 
-const EXPORT_TO_TH = (template) => {
+function EXPORT_TO_TH (template) {
   chrome.runtime.sendMessage({msg: `send_th`, data: template});
-};
+}
 
-const EXPORT_TO_MTC = (template) => {
+function EXPORT_TO_MTC (template) {
   chrome.runtime.sendMessage({msg: `send_mtc`, data: template});
-};
+}
 
-document.onclick = (event) => {
+document.onclick = function (event) {
   const e = event.target;
   
   if (e.matches(`.dropbtn`)) {
