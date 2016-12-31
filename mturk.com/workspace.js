@@ -1,8 +1,8 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
     WORKSPACE();
 });
 
-chrome.storage.onChanged.addListener( (changes) => {
+chrome.storage.onChanged.addListener( function (changes) {
   for (let key in changes) {
     if (key === `user`) {
       WORKSPACE();
@@ -10,8 +10,8 @@ chrome.storage.onChanged.addListener( (changes) => {
   }
 });
 
-const WORKSPACE = () => {
-  chrome.storage.local.get(`user`, (data) => {
+function WORKSPACE () {
+  chrome.storage.local.get(`user`, function (data) {
     const user = data.user || {workspace: true};
     
     let $workspace;
@@ -42,4 +42,4 @@ const WORKSPACE = () => {
       }
     }
   });
-};
+}

@@ -1,16 +1,16 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   if ($(`a[href*="requesterId="]`).length) {
     TURKOPTICON();
   }
 });
 
-chrome.runtime.onMessage.addListener( (request) => {
+chrome.runtime.onMessage.addListener( function (request) {
   if (request.msg == `turkopticon.js`) {
     TURKOPTICON_WRITE(request.data);
   }
 });
 
-const TURKOPTICON = () => {
+function TURKOPTICON () {
   const ids = [];
 
   for (let element of $(`a[href*="requesterId="]`)) {
@@ -20,10 +20,10 @@ const TURKOPTICON = () => {
     ids.push(element.value);
   }
   chrome.runtime.sendMessage({msg: `turkopticon`, data: ids});
-};
+}
 
-const TURKOPTICON_WRITE = (data) => {
-  const to = (id) => {
+function TURKOPTICON_WRITE (data) {
+  function to (id) {
     const html = 
           `<div style="float:left;">` +
           `  <div class="circle" style="background-color: ${color(data[id].attrs.pay)};">TO</div>` +
@@ -41,9 +41,9 @@ const TURKOPTICON_WRITE = (data) => {
           `  </div>` +
           `</div>`;
     return html;
-  };
+  }
   
-  const rating = (type, rating) => {
+  function rating (type, rating) {
     let html = ``;
     if (rating > 0.01) {
       html =
@@ -68,30 +68,27 @@ const TURKOPTICON_WRITE = (data) => {
         `</div>`;
     }
     return html;
-  };
+  }
   
-  const color = (rating) => {
+  function color (rating) {
     let color = `255, 0, 0, 0.65`;
     if (rating > 1.99) {color = `255, 140, 0, 0.65`;}
     if (rating > 2.99) {color = `255, 255, 0, 0.65`;}
     if (rating > 3.99) {color = `0, 255, 0, 0.65`;}
     if (rating < 0.01) {color = `160, 160, 160, 0.65`;}
     return `rgba(${color})`;
-  };
+  }
   
   for (let element of $(`.requesterIdentity`)) {
     const rid = $(element).closest(`a`).prop(`href`) || $(element).closest(`td[align="left"]:not(.capsule_field_text)`).find(`a:contains(Contact the Requester of this HIT)`).prop(`href`);
     const id = rid.split(`requesterId=`)[1].split(`&`)[0];
 
-    if ($(element).parent(`a`).length) {
-      $(element).parent().before(to(id));
-    }
-    else {
-      $(element).before(to(id));
-    } 
+    if ($(element).parent(`a`).length) $(element).parent().before(to(id));
+    else $(element).before(to(id));
   }
+  
   if ($(`input[name="requesterId"]`).length || $(`a[href^="/mturk/return?"]`).length && $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)) {
     const id = $(`input[name="requesterId"]`).val() || $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1];
     $(`.capsule_field_text`).eq(0).before(to(id));
   }
-};
+}
