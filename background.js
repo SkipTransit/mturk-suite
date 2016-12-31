@@ -1,16 +1,16 @@
 let user = {}, dashboard = {}, tpe = {};
 let syncing_tpe = {tab: null, running: false};
 
-chrome.storage.local.get(`user`, (data) => {
+chrome.storage.local.get(`user`, function (data) {
   user = data.user || {goal: 20, dark: false, hit_export: true, accept_next: true, workspace: false};
   tpe.goal = user.goal;
 });
 
-chrome.storage.local.get(`dashboard`, (data) => {
-  dashboard = data.dashboard || {id: `visit_your_dashboard`, date: null, earn_hits: 0, earn_bonus: 0, earn_total: 0, earn_trans: 0, total_sub: 0, total_app: 0, total_rej: 0, total_pen: 0, today_sub: 0, today_app: 0, today_rej: 0, today_pen: 0};
+chrome.storage.local.get(`dashboard`, function (data) {
+  dashboard = data.dashboard || {id: `Visit Dashboard!`, date: null, earn_hits: 0, earn_bonus: 0, earn_total: 0, earn_trans: 0, total_sub: 0, total_app: 0, total_rej: 0, total_pen: 0, today_sub: 0, today_app: 0, today_rej: 0, today_pen: 0};
 });
 
-chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
   if (request.msg == `user`) {
     user = request.data;
     chrome.storage.local.set({'user': user});
@@ -45,7 +45,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
 chrome.contextMenus.create({
   title: "Paste Mturk Worker ID",
   contexts: ["editable"],
-  onclick: (info, tab) => {
+  onclick: function (info, tab) {
     chrome.tabs.executeScript(tab.id, {
         frameId: info.frameId,
         code: `document.activeElement.value += '${dashboard.id}';`
@@ -58,7 +58,7 @@ chrome.contextMenus.create({
   title: "Search Mturk",
   "type" : "normal",
   contexts: ["selection"],
-  onclick: (info, tab) => {
+  onclick: function (info, tab) {
     chrome.tabs.create({url: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${info.selectionText}`});
   }
 });
@@ -66,15 +66,15 @@ chrome.contextMenus.create({
 // Turkopticon IndexedDB
 let TODB;
 const TODB_request = indexedDB.open(`TODB`, 1);
-TODB_request.onsuccess = (event) => {
+TODB_request.onsuccess = function (event) {
   TODB = event.target.result;
 };
-TODB_request.onupgradeneeded = (event) => {
+TODB_request.onupgradeneeded = function (event) {
   const TODB = event.target.result;
   TODB.createObjectStore(`requester`, {keyPath: `id`});
 };
 
-const TURKOPTICON_DB = (tab, ids) => {
+function TURKOPTICON_DB (tab, ids) {
   let grab = false;
   const to = {};
   const time = new Date().getTime();
@@ -83,8 +83,8 @@ const TURKOPTICON_DB = (tab, ids) => {
   
   for (let i = 0; i < ids.length; i ++) {
     const request = objectStore.get(ids[i]);
-    request.onsuccess = (event) => {
-      if (request.result && request.result.edited > time - 21600000) {
+    request.onsuccess = function (event) {
+      if (request.result && request.result.edited > time - 21600000) { 
         to[ids[i]] = request.result;
       }
       else {
@@ -93,9 +93,9 @@ const TURKOPTICON_DB = (tab, ids) => {
     };
   }
   
-  transaction.oncomplete = (event) => {
+  transaction.oncomplete = function (event) {
     if (grab) {
-      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`, (data) => {
+      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`, function (data) {
         const transaction = TODB.transaction([`requester`], `readwrite`);
         const objectStore = transaction.objectStore(`requester`);
 
@@ -119,14 +119,14 @@ const TURKOPTICON_DB = (tab, ids) => {
       chrome.tabs.sendMessage(tab, {msg: `turkopticon.js`, data: to}); 
     }
   };
-};
+}
 
-const TODB_hitexport = (tab, id) => {
+function TODB_hitexport (tab, id) {
   const transaction = TODB.transaction([`requester`]);
   const objectStore = transaction.objectStore(`requester`);
   const request = objectStore.get(id);
 
-  request.onsuccess = (event) => {
+  request.onsuccess = function (event) {
     if (request.result) {
       chrome.tabs.sendMessage(tab, {msg: `hitexport.js`, data: request.result});
     }
@@ -134,10 +134,10 @@ const TODB_hitexport = (tab, id) => {
       chrome.tabs.sendMessage(tab, {msg: `hitexport.js`, data: {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0}});
     }
   };
-};
+}
 
-const SEND_MTC = (tab, message) => {
-  $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, (data) => {
+function SEND_MTC (tab, message) {
+  $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, function (data) {
     const $data = $(data);
     const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
     const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
@@ -147,10 +147,10 @@ const SEND_MTC = (tab, message) => {
       _xfToken: xfToken
     });
   });
-};
+}
 
-const SEND_TH = (tab, message) => {
-  $.get(`https://turkerhub.com/forums/2/?order=post_date&direction=desc`, (data) => {
+function SEND_TH (tab, message) {
+  $.get(`https://turkerhub.com/forums/2/?order=post_date&direction=desc`, function (data) {
     const $data = $(data);
     const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
     const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
@@ -160,16 +160,16 @@ const SEND_TH = (tab, message) => {
       _xfToken: xfToken
     });
   });
-};
+}
 
 //******* Experimental *******//
 let hits  = {};
 let requests = {};
 
-chrome.storage.local.get(`hits`, (data) => {
-  hits = data.hits || {};
+chrome.storage.local.get(`hits`, function (data) {
+  hits = data.hits || {}; update_tpe();
   
-  chrome.webRequest.onBeforeRequest.addListener( (data) => {
+  chrome.webRequest.onBeforeRequest.addListener( function (data) {
     if (data.requestBody) {
       requests[data.requestId] = {
         hitid : data.requestBody.formData.hitId ? data.requestBody.formData.hitId[0] : null,
@@ -184,7 +184,7 @@ chrome.storage.local.get(`hits`, (data) => {
     }
   }, { urls: [`https://www.mturk.com/mturk/externalSubmit*`] }, [`requestBody`]);
   
-  chrome.webRequest.onCompleted.addListener( (data) => {
+  chrome.webRequest.onCompleted.addListener( function (data) {
     if (data.statusCode == `200`) {
       if (requests[data.requestId].hitid) {
         const key = requests[data.requestId].hitid;
@@ -203,20 +203,16 @@ chrome.storage.local.get(`hits`, (data) => {
     }
   }, { urls: [`https://www.mturk.com/mturk/externalSubmit*`] }, [`responseHeaders`]);
 
-  chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
-    if (request.msg == `sendhit`) {
-      ADD_HIT(request.data);
-    }
+  chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
+    if (request.msg == `sendhit`) ADD_HIT(request.data);
   });
   
-  chrome.runtime.onMessageExternal.addListener( (request, sender, sendResponse) => {
-    if (request.msg == `sendhit`) {
-      ADD_HIT(request.data);
-    }
+  chrome.runtime.onMessageExternal.addListener( function (request, sender, sendResponse) {
+    if (request.msg == `sendhit`) ADD_HIT(request.data);
   });
 });
 
-const ADD_HIT = (data) => {
+function ADD_HIT (data) {
   if (!hits[data.hitid]) {
     hits[data.hitid] = {
       reqname   : data.reqname,
@@ -237,13 +233,13 @@ const ADD_HIT = (data) => {
   else {
     hits[data.hitid].assignid = data.assignid;
   }
-};
+}
 
-const sync_tpe = (tab) => {
+function sync_tpe (tab) {
   const date = mturk_date(Date.now());
   
-  const scrape = (page) => {
-    $.get(`https://www.mturk.com/mturk/statusdetail?encodedDate=${date}&pageNumber=${page}`, (data) => {
+  function scrape (page) {
+    $.get(`https://www.mturk.com/mturk/statusdetail?encodedDate=${date}&pageNumber=${page}`, function (data) {
       const $data = $(data);
       const url = $data.find(`a:contains(Next)`).eq(0).prop(`href`);
       const err = $data.find(`.error_title:contains(You have exceeded the maximum allowed page request rate for this website.)`).length;
@@ -297,7 +293,7 @@ const sync_tpe = (tab) => {
         }
       }
       else if (err) {
-        setTimeout( () => { scrape(page); }, 2000);
+        setTimeout( function () { scrape(page); }, 2000);
       }
       else if (act) {
         hits = {};
@@ -306,7 +302,7 @@ const sync_tpe = (tab) => {
         chrome.tabs.sendMessage(syncing_tpe.tab, {msg: `sync_tpe_done`, data: {current: page, total: last}});
       }
     });
-  };
+  }
   
   if (!syncing_tpe.running) {
     syncing_tpe.tab = tab;
@@ -316,11 +312,10 @@ const sync_tpe = (tab) => {
   else {
     syncing_tpe.tab = tab;
   }
-  
-};
+}
 
 // Updates the TPE and removes old HITs from previous day
-const update_tpe = () => {
+function update_tpe () {
   tpe.tpe = 0;
   const date = mturk_date(Date.now());
 
@@ -335,10 +330,10 @@ const update_tpe = () => {
 
   chrome.storage.local.set({'tpe': tpe});
   chrome.storage.local.set({'hits': hits});
-};
+}
 
 // Get the date for mturk
-const mturk_date = (time) => {
+function mturk_date (time) {
   const given = new Date(time);
   const utc = given.getTime() + (given.getTimezoneOffset() * 60000);
   const offset = dst() === true ? `-7` : `-8`;
@@ -347,10 +342,10 @@ const mturk_date = (time) => {
   const month = (amz.getMonth() + 1) < 10 ? `0` + (amz.getMonth() + 1).toString() : ((amz.getMonth() + 1)).toString();
   const year = (amz.getFullYear()).toString();
   return month + day + year;
-};
+}
 
 // Check if DST
-const dst = () => {
+function dst () {
   const today = new Date();
   const year = today.getFullYear();
   let start = new Date(`March 14, ${year} 02:00:00`);
@@ -360,4 +355,4 @@ const dst = () => {
   day = end.getDay();
   end.setDate(7 - day);
   return (today >= start && today < end) ? true : false;
-};
+}
