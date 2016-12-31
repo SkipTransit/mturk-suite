@@ -1,4 +1,4 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   if ($(`#total_earnings_amount`).length) {
     DASHBOARD();
   }
