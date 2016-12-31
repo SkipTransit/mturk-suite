@@ -13,7 +13,7 @@ function CSS_WRITE (data) {
   css.className = `dark`;
   css.innerHTML = data;
   document.documentElement.insertBefore(css, null);
-};
+}
 
 function DARK_THEME () {
   chrome.storage.local.get(`user`, function (data) {
@@ -46,7 +46,7 @@ function DARK_THEME () {
       $(`style.dark`).remove();
     }
   });
-};
+}
 
 const css_all = `
 html > body {
