@@ -4,7 +4,7 @@ document.addEventListener(`DOMContentLoaded`, () => {
   }
 });
 
-const DASHBOARD = () => {
+function DASHBOARD () {
   const dash = {
     id : $(`.orange_text_right:contains(Your Worker ID: )`).text().split(`ID: `)[1],
     date : $(`a:contains(Today)`).length ? $(`a:contains(Today)`).prop(`href`).split(`encodedDate=`)[1] : null,
@@ -25,7 +25,7 @@ const DASHBOARD = () => {
     today_pen : Number($(`a:contains(Today)`).parent().next().next().next().next().text()) || 0
   };
   
-  chrome.storage.local.get(`dashboard`, (data) => {
+  chrome.storage.local.get(`dashboard`, function (data) {
     const loaded_dash = data.dashboard || {id: null, date: null, earn_hits: 0, earn_bonus: 0, earn_total: 0, earn_trans: 0, total_sub: 0, total_app: 0, total_rej: 0, total_pen: 0, today_sub: 0, today_app: 0, today_rej: 0, today_pen: 0};  
    
     if (dash.date !== loaded_dash.date) {
@@ -143,4 +143,4 @@ const DASHBOARD = () => {
   
     chrome.runtime.sendMessage({msg: `dashboard`, data: dash});
   });
-};
+}
