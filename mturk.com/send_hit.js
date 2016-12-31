@@ -1,10 +1,10 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   if ($(`input[name="isAccepted"]`).length) {
     SEND_HIT();
   }
 });
 
-const SEND_HIT = () => {
+function SEND_HIT () {
   const reqname  = $(`input[name="prevRequester"]`).val() || null;
   const reqid    = $(`input[name="requesterId"]`).val() || reqname;
   const title    = $(`.capsulelink_bold`).text().trim();
@@ -19,46 +19,34 @@ const SEND_HIT = () => {
   const date     = MTURK_DATE(accepted);
   
   const data = {
-    reqname   : reqname,
-    reqid     : reqid,
-    title     : title,
-    reward    : reward,
-    autoapp   : autoapp,
-    hitid     : hitid,
-    assignid  : assignid,
-    status    : status,
-    source    : source,
-    date      : date,
-    viewed    : new Date().getTime(),
-    submitted : null
+    reqname: reqname,
+    reqid: reqid,
+    title: title,
+    reward: reward,
+    autoapp: autoapp,
+    hitid: hitid,
+    assignid: assignid,
+    status: status,
+    source: source,
+    date: date,
+    viewed: new Date().getTime(),
+    submitted: null
   };
 
   chrome.runtime.sendMessage({msg: `sendhit`, data: data});
 };
 
-const WHEN_ACCEPTED = (time) => {
+function WHEN_ACCEPTED (time) {
   const split = time.split(/:| /);
-  let days = 0;
-  let hours = 0;
-  let minutes = 0;
-  let seconds = 0;
-  let milli = 0;
-  if (split.length == 3) {
-    hours = parseInt(split[0], 10);
-    minutes = parseInt(split[1], 10);
-    seconds = parseInt(split[2], 10);
-  }
-  if (split.length == 4) {
-    days = parseInt(split[0], 10);
-    hours = parseInt(split[1], 10);
-    minutes = parseInt(split[2], 10);
-    seconds = parseInt(split[3], 10);
-  }
-  milli = (days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds) * 1000;
+  const days = split.length == 4 ? parseInt(split[0], 10) : 0;
+  const hours = split.length == 4 ? parseInt(split[1], 10) : parseInt(split[0], 10);
+  const minutes = split.length == 4 ? parseInt(split[2], 10) : parseInt(split[1], 10);
+  const seconds = split.length == 4 ? parseInt(split[3], 10) : parseInt(split[2], 10);
+  const milli = (days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds) * 1000;
   return Date.now() - milli;
-};
+}
 
-const MTURK_DATE = (time) => {
+function MTURK_DATE (time) {
   const given = new Date(time);
   const utc = given.getTime() + (given.getTimezoneOffset() * 60000);
   const offset = DST() === true ? `-7` : `-8`;
@@ -67,9 +55,9 @@ const MTURK_DATE = (time) => {
   const month = (amz.getMonth() + 1) < 10 ? `0` + (amz.getMonth() + 1).toString() : ((amz.getMonth() + 1)).toString();
   const year = (amz.getFullYear()).toString();
   return month + day + year;
-};
+}
 
-const DST = () => {
+function DST () {
   const today = new Date();
   const year = today.getFullYear();
   let start = new Date(`March 14, ${year} 02:00:00`);
@@ -79,4 +67,4 @@ const DST = () => {
   day = end.getDay();
   end.setDate(7 - day);
   return (today >= start && today < end) ? true : false;
-};
+}
