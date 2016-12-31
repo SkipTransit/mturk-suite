@@ -2,7 +2,7 @@ let user = {}, dashboard = {}, tpe = {};
 let syncing_tpe = {tab: null, running: false};
 
 chrome.storage.local.get(`user`, (data) => {
-  user = data.user || {goal: 20, dark: true};
+  user = data.user || {goal: 20, dark: false, hit_export: true, accept_next: true, workspace: false};
   tpe.goal = user.goal;
 });
 
@@ -18,6 +18,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
     chrome.storage.local.set({'tpe': tpe});
   }
   if (request.msg == `dashboard`) {
+    dashboard = request.data;
     chrome.storage.local.set({'dashboard': request.data});
   }
   if (request.msg == `turkopticon`) {
