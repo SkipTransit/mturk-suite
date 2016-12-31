@@ -12,9 +12,7 @@ chrome.storage.onChanged.addListener( function (changes) {
 
 function ACCEPT_NEXT () {
   chrome.storage.local.get(`user`, (data) => {
-    const user = {
-      accept_next: data.user ? data.user.hasOwnProperty(`accept_next`) ? data.user.accept_next : true : true
-    };
+    const user = data.user || {accept_next: true};
 
     if (user.accept_next) return $(`input[name="autoAcceptEnabled"]`).prop(`checked`, true);
     $(`input[name="autoAcceptEnabled"]`).prop(`checked`, false);

@@ -26,10 +26,8 @@ chrome.storage.onChanged.addListener( function (changes) {
 
 function TODAYS_PROJECTED_EARNINGS () {
   chrome.storage.local.get(`tpe`, function (data) {
-    const tpe = {
-      tpe: data.tpe ? data.tpe.hasOwnProperty(`tpe`) ? data.tpe.tpe : 0 : 0,
-      goal: data.tpe ? data.tpe.hasOwnProperty(`goal`) ? data.tpe.goal : 20 : 20
-    };
+    const tpe = data.tpe || {tpe: 0, goal: 20};
+
     TPE_WRITE(tpe.tpe, tpe.goal);
   });
 }

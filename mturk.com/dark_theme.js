@@ -1,16 +1,54 @@
-chrome.storage.onChanged.addListener( (changes) => {
+DARK_THEME();
+
+chrome.storage.onChanged.addListener( function (changes) {
   for (let change in changes) {
     if (change === `user`) {
-      DARK_THEME_WRITE();
+      DARK_THEME();
     }
   }
 });
 
-const css_all = () => {
+function CSS_WRITE (data) {
   const css = document.createElement(`style`);
   css.className = `dark`;
-  css.innerHTML = `
+  css.innerHTML = data;
+  document.documentElement.insertBefore(css, null);
+};
 
+function DARK_THEME () {
+  chrome.storage.local.get(`user`, function (data) {
+    const user = data.user || {dark: true};
+  
+    if (user.dark) {
+      if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|finder_).)*$/)) {
+        CSS_WRITE(css_all);
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(dashboard|status)/)) {
+        CSS_WRITE(css_dash);
+      }
+      if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|dashboard|transferearnings|last_hits_previewed|finder).)*$/)) {
+        CSS_WRITE(css_1);
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(transferearnings|requesttransferearnings)/)) {
+        CSS_WRITE(css_2);
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(findquals|sortquals|pendingquals|searchbar\?selectedSearchType=quals|sortsearchbar\?searchSpec=QualTypeSearch|requestqualification|takequalificationtest)/)) {
+        CSS_WRITE(css_3);
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/youraccount/)) {
+        CSS_WRITE(css_4);
+      }
+      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/contact/)) {
+        CSS_WRITE(css_5);
+      } 
+    }
+    else {
+      $(`style.dark`).remove();
+    }
+  });
+};
+
+const css_all = `
 html > body {
     color            : #FFFFFF;
     background-color : #0b0c0f;    
@@ -191,13 +229,8 @@ img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechani
 }
 
 `;
-  document.documentElement.insertBefore(css, null);
-};
 
-const css_dash = () => {
-  const css = document.createElement(`style`);
-  css.className = `dark`;
-  css.innerHTML = `
+const css_dash = `
 .container-content,
 td[bgcolor="#7fb4cf"],
 body > table:not([border="0"]) > tbody > tr > td {
@@ -244,13 +277,8 @@ span#lnk_hide_earnings_details {
   color : #9BAED2 !important;
 }
 `;
-  document.documentElement.insertBefore(css, null);
-};
-
-const css_1 = () => {
-  const css = document.createElement(`style`);
-  css.className = `dark`;
-  css.innerHTML = `
+  
+const css_1 = `
 iframe {
     background-color : #BDBDBD !important;
     border-color     : #FFFFFF !important;
@@ -343,13 +371,8 @@ a.capsulelink
     color : #FFFFFF !important;
 }
 `;
-  document.documentElement.insertBefore(css, null);
-};
 
-const css_2 = () => {
-  const css = document.createElement(`style`);
-  css.className = `dark`;
-  css.innerHTML = `
+const css_2 = `
 table:nth-of-type(3) > tbody > tr > td {
     color            : #FFFFFF !important;
     background-color : #0b0c0f !important;
@@ -389,13 +412,8 @@ td[width="10"] {
    display : none !important;
 }
 `;
-  document.documentElement.insertBefore(css, null);
-};
-
-const css_3 = () => {
-  const css = document.createElement(`style`);
-  css.className = `dark`;
-  css.innerHTML = `
+  
+const css_3 = `
 /* Table just underneath the navigation table */
 #subtabs_and_searchbar:first-of-type + table td,
 #subtabs_and_searchbar:first-of-type + div > table td,
@@ -445,13 +463,8 @@ const css_3 = () => {
     color : #336699 !important;
 }
 `;
-  document.documentElement.insertBefore(css, null);
-};
 
-const css_4 = () => {
-  const css = document.createElement(`style`);
-  css.className = `dark`;
-  css.innerHTML = `
+const css_4 = `
 #subtabs_and_searchbar:first-of-type + table  > tbody > tr:nth-child(4) {
     background-color: #0b0c0f !important;
 }
@@ -471,13 +484,8 @@ td.greyBox {
   background-image : none;
 }
 `;
-  document.documentElement.insertBefore(css, null);
-};
 
-const css_5 = () => {
-  const css = document.createElement(`style`);
-  css.className = `dark`;
-  css.innerHTML = `
+const css_5 = `
 .black_text {
   color : #FFFFFF !important;   
 }
@@ -527,40 +535,3 @@ const css_5 = () => {
   margin-right: 3px;
 }
 `;
-  document.documentElement.insertBefore(css, null);
-};
-
-const DARK_THEME_WRITE = () => {
-  chrome.storage.local.get(`user`, (data) => {
-    const user = data.user || {dark: true};
-  
-    if (user.dark) {
-      if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|finder_).)*$/)) {
-        css_all();
-      }
-      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(dashboard|status)/)) {
-        css_dash();
-      }
-      if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|dashboard|transferearnings|last_hits_previewed|finder).)*$/)) {
-        css_1();
-      }
-      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(transferearnings|requesttransferearnings)/)) {
-        css_2();
-      }
-      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/(findquals|sortquals|pendingquals|searchbar\?selectedSearchType=quals|sortsearchbar\?searchSpec=QualTypeSearch|requestqualification|takequalificationtest)/)) {
-        css_3();
-      }
-      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/youraccount/)) {
-        css_4();
-      }
-      if (document.URL.match(/https:\/\/www.mturk.com\/mturk\/contact/)) {
-        css_5();
-      } 
-    }
-    else {
-      $(`style.dark`).remove();
-    }
-  });
-};
-
-DARK_THEME_WRITE();
