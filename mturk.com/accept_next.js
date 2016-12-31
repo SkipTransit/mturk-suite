@@ -1,8 +1,8 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   ACCEPT_NEXT();
 });
 
-chrome.storage.onChanged.addListener( (changes) => {
+chrome.storage.onChanged.addListener( function (changes) {
   for (let key in changes) {
     if (key === `user`) {
       ACCEPT_NEXT();
@@ -10,16 +10,13 @@ chrome.storage.onChanged.addListener( (changes) => {
   }
 });
 
-const ACCEPT_NEXT = () => {
+function ACCEPT_NEXT () {
   chrome.storage.local.get(`user`, (data) => {
-    const user = data.user || {accept_next: true};
+    const user = {
+      accept_next: data.user.hasOwnProperty(`accept_next`) ? data.user.accept_next : true
+    };
 
-    if (user.accept_next) {
-      $(`input[name="autoAcceptEnabled"]`).prop(`checked`, true);
-    }
-    else {
-      $(`input[name="autoAcceptEnabled"]`).prop(`checked`, false);
-    }
+    if (user.accept_next) return $(`input[name="autoAcceptEnabled"]`).prop(`checked`, true);
+    $(`input[name="autoAcceptEnabled"]`).prop(`checked`, false);
   });
-};
-
+}
