@@ -34,7 +34,7 @@ function SEND_HIT () {
   };
 
   chrome.runtime.sendMessage({msg: `sendhit`, data: data});
-};
+}
 
 function WHEN_ACCEPTED (time) {
   const split = time.split(/:| /);
