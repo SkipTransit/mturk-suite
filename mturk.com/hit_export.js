@@ -155,8 +155,12 @@ function EXPORTS_WRITE_MAIN () {
             `</div>` : ``
       ;
       
-      if (hit.find(`.exports`).length) return hit.find(`.exports`).html(html);
-      hit.find(`a[id^="capsule"]`).before(`<span class="exports">${html}</span>`);
+      if (hit.find(`.exports`).length) {
+        hit.find(`.exports`).html(html);
+      }
+      else {
+        hit.find(`a[id^="capsule"]`).before(`<span class="exports">${html}</span>`);
+      }
     }
   });
 }
@@ -179,8 +183,12 @@ function EXPORTS_WRITE_CAPSULE () {
             `</div>` : ``
       ;
       
-    if ($(`.exports`).length) return $(`.exports`).html(html);
-    $(`.capsulelink_bold`).before(`<span class="exports">${html}</span>`);
+    if ($(`.exports`).length) {
+      $(`.exports`).html(html);
+    }
+    else {
+      $(`.capsulelink_bold`).before(`<span class="exports">${html}</span>`);
+    }
   });
 }
 

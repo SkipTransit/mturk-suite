@@ -8,9 +8,6 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   }
 });
 
-// Toggle to hide what was worked on
-const testing = false;
-
 let tpeexport = ``;
 
 const WRITE = () => {
@@ -62,8 +59,7 @@ const WRITE = () => {
           approved ++;
           approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
         }
-      
-        if (hits[key].status.match(/Submitted|Pending/)) {
+        else if (hits[key].status.match(/Submitted|Pending/)) {
           const apped = IS_APPROVED(hits[key].autoapp, hits[key].submitted);
           if (apped) {
             approved ++;
@@ -73,7 +69,6 @@ const WRITE = () => {
       }
     }
     
-    if (testing) {submitted_pe = 295; approved_pe = 295;}
     $(`#overview`).html(
       `<div style="font-size: 20px; line-height: normal;">` +
       `  <br>` +
@@ -127,7 +122,6 @@ const WRITE = () => {
         ;
       }
 
-      if (testing) {hit.reqname = `Kadauchi`; hit.reward = 295;}
       breakdown_html +=
         `<tr>` +
         `  <td><a href="${reqlink}" target="_blank">${hit.reqname}</td>` +
@@ -175,7 +169,6 @@ const WRITE = () => {
       }
       
       if (hit.reqname !== hit.reqid) {
-        if (testing) {hit.reqname = `Kadauchi`;}
         contact =
           `<a href="https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}&hitId=${hit.hitid}&requesterName=${hit.reqname}&subject=Regarding+Amazon+Mechanical+Turk+HIT+${hit.hitid}" target="_blank">` +
           `  <span class="glyphicon glyphicon-envelope" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Contact the requester about this HIT."></span>` +
@@ -186,7 +179,6 @@ const WRITE = () => {
         ;
       }
       else {
-        if (testing) {hit.reqname = `Kadauchi`;}
         contact =
           `<span class="glyphicon glyphicon-envelope text-muted" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Sync to be able to contact requester."></span>`
         ;
@@ -195,7 +187,6 @@ const WRITE = () => {
         ;
       }
 
-      if (testing) {hit.title = `Go Away!`; hit.reward = `$295.00`;}
       detailed_html +=
         `<tr class="${status} ${trclass}">` +
         `  <td>${contact} ${reqlink}</div></td>` +

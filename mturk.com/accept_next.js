@@ -14,7 +14,11 @@ function ACCEPT_NEXT () {
   chrome.storage.local.get(`user`, function (data) {
     const user = data.user || {accept_next: true};
 
-    if (user.accept_next) return $(`input[name="autoAcceptEnabled"]`).prop(`checked`, true);
-    $(`input[name="autoAcceptEnabled"]`).prop(`checked`, false);
+    if (user.accept_next) {
+      $(`input[name="autoAcceptEnabled"]`).prop(`checked`, true);
+    }
+    else {
+      $(`input[name="autoAcceptEnabled"]`).prop(`checked`, false);
+    }
   });
 }

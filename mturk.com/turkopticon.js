@@ -83,8 +83,12 @@ function TURKOPTICON_WRITE (data) {
     const rid = $(element).closest(`a`).prop(`href`) || $(element).closest(`td[align="left"]:not(.capsule_field_text)`).find(`a:contains(Contact the Requester of this HIT)`).prop(`href`);
     const id = rid.split(`requesterId=`)[1].split(`&`)[0];
 
-    if ($(element).parent(`a`).length) $(element).parent().before(to(id));
-    else $(element).before(to(id));
+    if ($(element).parent(`a`).length) {
+      $(element).parent().before(to(id));
+    }
+    else {
+      $(element).before(to(id));
+    }
   }
   
   if ($(`input[name="requesterId"]`).length || $(`a[href^="/mturk/return?"]`).length && $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)) {

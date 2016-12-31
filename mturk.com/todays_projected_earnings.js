@@ -42,15 +42,23 @@ function TPE_WRITE (earnings, goal) {
       `</div>`
   ;
   
-  if ($(`#tpe`).length) return $(`#tpe`).html(html);
-  $(`#subtabs_and_searchbar`).prepend(`<div id="tpe">${html}</div>`);
+  if ($(`#tpe`).length) {
+    $(`#tpe`).html(html);
+  }
+  else {
+    $(`#subtabs_and_searchbar`).prepend(`<div id="tpe">${html}</div>`);
+  }
 }
 
 function TPE_MENU_WRITE () {
   const html = `<iframe src="${chrome.runtime.getURL(`todays_hits_menu.html`)}" style="width: 100%; height: 100%;">`;
   
-  if ($(`#tpe_menu`).length) return $(`#tpe_menu`).html(html);
-  $(`body`).append(`<div id="tpe_menu">${html}</div>`);
+  if ($(`#tpe_menu`).length) {
+    $(`#tpe_menu`).html(html);
+  }
+  else {
+    $(`body`).append(`<div id="tpe_menu">${html}</div>`);
+  }
 }
 
 function TPE_MENU_CLOSE () {
