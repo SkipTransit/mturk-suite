@@ -1,10 +1,10 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   if ($(`a[href="/mturk/beginsignout"]`).length) {
-    GLOBAL();
+    TODAYS_PROJECTED_EARNINGS();
   }
 });
 
-chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
   if (request.msg == `sync_tpe_done`) {
     TPE_MENU_WRITE();
   }
@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
   }
 });
 
-chrome.storage.onChanged.addListener( (changes) => {
+chrome.storage.onChanged.addListener( function (changes) {
   for (let key in changes) {
     if (key === `tpe`) {
       TPE_WRITE(
@@ -24,13 +24,17 @@ chrome.storage.onChanged.addListener( (changes) => {
   }
 });
 
-const GLOBAL = () => {
-  chrome.storage.local.get(`tpe`, (data) => {
-    TPE_WRITE(data.tpe.tpe || 0, data.tpe.goal || 20);
+function TODAYS_PROJECTED_EARNINGS () {
+  chrome.storage.local.get(`tpe`, function (data) {
+    const tpe = {
+      tpe: data.tpe.hasOwnProperty('tpe') ? data.tpe.tpe : 0,
+      goal: data.tpe.hasOwnProperty('goal') ? data.tpe.goal : 20
+    };
+    TPE_WRITE(tpe.tpe, tpe.goal);
   });
-};
+}
 
-const TPE_WRITE = (earnings, goal) => {
+function TPE_WRITE (earnings, goal) {
   const html =
       `<div>` +
       `  <div id="tpe_goal_outer">` +
@@ -40,28 +44,20 @@ const TPE_WRITE = (earnings, goal) => {
       `</div>`
   ;
   
-  if ($(`#tpe`).length) {
-    $(`#tpe`).html(html);
-  }
-  else {
-    $(`#subtabs_and_searchbar`).prepend(`<div id="tpe">${html}</div>`);
-  }
-};
+  if ($(`#tpe`).length) return $(`#tpe`).html(html);
+  $(`#subtabs_and_searchbar`).prepend(`<div id="tpe">${html}</div>`);
+}
 
-const TPE_MENU_WRITE = () => {
+function TPE_MENU_WRITE () {
   const html = `<iframe src="${chrome.runtime.getURL(`todays_hits_menu.html`)}" style="width: 100%; height: 100%;">`;
   
-  if ($(`#tpe_menu`).length) {
-    $(`#tpe_menu`).html(html);
-  }
-  else {
-    $(`body`).append(`<div id="tpe_menu">${html}</div>`);
-  }
-};
+  if ($(`#tpe_menu`).length) return $(`#tpe_menu`).html(html);
+  $(`body`).append(`<div id="tpe_menu">${html}</div>`);
+}
 
-const TPE_MENU_CLOSE = () => {
+function TPE_MENU_CLOSE () {
   $(`#tpe_menu`).remove();
-};
+}
 
 $(`html`).on(`click`, `#tpe`, function () {
   TPE_MENU_WRITE();
