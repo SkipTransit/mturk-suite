@@ -451,34 +451,62 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h4 class="modal-title">Advanced Settings</h4>
           </div>
-          <div class="modal-body">
-            <div class="input-group input-group-sm" style="width: 100%;">
-              <div class="input-group-addon">Pushbullet Token</div>
-              <input id="pushbullet_token" type="text" class="form-control">
+          <div class="modal-body row">
+            
+            <!-- Pushbullet Token -->
+            <div class="col-xs-12">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">Pushbullet Token</div>
+                <input id="pushbullet_token" type="text" class="form-control">
+              </div>
             </div>
-            <label style="font-weight: 400;">
-              Include Match Voice:
-              <select id="include_voice">
-                <option value="0">Male</option>
-                <option value="2">Female</option>
-              </select>
-            </label>
-            <label style="font-weight: 400;">
-              Include Match Sound:
-              <select id="include_sound">
-                <option value="1">Sound 1</option>
-                <option value="2">Sound 2</option>
-                <option value="3">Sound 3</option>
-                <option value="4">Sound 4</option>
-              </select>
-            </label>
-            <label style="font-weight: 400;">
-              New HIT Sound:
-              <select id="new_hit_sound">
-                <option value="1">Sound 1</option>
-                <option value="2">Sound 2</option>
-              </select>
-            </label>
+             
+            <!-- Site To Scan -->
+            <div class="col-xs-6">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">Site To Scan</div>
+                <select id="site_to_scan">
+                  <option value="mturk">mturk.com</option>
+                  <option value="worker">worker.mturk.com</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- New HIT Sound -->
+            <div class="col-xs-6">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">New HIT Sound</div>
+                <select id="new_hit_sound">
+                  <option value="1">Sound 1</option>
+                  <option value="2">Sound 2</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Include Match Voice -->
+            <div class="col-xs-6">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">Include Match Voice</div>
+                <select id="include_voice">
+                  <option value="0">Male</option>
+                  <option value="2">Female</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Include Match Sound -->
+            <div class="col-xs-6">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">Include Match Sound</div>
+                <select id="include_sound">
+                  <option value="1">Sound 1</option>
+                  <option value="2">Sound 2</option>
+                  <option value="3">Sound 3</option>
+                  <option value="4">Sound 4</option>
+                </select>
+              </div>
+            </div>
+           
           </div>
         </div>
       </div>
