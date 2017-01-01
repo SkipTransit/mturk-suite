@@ -15,14 +15,15 @@ function HIT_CAPSULE () {
   const reqname = $(`.capsule_field_text`).eq(0).text().trim();
 
   const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).val();
-  const days = Math.floor((aa / (60 * 60 * 24)));
-  const hours = Math.floor((aa / (60 * 60)) % 24);
-  const mins = Math.floor((aa / 60) % 60);
+  const d = Math.floor((aa / (60 * 60 * 24)));
+  const h = Math.floor((aa / (60 * 60)) % 24);
+  const m = Math.floor((aa / 60) % 60);
 
-  let aa_time = 
-      (days  === 0 ? `` : days  + ` day(s)`) +
-      (hours === 0 ? `` : hours + ` hour(s)`) +
-      (mins  === 0 ? `` : mins  + ` minute(s)`) +
+  let aa_time =   
+      (d > 0 ? `${d} day${d > 1 ? `s` : ``} ` : ``) +
+      (h > 0 ? `${h} hour${h > 1 ? `s` : ``} ` : ``) +
+      (m > 0 ? `${m} minute${m > 1 ? `s` : ``} ` : ``)
+  ;
 
   if (aa === 0) {
     aa_time = `0 seconds`;
