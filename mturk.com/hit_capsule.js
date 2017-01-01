@@ -12,7 +12,7 @@ function HIT_CAPSULE () {
         $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1]:
         null
   ;
-  const reqname = $(`.capsule_field_text`).text().trim();
+  const reqname = $(`.capsule_field_text`).eq(0).text().trim();
 
   const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).val();
   const days = Math.floor((aa / (60 * 60 * 24)));
