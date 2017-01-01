@@ -13,11 +13,11 @@ function HIT_CAPSULE () {
         null
   ;
   const reqname = $(`.capsule_field_text`).eq(0).text().trim();
-
+``
   const aa = $(`input[name="hitAutoAppDelayInSeconds"]`).val();
-  const d = Math.floor((aa / (60 * 60 * 24)));
-  const h = Math.floor((aa / (60 * 60)) % 24);
-  const m = Math.floor((aa / 60) % 60);
+  const d = Math.floor(aa / 86400);
+  const h = Math.floor(aa / 3600 % 24);
+  const m = Math.floor(aa / 60 % 60);
 
   let aa_time =   
       (d > 0 ? `${d} day${d > 1 ? `s` : ``} ` : ``) +
