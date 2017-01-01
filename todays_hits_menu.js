@@ -1,8 +1,8 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   WRITE();
 });
 
-chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
   if (request.msg == `sync_tpe_running`) {
     SYNC_PROGRESS(request.data.current, request.data.total);
   }
@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => {
 
 let tpeexport = ``;
 
-const WRITE = () => {
+function WRITE () {
   $(`#overview`).html(
     `<h3>Loading Information.....</h3>`
   );
@@ -42,7 +42,7 @@ const WRITE = () => {
     `    </table>`
   );
   
-  chrome.storage.local.get(`hits`, (data) => {
+  chrome.storage.local.get(`hits`, function (data) {
     const hits = data.hits || {};
     let breakdown = {}, breakdown_html = ``, detailed_html = ``;
     
@@ -200,17 +200,17 @@ const WRITE = () => {
     $(`#detailed_tbody`).html(detailed_html);
     $(`[data-toggle="tooltip"]`).tooltip();
   });  
-};
+}
 
-const IS_APPROVED = (aa, sub) => {
+function IS_APPROVED (aa, sub) {
   const autoapp = Number(aa);
   const submit  = Number(sub);
   const current = new Date().getTime() / 1000;
   const remain  = Math.round(submit + autoapp - current);
   return remain > 0 ? false : true;
-};
+}
 
-const APPROVES_WHEN = (aa, sub) => {
+function APPROVES_WHEN (aa, sub) {
   let willapp = `This HIT will approve in `;
   const autoapp = Number(aa);
   const submit  = Number(sub);
@@ -234,9 +234,9 @@ const APPROVES_WHEN = (aa, sub) => {
     willapp = `This HIT should be approved.`;
   }
   return willapp;
-};
+}
 
-const SYNC_PROGRESS = (current, total) => {
+function SYNC_PROGRESS (current, total) {
   const width = total === `???` ? 0 : Math.round(current / total * 100);
   $(`#overview, #requester, #detailed`).html(
     `<div class="text-center">` +
@@ -246,15 +246,15 @@ const SYNC_PROGRESS = (current, total) => {
     `  <div class="progress-bar" role="progressbar" aria-valuenow="${width}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: ${width}%">${width}%</div>` +
     `</div>`
   );
-};
+}
 
-const COPY_TO_CLIPBOARD = (template) => {
+function COPY_TO_CLIPBOARD (template) {
   $(`body`).append(`<textarea id="COPY_TO_CLIPBOARD" style="opacity: 0;">${template}</textarea>`);
   $(`#COPY_TO_CLIPBOARD`).select();
   document.execCommand(`Copy`);
   $(`#COPY_TO_CLIPBOARD`).remove();
   alert(`Today's HITs Breakdown has been copied to your clipboard.`);
-};
+}
 
 $(`html`).on(`click`, `#export`, function () {
   COPY_TO_CLIPBOARD(tpeexport);
