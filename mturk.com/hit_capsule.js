@@ -18,13 +18,11 @@ function HIT_CAPSULE () {
   const days = Math.floor((aa / (60 * 60 * 24)));
   const hours = Math.floor((aa / (60 * 60)) % 24);
   const mins = Math.floor((aa / 60) % 60);
-  const secs = aa % 60;
 
   let aa_time = 
       (days  === 0 ? `` : days  + ` day(s)`) +
       (hours === 0 ? `` : hours + ` hour(s)`) +
       (mins  === 0 ? `` : mins  + ` minute(s)`) +
-      (secs  === 0 ? `` : secs  + ` seconds(s)`);
 
   if (aa === 0) {
     aa_time = `0 seconds`;
