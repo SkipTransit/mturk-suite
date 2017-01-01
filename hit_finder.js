@@ -212,6 +212,13 @@ $(document).on('show.bs.modal', '.modal', function (event) {
   setTimeout( function () { $('.modal-backdrop').not('.modal-stack').css('z-index', zindex - 1).addClass('modal-stack'); }, 0);
 });
 
+//
+$('html').on('click', '.panel-heading.toggle', function () {
+  $(this).children(`.glyphicon`).toggleClass(`glyphicon-resize-small glyphicon-resize-full`);
+  $(this).next().toggle();
+});
+
+
 // Find HITs Stuff
 function FIND () {
   clearTimeout(timeout);

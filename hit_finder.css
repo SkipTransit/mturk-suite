@@ -86,3 +86,7 @@ select {
 .panel-body {
   padding-bottom: 0px !important;
 }
+
+.panel-heading.toggle {
+  cursor: pointer;
+}
