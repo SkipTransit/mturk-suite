@@ -2,3 +2,19 @@
   cursor: pointer;
   background: #DDDDDD;
 }
+
+body { padding-top: 23px; padding-left: 3px; padding-right: 3px; }
+
+.navbar-brand {
+ /* color: #FFFFFF;*/
+  margin-left: 3px;
+    float: left;
+    height: 18px !important;
+    padding: 0px 0px !important;
+    font-size: 16px !important;
+}
+
+.navbar {
+    min-height: 0px !important;
+    
+}
