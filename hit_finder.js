@@ -1,25 +1,17 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
   SET_CONFIG();
   BLOCK_LIST_WRITE();
   INCLUDE_LIST_WRITE();
   window.speechSynthesis.getVoices();
 });
 
-chrome.extension.onMessage.addListener( (request) => {
-  if (request.msg == 'turkopticon.js') {
-    HITS_WRITE_LOGGED_IN(request.data);
-  }
-  if (request.msg == 'hitexport.js') {
-    VB_EXPORT(request.data);
-  }
-});
-
+let timeout;
 let KEYS = [];
 let HITS = {};
 let LOGGED_IN = true;
-let TOTAL_SCANS = 0;
+let TOTAL_SCANS = 1;
 let LOGGED_HITS = 0;
-let REQUEST_ERRORS = 0;
+let REQUEST_ERRORS = 1;
 const DELAY_ALERTS = [];
 const DELAY_PUSHBULLET = [];
 
@@ -53,6 +45,7 @@ let CONFIG = {
 };
 
 $('html').on('click', '#scan', function () {
+  clearTimeout(timeout);
   $(this).toggleClass('btn-success btn-danger');
   if ($(this).text() === 'Start') {
     $(this).text('Stop');
@@ -195,48 +188,62 @@ $('html').on('click', '.vb', function () {
   const key = $(this).data('key');
   EXPORT.key = key;
   EXPORT.type = 'vb';
-  chrome.runtime.sendMessage({msg: 'hitexport', data: HITS[key].reqid});
+  TODB_HIT_EXPORT(HITS[key].reqid);
 });
 
 $('html').on('click', '.vb_th', function () {
   const key = $(this).data('key');
   EXPORT.key = key;
   EXPORT.type = 'vb_th';
-  chrome.runtime.sendMessage({msg: 'hitexport', data: HITS[key].reqid});
+  TODB_HIT_EXPORT(HITS[key].reqid);
 });
 
 $('html').on('click', '.vb_mtc', function () {
   const key = $(this).data('key');
   EXPORT.key = key;
   EXPORT.type = 'vb_mtc';
-  chrome.runtime.sendMessage({msg: 'hitexport', data: HITS[key].reqid});
+  TODB_HIT_EXPORT(HITS[key].reqid);
 });
 
 // Modal Stuff
 $(document).on('show.bs.modal', '.modal', function (event) {
   const zindex = 1040 + (10 * $('.modal:visible').length);
   $(this).css('z-index', zindex);
-  setTimeout( () => { $('.modal-backdrop').not('.modal-stack').css('z-index', zindex - 1).addClass('modal-stack'); }, 0);
+  setTimeout( function () { $('.modal-backdrop').not('.modal-stack').css('z-index', zindex - 1).addClass('modal-stack'); }, 0);
 });
 
 // Find HITs Stuff
-const FIND = () => {
-  let url = '';
-  //if () {
-    url = 
-      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups` +
-      `&sortType=${SEARCH_TYPE()}` +
-      `&pageSize=${CONFIG.size}` +
-      `&minReward=${CONFIG.min_reward}` +
-      `&qualifiedFor=${(CONFIG.qualified ? 'on' : 'off')}`
-    ;  
-  //}
-  if ($('#scan').text() === 'Stop') {
-    $.get(url, (data) => { TOTAL_SCANS++; FIND_OLD(data); });
-  }
-};
+function FIND () {
+  clearTimeout(timeout);
+  const  url = 
+        `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups` +
+        `&sortType=${SEARCH_TYPE()}` +
+        `&pageSize=${CONFIG.size}` +
+        `&minReward=${CONFIG.min_reward}` +
+        `&qualifiedFor=${(CONFIG.qualified ? 'on' : 'off')}`
+  ;  
 
-const SEARCH_TYPE = () => {
+  GET_HITS(url, PARSE_OLD_HITS);
+}
+
+function GET_HITS (url, callback) {
+  const xhr = new XMLHttpRequest();
+  xhr.open('get', url, true);
+  xhr.send();
+  xhr.onload = function () {
+    if (this.status === 200) {
+      callback(this.response);
+    }
+    else {
+      console.log(`Error: ${this.status} | ${this.statusText}`);
+    }
+  };
+  xhr.onerror = function () {
+    console.log(`Error: ${this.status} | ${this.statusText}`);
+  };
+}
+
+function SEARCH_TYPE () {
   if (CONFIG.sort_by === 'latest') {
     return 'LastUpdatedTime%3A1';
   }
@@ -246,76 +253,87 @@ const SEARCH_TYPE = () => {
   if (CONFIG.sort_by === 'reward') {
     return 'Reward%3A1';
   }
-};
+}
 
-const FIND_OLD = (data) => {
-  let ids = []; KEYS = [];
-
-  const hits = $(data).find('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
-  const logged_in = $(data).find(`a[href="/mturk/beginsignout"]`).length;
-  const request_error = $(data).find(`.error_title:contains(You have exceeded)`).length;
-
-  for (let i = 0; i < hits.length; i ++) {
-    const hit = hits.eq(i);
+function PARSE_OLD_HITS (data) {
+  const ids = []; KEYS = [];
+  
+  const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = data;
+  const hits = doc.querySelectorAll('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
+  const logged_in = doc.querySelector(`a[href="/mturk/beginsignout"]`);
+ 
+  const request_error = doc.querySelector(`.error_title`) ? doc.querySelector(`.error_title`).textContent.match(/You have exceeded/) ? true : false : false;
+  if (request_error) {
+    document.getElementById(`total_scans`).textContent = TOTAL_SCANS ++;
+    document.getElementById(`request_errors`).textContent = REQUEST_ERRORS ++;
+    timeout = setTimeout(FIND, 2500);
+    return;
+  }  
+  
+  for (let i = 0; i < hits.length; i ++) {    
+    const hit = selector => hits[i].querySelectorAll(selector);
     
     const obj = {
       reqid:
       logged_in ?
-      hit.find('a[href*="requesterId="]').prop('href').split('requesterId=')[1]:
-      hit.find('.requesterIdentity').text().trim(),
-          
+      hit('[href*="requesterId="]')[0].getAttribute('href').match(/requesterId=(.*)/)[1]:
+      hit('.requesterIdentity')[0].textContent.trim(),
+      
       reqname: 
-      hit.find('.requesterIdentity').text().trim(),
+      hit('.requesterIdentity')[0].textContent.trim(),
           
       reqlink:
       logged_in ?
-      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit.find('a[href*="requesterId="]').prop('href').split('requesterId=')[1]}`:
-      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.find('.requesterIdentity').text().trim().replace(/ /g, `+`)}`,
+      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit('[href*="requesterId="]')[0].getAttribute('href').match(/requesterId=(.*)/)[1]}`:
+      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit('.requesterIdentity')[0].textContent.trim().replace(/ /g, `+`)}`,
           
       title:
-      hit.find('a.capsulelink').text().trim(),
-          
+      hit('a.capsulelink')[0].textContent.trim(),
+         
       desc:
-      hit.find('.capsule_field_title:contains(Description:)').next().text().trim(),
-          
+      hit('.capsule_field_text')[5].textContent.trim(),
+
       time:
-      hit.find('.capsule_field_title:contains(Time Allotted:)').next().text().trim(),
+      hit('.capsule_field_text')[2].textContent.trim(),
           
       reward:
-      hit.find('.capsule_field_title:contains(Reward:)').next().text().trim(),
+      hit('.capsule_field_text')[3].textContent.trim(),
           
       avail:
-      hit.find('.capsule_field_title:contains(HITs Available:)').next().text().trim() || 'N/A',
-          
+      logged_in ?
+      hit('.capsule_field_text')[4].textContent.trim():
+      `N/A`,
+
       groupid:
-      hit.find('a[href*="roupId="]').length ?
-      hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1]:
+      hit('[href*="roupId="]')[0] ?
+      hit('[href*="roupId="]')[0].getAttribute('href').match(/roupId=(.*)/)[1]:
       `null`,
-          
+                
       prevlink:
-      hit.find('a[href*="roupId="]').length ?
-      `https://www.mturk.com/mturk/preview?groupId=${hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1]}`:
-      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.find('a.capsulelink').text().trim()}`,
+      hit('[href*="roupId="]')[0] ?
+      `https://www.mturk.com/mturk/preview?groupId=${hit('[href*="roupId="]')[0].getAttribute('href').match(/roupId=(.*)/)[1]}`:
+      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit('a.capsulelink')[0].textContent.trim()}`,
           
       pandlink:
-      hit.find('a[href*="roupId="]').length ?
-      `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.find('a[href*="roupId="]').prop('href').match(/roupId=(.*)/)[1]}`:
-      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.find('a.capsulelink').text().trim()}`,
+      hit('[href*="roupId="]')[0] ?
+      `https://www.mturk.com/mturk/previewandaccept?groupId=${hit('[href*="roupId="]')[0].getAttribute('href').match(/roupId=(.*)/)[1]}`:
+      `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit('a.capsulelink')[0].textContent.trim()}`,
   
       quals: 
-      hit.find('td[style="padding-right: 2em; white-space: nowrap;"]').length ?
-      hit.find('td[style="padding-right: 2em; white-space: nowrap;"]').map(function () { return $(this).text().trim().replace(/\s+/g, ' ') + `;`; }).get().join(` `):
+      hit('td[style="padding-right: 2em; white-space: nowrap;"]')[0] ?
+      [...hit('td[style="padding-right: 2em; white-space: nowrap;"]')].map(element => `${element.textContent.trim()};`).join(` `):
       `None;`,
       
       masters: 'N',
       new: true
     };
-    
+        
     const key = obj.groupid !== `null` ? obj.groupid : obj.reqid + obj.title + obj.reward;
-    console.log(key);
     KEYS.push(key);
-    if (ids.indexOf(obj.reqid) == -1) { ids.push(obj.reqid); } 
     
+    if (ids.indexOf(obj.reqid) === -1) {
+      ids.push(obj.reqid);
+    } 
     if (obj.quals.indexOf('Masters has been granted') !== -1) {
       obj.masters = 'Y';
     }
@@ -328,38 +346,40 @@ const FIND_OLD = (data) => {
   if (hits.length) {
     if (logged_in) {
       HIT_FINDER_DB();
-      TURKOPTICON_DB(ids);
+      if (CONFIG.enable_to) {
+        TURKOPTICON_DB(ids);
+      }
+      else {
+        HITS_WRITE_LOGGED_IN(false);
+      }
     }
     else {
       HITS_WRITE_LOGGED_OUT();
     }
   }
   else {
-    setTimeout( () => { FIND(); }, 2500);
+    timeout = setTimeout(FIND, 2500);
   }
   
-  if (!request_error && LOGGED_IN && !logged_in) {
+  if (LOGGED_IN && !logged_in) {
     LOGGED_IN = false;
     SPEAK(`Attention, You are logged out.`);
     $('.panel').removeClass('panel-primary').addClass('panel-danger');
   }
-  if (!request_error && !LOGGED_IN && logged_in) {
+  if (!LOGGED_IN && logged_in) {
     LOGGED_IN = true;
     SPEAK(`Attention, You are logged in.`);
     $('.panel').removeClass('panel-danger').addClass('panel-primary');
   }
-  if (request_error) {
-    $('#request_errors').text(REQUEST_ERRORS ++);
-  }
-};
+}
 
-const HITS_WRITE_LOGGED_IN = (data) => {
+function HITS_WRITE_LOGGED_IN (data) {
   let found_html = '', logged_html = '', hits_hidden = 0, logged = false;
   
   for (let i = 0; i < KEYS.length; i ++) {
     const hit = HITS[KEYS[i]];
     const time = TIME();
-    const tr_color = TO_COLOR(data[hit.reqid].attrs.pay);
+    const tr_color = TO_COLOR((data ? data[hit.reqid].attrs.pay : 0));
     const blocked = IS_BLOCKED(hit);
     const included = IS_INCLUDED(hit);
     
@@ -379,73 +399,24 @@ const HITS_WRITE_LOGGED_IN = (data) => {
       classes += CONFIG.hide_m ? ' m_hidden' : ' m';
       log = false;
     }
-    if (Number(CONFIG.min_avail) > Number(hit.avail) || Number(CONFIG.min_to) > Number(data[hit.reqid].attrs.pay)) {
+    if (Number(CONFIG.min_avail) > Number(hit.avail) || data && Number(CONFIG.min_to) > Number(data[hit.reqid].attrs.pay)) {
       classes += ' hidden';
       log = false;
     }
     if (classes.indexOf(`hidden`) !== -1) {
       hits_hidden ++;
     }
-    
-    const qualtip = hit.quals.replace(/; /g, `;<br>`);
         
-    found_html += 
-      `<tr class="${tr_color}${classes}">` +
-      // Requester
-      `  <td>` +
-      `    <div class="btn-group btn-group-xs">` +
-      `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
-      `        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>` +
-      `        <span class="caret"></span>` +
-      `      </button>` +
-      `      <ul class="dropdown-menu">` +
-      `        <li><a class="rt_block" data-term="${hit.reqid}" data-name="${hit.reqname}">Block List Requester</a></li>` +
-      `        <li><a class="rt_block" data-term="${hit.groupid}" data-name="${hit.title}">Block List HIT</a></li>` +
-      `        <li><a class="rt_include" data-term="${hit.reqid}" data-name="${hit.reqname}">Include List Requester</a></li>` +
-      `        <li><a class="rt_include" data-term="${hit.groupid}" data-name="${hit.title}">Include List HIT</a></li>` +
-      `      </ul>` +
-      `    </div>` +
-      `    <a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
-      `  </td>` +
-      // Project
-      `  <td>` +
-      `    <div class="btn-group btn-group-xs">` +
-      `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
-      `        Export <span class="caret"></span>` +
-      `      </button>` +
-      `      <ul class="dropdown-menu">` +
-      `        <li><a class="vb" data-key="${KEYS[i]}">Forum</a></li>` +
-      `        <li><a class="vb_th" data-key="${KEYS[i]}">TH Direct</a></li>` +
-      `        <li><a class="vb_mtc" data-key="${KEYS[i]}">MTC Direct</a></li>` +
-      `      </ul>` +
-      `    </div>` +
-        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${qualtip}">${hit.title}</a>` +
-      `  </td>` +
-      // Tasks
-      `  <td>${hit.avail}</td>` +
-      // Accept and Reward
-      `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
-      // TO
-      `  <td>` +
-      `    <a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" title="Pay: ${data[hit.reqid].attrs.pay} Fair: ${data[hit.reqid].attrs.fair}<br />Comm: ${data[hit.reqid].attrs.comm} Fast: ${data[hit.reqid].attrs.fast}<br />Reviews: ${data[hit.reqid].reviews} ToS: ${data[hit.reqid].tos_flags}">${data[hit.reqid].attrs.pay}</a>` +
-      `  </td>` +
-      // Masters
-      `  <td>${hit.masters}</td>` +
-      `</tr>`
-    ;
-    
-    if (hit.new && !blocked && log) {
-      LOGGED_HITS ++; logged = true;
-      
-      logged_html += 
+    function hit_write (to, logged) {
+      const html = 
         `<tr class="${tr_color}${classes}">` +
         // Time
-        `  <td>${time}</td>` +
+        (logged ? `<td>${time}</td>` : ``) +
         // Requester
         `  <td>` +
         `    <div class="btn-group btn-group-xs">` +
         `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
-        `        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>` +
+        `        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>` +
         `        <span class="caret"></span>` +
         `      </button>` +
         `      <ul class="dropdown-menu">` +
@@ -469,35 +440,46 @@ const HITS_WRITE_LOGGED_IN = (data) => {
         `        <li><a class="vb_mtc" data-key="${KEYS[i]}">MTC Direct</a></li>` +
         `      </ul>` +
         `    </div>` +
-        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${qualtip}">${hit.title}</a>` +
+        `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${hit.quals.replace(/; /g, `;<br>`)}">${hit.title}</a>` +
         `  </td>` +
+        // Tasks
+        (!logged ? `<td class="text-center">${hit.avail}</td>>` : ``) +
         // Accept and Reward
-        `  <td><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+        `  <td class="text-center"><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
         // TO
-        `  <td>` +
-        `    <a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" title="Pay: ${data[hit.reqid].attrs.pay} Fair: ${data[hit.reqid].attrs.fair}<br />Comm: ${data[hit.reqid].attrs.comm} Fast: ${data[hit.reqid].attrs.fast}<br />Reviews: ${data[hit.reqid].reviews} ToS: ${data[hit.reqid].tos_flags}">${data[hit.reqid].attrs.pay}</a>` +
+        `  <td class="text-center">` +
+        `    <a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" ` +
+        (to ?`title="Pay: ${to[hit.reqid].attrs.pay} Fair: ${to[hit.reqid].attrs.fair}<br>Comm: ${to[hit.reqid].attrs.comm} Fast: ${to[hit.reqid].attrs.fast}<br>Reviews: ${to[hit.reqid].reviews} ToS: ${to[hit.reqid].tos_flags}">${to[hit.reqid].attrs.pay}</a>`: `title="TO Off">Off</a>`) +
         `  </td>` +
         // Masters
-        `  <td>${hit.masters}</td>` +
+        `  <td class="text-center">${hit.masters}</td>` +
         `</tr>`
       ;
+      return html;
+    }
+    
+    found_html += hit_write(data, false);
+    
+    if (hit.new && !blocked && log) {
+      LOGGED_HITS ++; logged = true;
+      logged_html += hit_write(data, true);
     }
   }
-  if (logged && CONFIG.new_hit) { NEW_HIT_SOUND(); };
+  if (logged && CONFIG.new_hit) { NEW_HIT_SOUND(); }
   $('#hits_found').text(KEYS.length);
   $('#hits_hidden').text(hits_hidden);
-  $('#total_scans').text(TOTAL_SCANS);
+  $('#total_scans').text(TOTAL_SCANS ++);
   $('#hits_logged').text(LOGGED_HITS);
   $('#found_tbody').html(found_html);
   $('#logged_tbody').prepend(logged_html);
   $('[data-toggle="tooltip"]').tooltip();
-  
-  if ($('#scan').text() === 'Stop') {
-    setTimeout( () => { FIND(); }, CONFIG.scan_delay * 1000);
-  }
-};
 
-const HITS_WRITE_LOGGED_OUT = () => {
+  if ($('#scan').text() === 'Stop') {
+    timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
+  }
+}
+
+function HITS_WRITE_LOGGED_OUT () {
   let found_html = '', logged_html = '';
   
   for (let i = 0; i < KEYS.length; i ++) {
@@ -612,57 +594,57 @@ const HITS_WRITE_LOGGED_OUT = () => {
   $('[data-toggle="tooltip"]').tooltip();
   
   if ($('#scan').text() === 'Stop') {
-    setTimeout( () => { FIND(); }, CONFIG.scan_delay * 1000);
+    timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
   }
-};
+}
 
-const TO_COLOR = (rating) => {
+function TO_COLOR (rating) {
   let color = 'toLow';
   if (rating > 1.99) {color = 'toAverage';}
   if (rating > 2.99) {color = 'toGood';}
   if (rating > 3.99) {color = 'toHigh';}
   if (rating < 0.01) {color = 'toNone';}
   return color;
-};
+}
 
-const TIME = () => {
+function TIME () {
   const date = new Date();
   let hours = date.getHours(), minutes = date.getMinutes(), ampm = hours >= 12 ? `pm` : `am`;
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? `0` + minutes : minutes;
   return `${hours}:${minutes}${ampm}`;
-};
+}
 
 // Block List Stuff
-const IS_BLOCKED = (hit) => {
+function IS_BLOCKED (hit) {
   for (let key in BLOCK_LIST) {
     const bl = BLOCK_LIST[key];
     if (bl.term.toLowerCase() === hit.reqname.toLowerCase() || bl.term.toLowerCase() === hit.title.toLowerCase() || bl.term.toLowerCase() === hit.reqid.toLowerCase() || bl.term.toLowerCase() === hit.groupid.toLowerCase()) {
       return bl;
     }
   }
-};
+}
 
-const SHOW_BLOCK_LIST = () => {
+function SHOW_BLOCK_LIST () {
   $('#block_list_modal').modal('show');
-};
+}
 
-const ADD_BLOCK_LIST = () => {
+function ADD_BLOCK_LIST () {
   $('#save_block_list_term').val('');
   $('#save_block_list_name').val('');
   
   $('#block_list_add').modal('show');
-};
+}
 
-const RT_ADD_BLOCK_LIST = (term, name) => {
+function RT_ADD_BLOCK_LIST (term, name) {
   $('#save_block_list_term').val(term);
   $('#save_block_list_name').val(name);
   
   $('#block_list_add').modal('show');
-};
+}
 
-const SAVE_BLOCK_LIST = () => {
+function SAVE_BLOCK_LIST () {
   const term = $('#save_block_list_term').val();
   const name = $('#save_block_list_name').val() === '' ? $('#save_block_list_term').val() : $('#save_block_list_name').val();
   
@@ -673,16 +655,16 @@ const SAVE_BLOCK_LIST = () => {
   
   $('#block_list_add').modal('hide');
   $('#save_block_list_term, #save_block_list_name').val('');
-};
+}
 
-const EDIT_BLOCK_LIST = (key) => {
+function EDIT_BLOCK_LIST (key) {
   $('#edit_block_list_term').val(BLOCK_LIST[key].term);
   $('#edit_block_list_name').val(BLOCK_LIST[key].name);
   
   $('#block_list_edit').modal('show');
-};
+}
 
-const SAVE_EDIT_BLOCK_LIST = () => {
+function SAVE_EDIT_BLOCK_LIST () {
   const term = $('#edit_block_list_term').val();
   const name = $('#edit_block_list_name').val() === '' ? $('#edit_block_list_term').val() : $('#edit_block_list_name').val();
   
@@ -690,17 +672,17 @@ const SAVE_EDIT_BLOCK_LIST = () => {
   BLOCK_LIST_WRITE();
   
   $('#block_list_edit').modal('hide');
-};
+}
 
-const DELETE_EDIT_BLOCK_LIST = () => {
+function DELETE_EDIT_BLOCK_LIST () {
   const term = $('#edit_block_list_term').val();
   delete BLOCK_LIST[term];
   BLOCK_LIST_WRITE();
   
   $('#block_list_edit').modal('hide');
-};
+}
 
-const IMPORT_BLOCK_LIST = () => {
+function IMPORT_BLOCK_LIST () {
   let import_block_list  = prompt(
     `Block List Import\n\n` +
     `This will not delete your current block list, only add to it.\n\n` +
@@ -733,20 +715,20 @@ const IMPORT_BLOCK_LIST = () => {
   else {
     alert('An error occured while importing.\n\n Please check if you have a valid import and try again.');
   }
-};
+}
 
-const EXPORT_BLOCK_LIST = () => {
+function EXPORT_BLOCK_LIST () {
   COPY_TO_CLIP(localStorage.getItem('BLOCK_LIST'), 'Your block list has been copied to your clipboard.');
-};
+}
 
-const BLOCK_LIST_WRITE = () => {
+function BLOCK_LIST_WRITE () {
   let block_list_sorted = [], html = '';
   
   for (let key in BLOCK_LIST) {
     block_list_sorted.push([key, BLOCK_LIST[key].name]);
   }
   
-  block_list_sorted.sort( (a, b) => {
+  block_list_sorted.sort( function (a, b) {
     if (a[1].toLowerCase() < b[1].toLowerCase()) return -1;
     if (a[1].toLowerCase() > b[1].toLowerCase()) return 1;
     return 0;
@@ -760,19 +742,19 @@ const BLOCK_LIST_WRITE = () => {
   $('#block_list_modal').find('.modal-body').html(html);
   
   localStorage.setItem('BLOCK_LIST', JSON.stringify(BLOCK_LIST));
-};
+}
 
 //Incude List Stuff
-const IS_INCLUDED = (hit) => {
+function IS_INCLUDED (hit) {
   for (let key in INCLUDE_LIST) {
     const il = INCLUDE_LIST[key];
     if (il.term.toLowerCase() === hit.reqname.toLowerCase() || il.term.toLowerCase() === hit.title.toLowerCase() || il.term.toLowerCase() === hit.reqid.toLowerCase() || il.term.toLowerCase() === hit.groupid.toLowerCase()) {
       return il;
     }
   }
-};
+}
 
-const INCLUDED_ALERTS_TEST = (test) => {
+function INCLUDED_ALERTS_TEST (test) {
   if (test.sound) {
     if (test.type === `sound`) {
       INCLUDE_SOUND();
@@ -803,9 +785,9 @@ const INCLUDED_ALERTS_TEST = (test) => {
       data: push
     });
   }
-};
+}
 
-const INCLUDED_ALERTS = (il, hit) => {
+function INCLUDED_ALERTS (il, hit) {
   var delay_alerts = DELAY_ALERTS.indexOf(hit.key) !== -1;
   var delay_pushbullet = DELAY_PUSHBULLET.indexOf(hit.key) !== -1;
   
@@ -824,7 +806,7 @@ const INCLUDED_ALERTS = (il, hit) => {
         icon: `/icon_128.png`,
         body: `${hit.title}`,
       });
-      n.onclick = (e) => {
+      n.onclick = function (e) {
         e.preventDefault();
         window.open(hit.prevlink, '_blank');
       };
@@ -845,33 +827,33 @@ const INCLUDED_ALERTS = (il, hit) => {
       });
       
       DELAY_PUSHBULLET.unshift(hit.key);
-      setTimeout( () => { DELAY_PUSHBULLET.pop(); }, 900000);
+      setTimeout( function () { DELAY_PUSHBULLET.pop(); }, 900000);
     }
     
     DELAY_ALERTS.unshift(hit.key);
-    setTimeout( () => { DELAY_ALERTS.pop(); }, 60 * 1000);
+    setTimeout( function () { DELAY_ALERTS.pop(); }, 60 * 1000);
   }
-};
+}
 
-const SHOW_INCLUDE_LIST = () => {
+function SHOW_INCLUDE_LIST () {
   $('#include_list_modal').modal('show');
-};
+}
 
-const ADD_INCLUDE_LIST = () => {
+function ADD_INCLUDE_LIST () {
   $('#save_include_list_term').val('');
   $('#save_include_list_name').val('');
   
   $('#include_list_add').modal('show');
-};
+}
 
-const RT_ADD_INCLUDE_LIST = (term, name) => {
+function RT_ADD_INCLUDE_LIST (term, name) {
   $('#save_include_list_term').val(term);
   $('#save_include_list_name').val(name);
   
   $('#include_list_add').modal('show');
-};
+}
 
-const SAVE_INCLUDE_LIST = () => {
+function SAVE_INCLUDE_LIST () {
   const term = $('#save_include_list_term').val();
   const name = $('#save_include_list_name').val() === '' ? $('#save_include_list_term').val() : $('#save_include_list_name').val();
   const type = $('#save_include_list_type').val();
@@ -893,9 +875,9 @@ const SAVE_INCLUDE_LIST = () => {
   
   $('#include_list_add').modal('hide');
   $('#save_include_list_term, #save_include_list_name').val('');
-};
+}
 
-const EDIT_INCLUDE_LIST = (key) => {
+function EDIT_INCLUDE_LIST (key) {
   $('#edit_include_list_term').val(INCLUDE_LIST[key].term);
   $('#edit_include_list_name').val(INCLUDE_LIST[key].name);
   $('#edit_include_list_type').val(INCLUDE_LIST[key].type);
@@ -904,9 +886,9 @@ const EDIT_INCLUDE_LIST = (key) => {
   $('#edit_include_list_pushbullet').prop('checked', INCLUDE_LIST[key].pushbullet);
   
   $('#include_list_edit').modal('show');
-};
+}
 
-const SAVE_EDIT_INCLUDE_LIST = () => {
+function SAVE_EDIT_INCLUDE_LIST () {
   const term = $('#edit_include_list_term').val();
   const name = $('#edit_include_list_name').val() === '' ? $('#edit_include_list_term').val() : $('#edit_include_list_name').val();
   const type = $('#edit_include_list_type').val();
@@ -922,17 +904,17 @@ const SAVE_EDIT_INCLUDE_LIST = () => {
   INCLUDE_LIST_WRITE();
   
   $('#include_list_edit').modal('hide');
-};
+}
 
-const DELETE_EDIT_INCLUDE_LIST = () => {
+function DELETE_EDIT_INCLUDE_LIST () {
   const term = $('#edit_include_list_term').val();
   delete INCLUDE_LIST[term];
   INCLUDE_LIST_WRITE();
   
   $('#include_list_edit').modal('hide');
-};
+}
 
-const IMPORT_INCLUDE_LIST = () => {
+function IMPORT_INCLUDE_LIST () {
   var import_include_list  = prompt(
     'Include List Import\n\n' +
     'This will not delete your current include list, only add to it.\n\n' +
@@ -970,20 +952,20 @@ const IMPORT_INCLUDE_LIST = () => {
   else {
     alert('An error occured while importing.\n\n Please check that you have a valid import and try again.');
   }
-};
+}
 
-const EXPORT_INCLUDE_LIST = () => {
+function EXPORT_INCLUDE_LIST () {
   COPY_TO_CLIP(localStorage.getItem('INCLUDE_LIST'), 'Your include list has been copied to your clipboard.');
-};
+}
 
-const INCLUDE_LIST_WRITE = () => {
+function INCLUDE_LIST_WRITE () {
   let include_list_sorted = [], html = '';
   
   for (let key in INCLUDE_LIST) {
     include_list_sorted.push([key, INCLUDE_LIST[key].name]);
   }
   
-  include_list_sorted.sort( (a, b) => {
+  include_list_sorted.sort( function (a, b) {
     if (a[1].toLowerCase() < b[1].toLowerCase()) return -1;
     if (a[1].toLowerCase() > b[1].toLowerCase()) return 1;
     return 0;
@@ -997,10 +979,10 @@ const INCLUDE_LIST_WRITE = () => {
   $('#include_list_modal').find('.modal-body').html(html);
   
   localStorage.setItem('INCLUDE_LIST', JSON.stringify(INCLUDE_LIST));
-};
+}
 
 // Settings Stuff
-const SET_CONFIG = () => {
+function SET_CONFIG () {
   $('#scan_delay').val(CONFIG.scan_delay);
   $('#min_reward').val(Number(CONFIG.min_reward).toFixed(2));
   $('#min_avail').val(CONFIG.min_avail);
@@ -1021,9 +1003,9 @@ const SET_CONFIG = () => {
   $('#include_voice').val(CONFIG.include_voice);
   $('#include_sound').val(CONFIG.include_sound);
   $('#new_hit_sound').val(CONFIG.new_hit_sound);
-};
+}
 
-const SAVE_CONFIG = () => {
+function SAVE_CONFIG () {
   CONFIG.scan_delay = $('#scan_delay').val();
   CONFIG.min_reward = $('#min_reward').val();
   CONFIG.min_avail = $('#min_avail').val();
@@ -1049,24 +1031,25 @@ const SAVE_CONFIG = () => {
   $(CONFIG.hide_nl ? '.nl' : '.nl_hidden').toggleClass('nl nl_hidden');
   $(CONFIG.hide_bl ? '.bl' : '.bl_hidden').toggleClass('bl bl_hidden');
   $(CONFIG.hide_m ? '.m' : '.m_hidden').toggleClass('m m_hidden');
-};
+}
 
-const SHOW_ADVANCED_SETTINGS = () => {
+function SHOW_ADVANCED_SETTINGS () {
   $('#advanced_settings_modal').modal('show');
-};
+}
 
 // Export Stuff
-const VB_EXPORT = (data) => {
+function VB_EXPORT (data) {
   const hit = HITS[EXPORT.key];
+  console.log(hit);
   
-  const attr = (type, rating) => {
+  function attr (type, rating) {
     let color = '#B30000';
     if (rating > 1.99) {color = '#B37400';}
     if (rating > 2.99) {color = '#B3B300';}
     if (rating > 3.99) {color = '#00B300';}
     if (rating < 0.01) {color = 'grey'; rating = 'N/A';}
     return `[b][${type}: [color=${color}]${rating}[/color]][/b]`;
-  };
+  }
   
   const template =
         `[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]\n` +
@@ -1115,26 +1098,26 @@ const VB_EXPORT = (data) => {
       EXPORT_TO_MTC(direct_template + `<p>${confirm_post}</p>`);
     }
   }
-};
+}
 
-const EXPORT_TO_TH = (template) => {
+function EXPORT_TO_TH (template) {
   chrome.runtime.sendMessage({msg: 'send_th', data: template});
-};
+}
 
-const EXPORT_TO_MTC = (template) => {
+function EXPORT_TO_MTC (template) {
   chrome.runtime.sendMessage({msg: 'send_mtc', data: template});
-};
+}
 
 // Random Stuff
-const COPY_TO_CLIP = (string, message) => {
+function COPY_TO_CLIP (string, message) {
   $('body').append(`<textarea id="clipboard" style="opacity: 0;">${string}</textarea>`);
   $('#clipboard').select();
   document.execCommand('Copy');
   $('#clipboard').remove();
   alert(message);
-};
+}
 
-const VALID_JSON = (data) => {
+function VALID_JSON (data) {
   try {
     JSON.parse(data);
     return true;
@@ -1142,39 +1125,39 @@ const VALID_JSON = (data) => {
   catch (e) {
     return false;
   }
-};
+}
 
-const SPEAK = (phrase) => {
+function SPEAK (phrase) {
   const msg = new SpeechSynthesisUtterance();
   msg.text = phrase;
   msg.voice = window.speechSynthesis.getVoices()[$(`#include_voice`).val()];
   window.speechSynthesis.speak(msg);
-};
+}
 
-const INCLUDE_SOUND = () => {
+function INCLUDE_SOUND () {
   const audio = new Audio();
   audio.src = `media/audio/include_list_${$('#include_sound').val()}.ogg`;
   audio.play();
-};
+}
 
-const NEW_HIT_SOUND = () => {
+function NEW_HIT_SOUND () {
   const audio = new Audio();
   audio.src = `media/audio/new_hit_${$('#new_hit_sound').val()}.ogg`;
   audio.play();
-};
+}
 
 // Turkopticon IndexedDB
 let TODB;
 const TODB_request = indexedDB.open(`TODB`, 1);
-TODB_request.onsuccess = (event) => {
+TODB_request.onsuccess = function (event) {
   TODB = event.target.result;
 };
-TODB_request.onupgradeneeded = (event) => {
+TODB_request.onupgradeneeded = function (event) {
   const TODB = event.target.result;
   TODB.createObjectStore(`requester`, {keyPath: `id`});
 };
 
-const TURKOPTICON_DB = (ids) => {
+function TURKOPTICON_DB (ids) {
   let grab = false;
   const to = {};
   const time = new Date().getTime();
@@ -1183,7 +1166,7 @@ const TURKOPTICON_DB = (ids) => {
   
   for (let i = 0; i < ids.length; i ++) {
     const request = objectStore.get(ids[i]);
-    request.onsuccess = (event) => {
+    request.onsuccess = function (event) {
       if (request.result && request.result.edited > time - 21600000) {
         to[ids[i]] = request.result;
       }
@@ -1193,9 +1176,9 @@ const TURKOPTICON_DB = (ids) => {
     };
   }
   
-  transaction.oncomplete = (event) => {
+  transaction.oncomplete = function (event) {
     if (grab) {
-      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`, (data) => {
+      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`, function (data) {
         const transaction = TODB.transaction([`requester`], `readwrite`);
         const objectStore = transaction.objectStore(`requester`);
 
@@ -1219,15 +1202,30 @@ const TURKOPTICON_DB = (ids) => {
       HITS_WRITE_LOGGED_IN(to);
     }
   };
-};
+}
+
+function TODB_HIT_EXPORT (id) {
+  const transaction = TODB.transaction([`requester`]);
+  const objectStore = transaction.objectStore(`requester`);
+  const request = objectStore.get(id);
+
+  request.onsuccess = function (event) {
+    if (request.result) {
+      VB_EXPORT(request.result);
+    }
+    else {
+      VB_EXPORT({attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0});
+    }
+  };
+}
 
 // HIT Finder IndexedDB
 let HFDB;
 const HFDB_request = indexedDB.open(`HFDB`, 1);
-HFDB_request.onsuccess = (event) => {
+HFDB_request.onsuccess = function (event) {
   HFDB = event.target.result;
 };
-HFDB_request.onupgradeneeded = (event) => {
+HFDB_request.onupgradeneeded = function (event) {
   const HFDB = event.target.result;
   const createObjectStore = HFDB.createObjectStore(`hit`, {keyPath: `groupid`});
   for (let index of [`reqid`, `reqname`, `title`, `reward`]) {
@@ -1235,7 +1233,7 @@ HFDB_request.onupgradeneeded = (event) => {
   }
 };
 
-const HIT_FINDER_DB = () => {
+function HIT_FINDER_DB () {
   const transaction = HFDB.transaction([`hit`], `readwrite`);
   const objectStore = transaction.objectStore(`hit`);
 
@@ -1243,4 +1241,4 @@ const HIT_FINDER_DB = () => {
     const key = KEYS[i];
     objectStore.put(HITS[key]);
   }
-};
+}
