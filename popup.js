@@ -1,12 +1,12 @@
-document.addEventListener(`DOMContentLoaded`, () => {
+document.addEventListener(`DOMContentLoaded`, function () {
   POPUP();
 });
 
 let user;
 
-const POPUP = () => {
-  chrome.storage.local.get(`user`, (data) => {
-    user = data.user || {dark: true, goal: 20};
+function POPUP () {
+  chrome.storage.local.get(`user`, function (data) {
+    user = data.user || {goal: 20, dark: false, hit_export: true, accept_next: true, workspace: true};
     
     $(`#options`).append(
       GOAL_WRITE(user.goal || 20),
@@ -16,9 +16,9 @@ const POPUP = () => {
       SWITCH_WRITE(`workspace`, user.workspace, `Workspace Expand + Scroll`)
     );
   });
-};
+}
 
-const GOAL_WRITE = (goal) => {
+function GOAL_WRITE (goal) {
   const html = 
         `<div class="form-inline">` +
         `  <div class="input-group">` +
@@ -28,9 +28,9 @@ const GOAL_WRITE = (goal) => {
         `</div>`
   ;
   return html;
-};
+}
 
-const SWITCH_WRITE = (id, prop, name) => {
+function SWITCH_WRITE (id, prop, name) {
   const html =
         `<div class="checkbox" style="padding: 2px; margin: 1px;">` +
         `  <label>` +
@@ -40,11 +40,15 @@ const SWITCH_WRITE = (id, prop, name) => {
         `</div>`
   ;
   return html;
-};
+}
 
 $(`html`).on(`click`, `.checkbox, label`, function (e) {
-  if (e.target !== this) return;
-  $(this).find(`input[type="checkbox"]`).bootstrapToggle(`toggle`);
+  if (e.target !== this) {
+    return;
+  }
+  else {
+    $(this).find(`input[type="checkbox"]`).bootstrapToggle(`toggle`);
+  }
 });
 
 $(`html`).on(`change`, `input`, function () {
