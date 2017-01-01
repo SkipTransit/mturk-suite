@@ -39,9 +39,11 @@ let CONFIG = {
   pushbullet : LOADED_CONFIG.hasOwnProperty('pushbullet') ? LOADED_CONFIG.pushbullet : false,
   
   pushbullet_token : LOADED_CONFIG.pushbullet_token || 'access_token_here',
+  site_to_scan     : LOADED_CONFIG.site_to_scan     || 'mturk',
+  new_hit_sound    : LOADED_CONFIG.new_hit_sound    || '1',
   include_voice    : LOADED_CONFIG.include_voice    || '0',
-  include_sound    : LOADED_CONFIG.include_sound    || '1',
-  new_hit_sound    : LOADED_CONFIG.new_hit_sound    || '1'
+  include_sound    : LOADED_CONFIG.include_sound    || '1'
+  
 };
 
 $('html').on('click', '#scan', function () {
@@ -155,7 +157,7 @@ $('html').on('click', '.rt_include', function () {
 });
 
 // Setting Stuff
-$('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet, #include_voice, #include_sound, #new_hit_sound', function () {
+$('html').on('change', '#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet, #site_to_scan, #new_hit_sound, #include_voice, #include_sound', function () {
   SAVE_CONFIG();
 });
 
@@ -222,6 +224,8 @@ $('html').on('click', '.panel-heading.toggle', function () {
 // Find HITs Stuff
 function FIND () {
   clearTimeout(timeout);
+  
+  if (CONFIG.site_to_scan === `mturk`) {
   const  url = 
         `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups` +
         `&sortType=${SEARCH_TYPE()}` +
@@ -229,8 +233,45 @@ function FIND () {
         `&minReward=${CONFIG.min_reward}` +
         `&qualifiedFor=${(CONFIG.qualified ? 'on' : 'off')}`
   ;  
-
   GET_HITS(url, PARSE_OLD_HITS);
+  }
+  
+  if (CONFIG.site_to_scan === `worker`) {
+    $.ajax({
+      url: `https://worker.mturk.com/`,
+      type: `GET`,
+      data: {
+        page_size: CONFIG.size,
+        sort: CONFIG.sort_by === 'latest' ? `updated_desc` : CONFIG.sort_by === 'most' ? `num_hits_desc` : `reward_desc`,
+        filters : {
+          qualified: CONFIG.qualified ? true : false, 
+          masters: false,
+          min_reward: CONFIG.min_reward
+        }
+      },
+      statusCode: {
+        200: function (response) {
+          if ($.type(response) === `object`) {
+            PARSE_NEW_HITS(response);
+          }
+          else {
+            if (LOGGED_IN) {
+              LOGGED_IN = false;
+              SPEAK(`Attention, You are logged out.`);
+              $('.panel').removeClass('panel-primary').addClass('panel-danger');
+            }
+            $(`#total_scans`).text(TOTAL_SCANS ++);
+            timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
+          }
+        },
+        429: function () {
+          $(`#total_scans`).text(TOTAL_SCANS ++);
+          $(`#request_errors`).text(REQUEST_ERRORS ++);
+          timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
+        }
+      }
+    });
+  }
 }
 
 function GET_HITS (url, callback) {
@@ -259,6 +300,67 @@ function SEARCH_TYPE () {
   }
   if (CONFIG.sort_by === 'reward') {
     return 'Reward%3A1';
+  }
+}
+
+function PARSE_NEW_HITS (data) {
+  const ids = []; KEYS = [];
+
+  const hits = data.results;
+
+  for (let i = 0; i < hits.length; i ++) {
+    const hit = hits[i];
+    
+    const obj = {
+      reqid: hit.requester_id,
+      reqname: hit.requester_name,
+      reqlink: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit.requester_id}`,
+      title: hit.title,
+      desc: hit.description,
+      time: SECONDS_TO_STRING(hit.assignment_duration_in_seconds),
+      reward: `$${hit.monetary_reward.amount_in_dollars.toFixed(2)}`,
+      avail: hit.assignable_hits_count,
+      groupid: hit.hit_set_id,
+      prevlink: `https://www.mturk.com/mturk/preview?groupId=${hit.hit_set_id}`,
+      pandlink: `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.hit_set_id}`,
+      
+      quals:
+      hit.hit_requirements.length ?
+      hit.hit_requirements.map(obj => `${obj.qualification_type.name} ${obj.comparator} ${obj.qualification_values.map(val => val).join(`, `)};`).join(` `):
+      `None;`,
+      
+      masters: `N`,
+      new: true
+    }
+    
+    const key = obj.groupid;
+    KEYS.push(key);
+    
+    if (ids.indexOf(obj.reqid) === -1) {
+      ids.push(obj.reqid);
+    } 
+    if (obj.quals.indexOf('Masters Exists') !== -1) {
+      obj.masters = 'Y';
+    }
+    if (HITS[key]) {
+      obj.new = false;
+    }
+    HITS[key] = obj;
+  }
+  
+  HIT_FINDER_DB();
+  
+  if (CONFIG.enable_to) {
+    TURKOPTICON_DB(ids);
+  }
+  else {
+    HITS_WRITE_LOGGED_IN(false);
+  }
+
+  if (!LOGGED_IN) {
+    LOGGED_IN = true;
+    SPEAK(`Attention, You are logged in.`);
+    $('.panel').removeClass('panel-danger').addClass('panel-primary');
   }
 }
 
@@ -621,6 +723,12 @@ function TIME () {
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? `0` + minutes : minutes;
   return `${hours}:${minutes}${ampm}`;
+}
+
+function SECONDS_TO_STRING (s) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor(s % 3600 / 60);
+  return `${(h > 0 ? `${h} hour${h > 1 ? `s` : ``} ` : ``)}${(m > 0 ? `${m} minute${m > 1 ? `s` : ``}` : ``)}`;
 }
 
 // Block List Stuff
@@ -1007,9 +1115,10 @@ function SET_CONFIG () {
   
   
   $('#pushbullet_token').val(CONFIG.pushbullet_token);
+  $('#site_to_scan').val(CONFIG.site_to_scan);
+  $('#new_hit_sound').val(CONFIG.new_hit_sound);
   $('#include_voice').val(CONFIG.include_voice);
   $('#include_sound').val(CONFIG.include_sound);
-  $('#new_hit_sound').val(CONFIG.new_hit_sound);
 }
 
 function SAVE_CONFIG () {
@@ -1029,9 +1138,11 @@ function SAVE_CONFIG () {
   CONFIG.pushbullet = $('#pushbullet').prop('checked');
   
   CONFIG.pushbullet_token = $('#pushbullet_token').val();
+  CONFIG.site_to_scan = $('#site_to_scan').val();
+  CONFIG.new_hit_sound = $('#new_hit_sound').val();
   CONFIG.include_voice = $('#include_voice').val();
   CONFIG.include_sound = $('#include_sound').val();
-  CONFIG.new_hit_sound = $('#new_hit_sound').val();
+  
   
   localStorage.setItem('CONFIG', JSON.stringify(CONFIG));
 
@@ -1047,7 +1158,6 @@ function SHOW_ADVANCED_SETTINGS () {
 // Export Stuff
 function VB_EXPORT (data) {
   const hit = HITS[EXPORT.key];
-  console.log(hit);
   
   function attr (type, rating) {
     let color = '#B30000';
@@ -1070,7 +1180,7 @@ function VB_EXPORT (data) {
         `[b]Time:[/b] ${hit.time}\n` +
         `[b]HITs Available:[/b] ${hit.avail}\n` +
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
-        `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`)}\n` +
+        `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}\n` +
         `[/td][/tr][/table]`
   ;
   
@@ -1086,7 +1196,7 @@ function VB_EXPORT (data) {
         `<p>[b]Time:[/b] ${hit.time}</p>` +
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
-        `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`)}[/td][/tr]</p>` +
+        `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
         `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`
   ;
 
