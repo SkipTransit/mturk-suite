@@ -7,7 +7,7 @@ document.addEventListener(`DOMContentLoaded`, function () {
   }
 });
 
-chrome.extension.onMessage.addListener( function (request) {
+chrome.runtime.onMessage.addListener( function (request) {
   if (request.msg == `hitexport.js`) {
     EXPORT_HIT(request.data);
   }
@@ -207,7 +207,7 @@ function EXPORT_HIT (data) {
   const template =
         `[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]\n` +
         `[b]Requester:[/b] [URL=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/URL] [${hit.reqid}] ([URL=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/URL])\n` +
-        `[b][URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]:[b] ` +
+        `[b][URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]:[/b] ` +
         `${attr(`Pay`, data.attrs.pay)} ${attr(`Fair`, data.attrs.fair)} ` +
         `${attr(`Comm`, data.attrs.comm)} ${attr(`Fast`, data.attrs.fast)} ` +
         `[b][Reviews: ${data.reviews}][/b] ` +
@@ -268,9 +268,24 @@ function EXPORT_HIT (data) {
 function EXPORT_TO_CLIP (template) {
   $(`body`).append(`<textarea id="clipboard" style="opacity: 0;">${template}</textarea>`);
   $(`#clipboard`).select();
-  document.execCommand(`Copy`);
-  $(`#clipboard`).remove();
-  alert(`HIT export has been copied to your clipboard.`);
+  //document.execCommand(`Copy`);
+  //$(`#clipboard`).remove();
+  //alert(`HIT export has been copied to your clipboard.`);
+  
+  try {
+    const copy = document.execCommand('copy');
+    if (!copy) {
+      prompt(`Copy the HIT Export below with Ctrl+C`, template);
+    }
+    else {
+      alert(`HIT export has been copied to your clipboard.`);
+    }
+    $(`#clipboard`).remove();
+  }
+  catch (err) {
+    prompt(`Copy the HIT Export below with Ctrl+C`, template);
+    $(`#clipboard`).remove();
+  }
 }
 
 function EXPORT_TO_TH (template) {
