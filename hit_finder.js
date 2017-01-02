@@ -1197,7 +1197,7 @@ function VB_EXPORT (data) {
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
         `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
-        `<p>[tr][td][CENTER][SIZE=2]HIT posted from [URL=http://mturksuite.com/]Mturk Suite[/URL] v1.0.0[/SIZE][/CENTER][/td][/tr][/table]</p>`
+        `<p>[tr][td][CENTER][SIZE=2]HIT posted from [URL=http://mturksuite.com/]Mturk Suite[/URL] v1.0.1[/SIZE][/CENTER][/td][/tr][/table]</p>`
   ;
 
   if (EXPORT.type === 'vb') {
