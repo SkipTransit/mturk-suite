@@ -216,7 +216,7 @@ function EXPORT_HIT (data) {
         `[b]Time:[/b] ${hit.time}\n` +
         `[b]HITs Available:[/b] ${hit.avail}\n` +
         `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
-        `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`)}\n` +
+        `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}\n` +
         `[/td][/tr][/table]`
   ;
   
@@ -232,8 +232,8 @@ function EXPORT_HIT (data) {
         `<p>[b]Time:[/b] ${hit.time}</p>` +
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
-        `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`)}[/td][/tr]</p>` +
-        `<p>[tr][td][CENTER][SIZE=2]HIT posted from Mturk Suite[/SIZE][/CENTER][/td][/tr][/table]</p>`
+        `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
+        `<p>[tr][td][CENTER][SIZE=2]HIT exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v1.0.0[/SIZE][/CENTER][/td][/tr][/table]</p>`
   ;
 
   if (EXPORT.type === `vb`) {
