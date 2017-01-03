@@ -61,6 +61,36 @@ function DASHBOARD () {
         `<span style="float:right;">+$${(dash.earn_trans - loaded_dash.earn_trans).toFixed(2)}</span>`
       );
     }
+    
+    if (dash.today_sub !== loaded_dash.today_sub) {
+      hit_status[1].insertAdjacentHTML(`beforeend`,
+        `<span style="float: left;">+${(dash.today_sub - loaded_dash.today_sub)}</span>`
+      );
+    }
+
+    if (dash.today_app !== loaded_dash.today_app) {
+      hit_status[2].insertAdjacentHTML(`beforeend`,
+        `<span style="float: left;">+${(dash.today_app - loaded_dash.today_app)}</span>`
+      );
+    }
+
+    if (dash.today_rej !== loaded_dash.today_rej) {
+      hit_status[3].insertAdjacentHTML(`beforeend`,
+        `<span style="float: left;">+${(dash.today_rej - loaded_dash.today_rej)}</span>`
+      );
+    }
+
+    if (dash.today_pen < loaded_dash.today_pen) {
+      hit_status[4].insertAdjacentHTML(`beforeend`,
+        `<span style="float: left;">-${(loaded_dash.today_pen - dash.today_pen)}</span>`
+      );
+    }
+
+    if (dash.today_pen > loaded_dash.today_pen) {
+      hit_status[4].insertAdjacentHTML(`beforeend`,
+        `<span style="float: left;">+${(dash.today_pen - loaded_dash.today_pen)}</span>`
+      );
+    }
 
     if (dash.total_sub !== loaded_dash.total_sub) {
       hit_totals[1].children[0].insertAdjacentHTML(`beforeend`,
@@ -89,36 +119,6 @@ function DASHBOARD () {
     if (dash.total_pen > loaded_dash.total_pen) {
       hit_totals[4].children[0].insertAdjacentHTML(`beforeend`,
         `<span style="float: right;">+${(dash.total_pen - loaded_dash.total_pen)}</span>`
-      );
-    }
-
-    if (dash.today_sub !== loaded_dash.today_sub) {
-      hit_status[1].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">+${(dash.today_sub - loaded_dash.today_sub)}</span>`
-      );
-    }
-
-    if (dash.today_app !== loaded_dash.today_app) {
-      hit_status[2].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">+${(dash.today_app - loaded_dash.today_app)}</span>`
-      );
-    }
-
-    if (dash.today_rej !== loaded_dash.today_rej) {
-      hit_status[3].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">+${(dash.today_rej - loaded_dash.today_rej)}</span>`
-      );
-    }
-
-    if (dash.today_pen < loaded_dash.today_pen) {
-      hit_status[4].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">-${(loaded_dash.today_pen - dash.today_pen)}</span>`
-      );
-    }
-
-    if (dash.today_pen > loaded_dash.today_pen) {
-      hit_status[4].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">+${(dash.today_pen - loaded_dash.today_pen)}</span>`
       );
     }
       
