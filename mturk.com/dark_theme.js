@@ -43,7 +43,9 @@ function DARK_THEME () {
       } 
     }
     else {
-      $(`style.dark`).remove();
+      for (let element of document.querySelectorAll(`.dark`)) {
+        document.documentElement.removeChild(element);
+      }
     }
   });
 }
