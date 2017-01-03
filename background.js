@@ -155,9 +155,17 @@ function SEND_TH (tab, message) {
     const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
     const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
 
-    $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
-      message_html: message,
-      _xfToken: xfToken
+    $.get(`https://turkerhub.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
+      const group_id = message.match(/groupId=(\w+)/)[1]
+      
+      for (let i = 0; i < data.posts.length; i++) {
+        if (data.posts[i].message.indexOf(group_id) !== -1) return;
+      }
+           
+      $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
+        message_html: message,
+        _xfToken: xfToken
+      });
     });
   });
 }
