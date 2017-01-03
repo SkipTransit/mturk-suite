@@ -9,14 +9,14 @@ function HIT_CAPSULE () {
   const reqname = document.getElementsByClassName(`capsule_field_text`)[0].textContent;
 
   const aa = document.getElementsByName(`hitAutoAppDelayInSeconds`)[0].value;
-  const d = Math.floor(aa / 86400);
-  const h = Math.floor(aa / 3600 % 24);
-  const m = Math.floor(aa / 60 % 60);
+  const dd = Math.floor(aa / 86400);
+  const hh = Math.floor(aa / 3600 % 24);
+  const mm = Math.floor(aa / 60 % 60);
 
-  let aa_time =   
-      (d > 0 ? `${d} day${d > 1 ? `s` : ``} ` : ``) +
-      (h > 0 ? `${h} hour${h > 1 ? `s` : ``} ` : ``) +
-      (m > 0 ? `${m} minute${m > 1 ? `s` : ``} ` : ``)
+  const aa_time =   
+      (dd > 0 ? `${dd} day${dd > 1 ? `s` : ``} ` : ``) +
+      (hh > 0 ? `${hh} hour${hh > 1 ? `s` : ``} ` : ``) +
+      (mm > 0 ? `${mm} minute${mm > 1 ? `s` : ``} ` : ``)
   ;
 
   document.getElementsByClassName(`capsule_field_text`)[0].parentElement.insertAdjacentHTML(`beforeend`,
