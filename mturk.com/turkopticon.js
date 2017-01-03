@@ -1,23 +1,10 @@
-document.addEventListener(`DOMContentLoaded`, function () {
-  if ($(`a[href*="requesterId="]`).length) {
-    TURKOPTICON();
-  }
-});
-
-chrome.runtime.onMessage.addListener( function (request) {
-  if (request.msg == `turkopticon.js`) {
-    TURKOPTICON_WRITE(request.data);
-  }
-});
-
 function TURKOPTICON () {
   const ids = [];
 
-  for (let element of $(`a[href*="requesterId="]`)) {
-    ids.push(element.href.split(`requesterId=`)[1].split(`&`)[0]);
-  }
-  for (let element of $(`input[name="requesterId"]`)) {
-    ids.push(element.value);
+  for (let element of document.querySelectorAll(`a[href*="requesterId="]`)) {
+    if (element.href.match(/requesterId=(\w+)/)) {
+      ids.push(element.href.match(/requesterId=(\w+)/)[1]);
+    }
   }
   chrome.runtime.sendMessage({msg: `turkopticon`, data: ids});
 }
@@ -79,20 +66,40 @@ function TURKOPTICON_WRITE (data) {
     return `rgba(${color})`;
   }
   
-  for (let element of $(`.requesterIdentity`)) {
-    const rid = $(element).closest(`a`).prop(`href`) || $(element).closest(`td[align="left"]:not(.capsule_field_text)`).find(`a:contains(Contact the Requester of this HIT)`).prop(`href`);
-    const id = rid.split(`requesterId=`)[1].split(`&`)[0];
+  for (let element of document.getElementsByClassName(`requesterIdentity`)) {
+    const reqid = 
+          element.closest(`a[href*="requesterId="]`) ?
+          element.closest(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/)[1] :
+          element.closest(`td[bgcolor="#F0F6F9"]`).querySelector(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/) ?
+          element.closest(`td[bgcolor="#F0F6F9"]`).querySelector(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/)[1] :
+          null;
 
-    if ($(element).parent(`a`).length) {
-      $(element).parent().before(to(id));
-    }
+    if (element.parentNode === element.closest(`a[href*="requesterId="]`)) {
+      element.parentNode.insertAdjacentHTML(`beforebegin`, to(reqid));
+    } 
     else {
-      $(element).before(to(id));
+      element.insertAdjacentHTML(`beforebegin`, to(reqid));
     }
   }
   
-  if ($(`input[name="requesterId"]`).length || $(`a[href^="/mturk/return?"]`).length && $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)) {
-    const id = $(`input[name="requesterId"]`).val() || $(`a[href^="/mturk/return?"]`).prop(`href`).match(/requesterId=(\w+)/)[1];
-    $(`.capsule_field_text`).eq(0).before(to(id));
+  if (document.getElementsByName(`requesterId`)[0] || document.querySelector(`a[href^="/mturk/return?"]`) && document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)) {
+    const reqid = 
+          document.getElementsByName(`requesterId`)[0] ?
+          document.getElementsByName(`requesterId`)[0].value :
+          document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/) ?
+          document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)[1] :
+          null;
+    
+    document.getElementsByClassName(`capsule_field_text`)[0].insertAdjacentHTML(`beforebegin`, to(reqid));
   }
 }
+
+if (document.querySelector(`a[href*="requesterId="]`)) {
+  TURKOPTICON();
+}
+
+chrome.runtime.onMessage.addListener( function (request) {
+  if (request.msg == `turkopticon.js`) {
+    TURKOPTICON_WRITE(request.data);
+  }
+});

@@ -1,45 +1,35 @@
-document.addEventListener(`DOMContentLoaded`, function () {
-    WORKSPACE();
-});
-
-chrome.storage.onChanged.addListener( function (changes) {
-  for (let key in changes) {
-    if (key === `user`) {
-      WORKSPACE();
-    }
-  }
-});
-
 function WORKSPACE () {
   chrome.storage.local.get(`user`, function (data) {
     const user = data.user || {workspace: true};
     
-    let $workspace;
-    const $iframe = $(`iframe`);
-    const $wrapper = $(`#hit-wrapper`);
-    const $timer = $(`#theTime`);
+    const iframe = document.getElementsByTagName(`iframe`)[0];
+    const wrapper = document.getElementById(`hit-wrapper`);
 
-    if (user.workspace && !$(`[name="userCaptchaResponse"]`).length) {
-      if ($(`input[name="isAccepted"][value="true"]`).length) {
-        if ($iframe.length) {
-          $iframe.height(`100vh`);
-          $iframe.focus();
-          $workspace = $iframe;
-        }
-        else if ($wrapper.length) {
-          $workspace = $wrapper;
-        }
-        $workspace[0].scrollIntoView();
+    if (user.workspace && document.getElementsByName(`isAccepted`)[0].value === `true`) {
+      if (iframe) {
+        iframe.style.height = `100vh`;
+        iframe.focus();
+        iframe.scrollIntoView();
       }
-      else if ($timer.length) {
-        $timer[0].scrollIntoView();
+      else if (wrapper) {
+        wrapper.scrollIntoView();
       }
     }
-    else {
-      if ($iframe.length) {
-        $iframe.height(`600px`);
-        $(`html, body`).scrollTop(0);
+    else if (iframe) {
+      iframe.style.height = `500px`;
+      document.body.scrollTop = 0;
+    }
+  });
+}
+
+if (document.getElementsByName(`isAccepted`)[0] && !document.getElementsByName(`userCaptchaResponse`)[0]) {
+  chrome.storage.onChanged.addListener( function (changes) {
+    for (let key in changes) {
+      if (key === `user`) {
+        WORKSPACE();
       }
     }
   });
+  
+  WORKSPACE();
 }
