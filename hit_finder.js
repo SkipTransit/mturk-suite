@@ -379,7 +379,7 @@ function PARSE_OLD_HITS (data) {
     return;
   }  
   
-  for (let i = 0; i < hits.length; i ++) {    
+  for (let i = 0; i < hits.length; i ++) {
     const hit = selector => hits[i].querySelectorAll(selector);
     
     const obj = {
