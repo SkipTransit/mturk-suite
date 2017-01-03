@@ -126,8 +126,8 @@ function DASHBOARD () {
   });
   
   hit_totals[4].children[0].insertAdjacentHTML(`beforeend`,
-    `<span style="color: orange;" title=""> (${((dash.total_rej - 0.01 * dash.total_sub) / -0.99 | 0)} ≥ 99%)</span>` + 
-    `<span style="color: red;"> (${((dash.total_rej - 0.05 * dash.total_sub) / -0.95 | 0)} ≥ 95%)</span>`
+    `<span style="color: orange;" title=""> (${Math.floor((dash.total_rej - 0.01 * dash.total_sub) / -0.99)} ≥ 99%)</span>` + 
+    `<span style="color: red;"> (${Math.floor((dash.total_rej - 0.05 * dash.total_sub) / -0.95)} ≥ 95%)</span>`
   );
     
   hit_totals[4].children[2].innerHTML =
@@ -147,7 +147,7 @@ function DASHBOARD () {
     let yearly_earnings = [...document.getElementById(`table_yearly_earnings`).getElementsByClassName(`reward`)].map(element => +(element.textContent.replace(/[^0-9.]/g, ``))).reduce((a, b) => a + b, 0);
     document.getElementById(`table_yearly_earnings`).getElementsByClassName(`metrics-table-header-row`)[0].insertAdjacentHTML(`afterend`, 
       `<tr class="odd">` +
-        `<td class="metrics-table-first-value">${1 + +(document.getElementById(`table_yearly_earnings`).getElementsByClassName(`metrics-table-first-value`)[0].textContent)}</td>` +
+        `<td class="metrics-table-first-value">${+(document.getElementById(`table_yearly_earnings`).getElementsByClassName(`metrics-table-first-value`)[0].textContent) + 1}</td>` +
         `<td><span class="reward">$${(dash.earn_total - yearly_earnings).toFixed(2)}</span></td>` +
       `</tr>`                                                                                                                      
     );
