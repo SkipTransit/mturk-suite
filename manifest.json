@@ -34,13 +34,11 @@
         "mturk.com/turkopticon.css"
       ],
       "js": [
-        "jquery-3.1.1.min.js",
-        "mturk.com/dark_theme.js",
-        "mturk.com/hit_export.js",
-        "mturk.com/send_hit.js",
-        "mturk.com/todays_projected_earnings.js",
-        "mturk.com/turkopticon.js",
-        "mturk.com/workspace.js"
+        //"jquery-3.1.1.min.js",
+        "mturk.com/dark_theme.js"
+        //
+        //
+        //
       ],
       "run_at": "document_start"
     },
@@ -53,7 +51,12 @@
         "mturk.com/accept_links.js",
         "mturk.com/accept_next.js",
         "mturk.com/hit_capsule.js",
-        "mturk.com/queue_value.js"
+        "mturk.com/hit_export.js",
+        "mturk.com/queue_value.js",
+        "mturk.com/send_hit.js",
+        "mturk.com/todays_projected_earnings.js",
+        "mturk.com/turkopticon.js",
+        "mturk.com/workspace.js"
       ],
       "run_at": "document_end"
     },
