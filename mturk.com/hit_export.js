@@ -299,7 +299,7 @@ chrome.storage.onChanged.addListener( function (changes) {
   }
 });
 
-document.onclick = function (event) {
+document.addEventListener('click', function (event) {
   const element = event.target;
   
   const dropdowns = document.getElementsByClassName(`dropdown-content`);
@@ -314,4 +314,4 @@ document.onclick = function (event) {
     EXPORT.type = element.dataset.type;
     chrome.runtime.sendMessage({msg: `hitexport`, data: HITS[EXPORT.key].reqid});
   }
-};
+});

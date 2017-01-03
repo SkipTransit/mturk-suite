@@ -60,13 +60,13 @@ if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
     }
   });
   
-  document.onclick = function (event) {
+  document.addEventListener('click', function (event) {
     const element = event.target;
-  
+    
     if (element.closest(`#tpe`)) {
       TPE_MENU_WRITE();
     }
-  };
+  });
   
   TODAYS_PROJECTED_EARNINGS();
 }
