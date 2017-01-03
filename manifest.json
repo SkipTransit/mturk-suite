@@ -36,7 +36,6 @@
       "js": [
         "jquery-3.1.1.min.js",
         "mturk.com/dark_theme.js",
-        "mturk.com/hit_capsule.js",
         "mturk.com/hit_export.js",
         "mturk.com/send_hit.js",
         "mturk.com/todays_projected_earnings.js",
@@ -53,6 +52,7 @@
       "js": [
         "mturk.com/accept_links.js",
         "mturk.com/accept_next.js",
+        "mturk.com/hit_capsule.js",
         "mturk.com/queue_value.js"
       ],
       "run_at": "document_end"
