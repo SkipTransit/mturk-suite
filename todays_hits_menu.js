@@ -139,6 +139,8 @@ function WRITE () {
       ;
     }
     
+    tpeexport += `[/table][/spoiler]`
+    
     $(`#requester_tbody`).html(breakdown_html);
     
     const sorted = Object.keys(hits).sort( (a, b) => {return hits[a].viewed - hits[b].viewed;});
