@@ -190,14 +190,24 @@ chrome.storage.local.get(`hits`, function (data) {
         assignid : data.url.indexOf(`assignmentId=`) !== -1  ? data.url.split(`assignmentId=`)[1].split(`&`)[0] : null
       };
     }
-  }, { urls: [`https://www.mturk.com/mturk/externalSubmit*`] }, [`requestBody`]);
+  }, { urls: [`https://www.mturk.com/mturk/submit`, `https://www.mturk.com/mturk/externalSubmit*`] }, [`requestBody`]);
   
   chrome.webRequest.onCompleted.addListener( function (data) {
     if (data.statusCode == `200`) {
       if (requests[data.requestId].hitid) {
         const key = requests[data.requestId].hitid;
-        hits[key].status = `Submitted`;
-        hits[key].submitted = new Date().getTime() / 1000;
+        if (hits[key]) {
+          hits[key].status = `Submitted`;
+          hits[key].submitted = new Date().getTime() / 1000;
+        }
+        else {
+          for (let key in hits) {
+            if (hits[key].assignid === requests[data.requestId].hitid) {
+              hits[key].status = `Submitted`;
+              hits[key].submitted = new Date().getTime() / 1000;
+            }
+          }
+        }
       }
       else {
         for (let key in hits) {
@@ -209,7 +219,7 @@ chrome.storage.local.get(`hits`, function (data) {
       }
       update_tpe();
     }
-  }, { urls: [`https://www.mturk.com/mturk/externalSubmit*`] }, [`responseHeaders`]);
+  }, { urls: [`https://www.mturk.com/mturk/submit`, `https://www.mturk.com/mturk/externalSubmit*`] }, [`responseHeaders`]);
 
   chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
     if (request.msg == `sendhit`) ADD_HIT(request.data);
@@ -364,3 +374,40 @@ function dst () {
   end.setDate(7 - day);
   return (today >= start && today < end) ? true : false;
 }
+
+const HFDB_request = indexedDB.open(`HFDB`);
+HFDB_request.onsuccess = function (event) {
+  const HFDB = event.target.result;
+    
+  if (HFDB.version !== 1) {
+    console.log(`version mismatch`);
+    HFDB.close();
+    indexedDB.deleteDatabase(`HFDB`);
+    return;
+  }
+  
+  if (!HFDB.objectStoreNames.length) {
+    console.log(`no objectStore`);
+    HFDB.close();
+    indexedDB.deleteDatabase(`HFDB`);
+    return;
+  }
+  
+  const transaction = HFDB.transaction([`hit`], `readonly`).objectStore(`hit`).indexNames
+  const check = $.map(transaction, value => value);
+  if (check.indexOf(`date`) === -1) {
+    console.log(`no date`);
+    HFDB.close();
+    indexedDB.deleteDatabase(`HFDB`);
+    return;
+  }
+  HFDB.close();
+};
+HFDB_request.onupgradeneeded = function (event) {
+  const HFDB = event.target.result;
+  
+  const createObjectStore = HFDB.createObjectStore(`hit`, {keyPath: `groupid`});
+  for (let index of [`reqid`, `reqname`, `title`, `reward`, `date`]) {
+    createObjectStore.createIndex(index, index, {unique: false});
+  }
+};
