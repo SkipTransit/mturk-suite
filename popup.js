@@ -16,6 +16,7 @@ function POPUP () {
       SWITCH_WRITE(`workspace`, user.workspace, `Workspace Expand + Scroll`)
     );
   });
+  $(`#version`).text(`v${chrome.runtime.getManifest().version}`);
 }
 
 function GOAL_WRITE (goal) {

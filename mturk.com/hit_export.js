@@ -20,10 +20,7 @@ function EXPORTS_WRITE () {
 }
 
 function HIT_EXPORT_MAIN () {
-  const hits = document.querySelectorAll('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
-  
-  for (let i = 0; i < hits.length; i ++) {
-    const hit = hits[i];
+  for (let hit of document.querySelectorAll(`table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr`)) {
     const key = hit.querySelector('[href*="roupId="]').getAttribute('href').match(/roupId=(.*)/)[1];
     
     HITS[key] = {
@@ -34,8 +31,8 @@ function HIT_EXPORT_MAIN () {
       hit.querySelector('[href*="requesterId="]').getAttribute('href').match(/requesterId=(.*)/)[1],      
       
       title:
-      document.getElementById(`capsule${i}-0`).textContent.trim(),
-         
+      hit.getElementsByClassName('capsulelink')[0].textContent.trim(),
+               
       desc:
       hit.getElementsByClassName('capsule_field_text')[5].textContent.trim(),
 
@@ -221,7 +218,7 @@ function EXPORT_HIT (data) {
         `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
         `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
         `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
-        `<p>[tr][td][CENTER][SIZE=2]HIT exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v1.1.0[/SIZE][/CENTER][/td][/tr][/table]</p>`
+        `<p>[tr][td][CENTER][SIZE=2]HIT exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version}[/SIZE][/CENTER][/td][/tr][/table]</p>`
   ;
 
   if (EXPORT.type === `vb`) {

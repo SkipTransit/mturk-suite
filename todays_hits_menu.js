@@ -83,7 +83,7 @@ function WRITE () {
     );
     
     tpeexport =
-      `[b]Today's Projected Earnings: $${submitted_pe.toFixed(2)}[/b] [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v1.1.0)[/SIZE]\n` +
+      `[b]Today's Projected Earnings: $${submitted_pe.toFixed(2)}[/b] [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version})[/SIZE]\n` +
       `[spoiler=Today's Projected Earnings Full Details][table][tr][th][b]Requester[/b][/th][th][b]HITs[/b][/th][th][b]Projected[/b][/th][/tr]` +
       `[tr][td]Total[/td][td]${submitted}[/td][td]$${submitted_pe.toFixed(2)}[/td][/tr]\n`
     ;
