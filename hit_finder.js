@@ -331,8 +331,8 @@ function PARSE_NEW_HITS (data) {
       
       masters: false,
       new: true,
-      time: new Date().getTime(),
-      date: DATE()
+      seen: new Date().getTime(),
+      date: new Date().toISOString().slice(0,10)
     }
     
     const key = obj.groupid;
@@ -437,8 +437,8 @@ function PARSE_OLD_HITS (data) {
       
       masters: false,
       new: true,
-      time: new Date().getTime(),
-      date: DATE()
+      seen: new Date().getTime(),
+      date: new Date().toISOString().slice(0,10)
     };
         
     const key = obj.groupid !== `null` ? obj.groupid : obj.reqid + obj.title + obj.reward;
@@ -1258,14 +1258,6 @@ function NEW_HIT_SOUND () {
   audio.play();
 }
 
-function DATE () {
-  const today = new Date();
-  const dd = today.getDate() < 10 ? `0${today.getDate()}` : today.getDate();
-  const mm = (today.getMonth() + 1) < 10 ? `0${today.getMonth() + 1}` : today.getMonth();
-  const yyyy = today.getFullYear();
-  return `${mm}/${dd}/${yyyy}`;
-}
-
 function TIME () {
   const date = new Date();
   let hours = date.getHours(), minutes = date.getMinutes(), ampm = hours >= 12 ? `pm` : `am`;
@@ -1350,18 +1342,12 @@ function TODB_HIT_EXPORT (id) {
 
 // HIT Finder IndexedDB
 let HFDB;
-const HFDB_request = indexedDB.open(`HFDB`, 2);
+const HFDB_request = indexedDB.open(`HFDB`, 1);
 HFDB_request.onsuccess = function (event) {
   HFDB = event.target.result;
 };
 HFDB_request.onupgradeneeded = function (event) {
   const HFDB = event.target.result;
-
-  if (event.oldVersion === 1) {
-    HFDB.close();
-    indexedDB.deleteDatabase(`HFDB`);
-    window.location.reload();
-  }
   
   const createObjectStore = HFDB.createObjectStore(`hit`, {keyPath: `groupid`});
   for (let index of [`reqid`, `reqname`, `title`, `reward`, `date`]) {
