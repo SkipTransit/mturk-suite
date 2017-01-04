@@ -1,0 +1,24 @@
+.toHigh td {
+  background-color: rgba(0, 255, 0, 0.65);
+  font-weight: bold;
+}
+.toGood td {
+  background-color: rgba(255, 255, 0, 0.65);
+  font-weight: bold;
+}
+.toAverage td {
+  background-color: rgba(255, 140, 0, 0.65);
+  font-weight: bold;
+}
+.toLow td {
+  background-color: rgba(255, 0, 0, 0.65);
+  font-weight: bold;
+}
+.toNone td {
+  background-color: rgba(160, 160, 160, 0.65);
+  font-weight: bold;
+}
+
+.vb, .vb_th, .vb_mtc, .rt_block, .rt_include {
+  cursor: pointer;
+}
