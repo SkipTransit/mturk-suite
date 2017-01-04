@@ -113,7 +113,7 @@ function HIT_EXPORT_CAPSULE () {
     `https://www.mturk.com/mturk/previewandaccept?groupId=${document.getElementsByName(`groupId`)[0].value}`,
       
     quals:
-    `${document.getElementsByClassName(`capsule_field_text`)[3].textContent.trim()};`,
+    `${document.getElementsByClassName(`capsule_field_text`)[4].textContent.trim()};`,
   };
   EXPORTS_WRITE_CAPSULE();
 }
