@@ -329,8 +329,9 @@ function PARSE_NEW_HITS (data) {
       hit.hit_requirements.map(obj => `${obj.qualification_type.name} ${obj.comparator} ${obj.qualification_values.map(val => val).join(`, `)};`).join(` `):
       `None;`,
       
-      masters: `N`,
-      new: true
+      masters: false,
+      new: true, 
+      date: DATE()
     }
     
     const key = obj.groupid;
@@ -340,7 +341,7 @@ function PARSE_NEW_HITS (data) {
       ids.push(obj.reqid);
     } 
     if (obj.quals.indexOf('Masters Exists') !== -1) {
-      obj.masters = 'Y';
+      obj.masters = true;
     }
     if (HITS[key]) {
       obj.new = false;
@@ -433,8 +434,9 @@ function PARSE_OLD_HITS (data) {
       [...hit('td[style="padding-right: 2em; white-space: nowrap;"]')].map(element => `${element.textContent.trim().replace(/\s+/g, ' ')};`).join(` `):
       `None;`,
       
-      masters: 'N',
-      new: true
+      masters: false,
+      new: true, 
+      date: DATE()
     };
         
     const key = obj.groupid !== `null` ? obj.groupid : obj.reqid + obj.title + obj.reward;
@@ -444,7 +446,7 @@ function PARSE_OLD_HITS (data) {
       ids.push(obj.reqid);
     } 
     if (obj.quals.indexOf('Masters has been granted') !== -1) {
-      obj.masters = 'Y';
+      obj.masters = true;
     }
     if (HITS[key]) {
       obj.new = false;
@@ -504,7 +506,7 @@ function HITS_WRITE_LOGGED_IN (data) {
     else {
       classes += CONFIG.hide_nl ? ' nl_hidden' : ' nl';
     }
-    if (hit.masters === 'Y') {
+    if (hit.masters) {
       classes += CONFIG.hide_m ? ' m_hidden' : ' m';
       if (CONFIG.hide_m) {log = false;}
     }
@@ -561,7 +563,7 @@ function HITS_WRITE_LOGGED_IN (data) {
         (to ?`title="Pay: ${to[hit.reqid].attrs.pay} Fair: ${to[hit.reqid].attrs.fair}<br>Comm: ${to[hit.reqid].attrs.comm} Fast: ${to[hit.reqid].attrs.fast}<br>Reviews: ${to[hit.reqid].reviews} ToS: ${to[hit.reqid].tos_flags}">${to[hit.reqid].attrs.pay}</a>`: `title="TO Off">Off</a>`) +
         `  </td>` +
         // Masters
-        `  <td class="text-center">${hit.masters}</td>` +
+        `  <td class="text-center">${hit.masters ? `Y` : `N`}</td>` +
         `</tr>`
       ;
       return html;
@@ -610,7 +612,7 @@ function HITS_WRITE_LOGGED_OUT () {
     else {
       classes += CONFIG.hide_nl ? ' nl_hidden' : ' nl';
     }
-    if (hit.masters === 'Y') {
+    if (hit.masters) {
       classes += CONFIG.hide_m ? ' m_hidden' : ' m';
       if (CONFIG.hide_m) {log = false;}
     }
@@ -690,7 +692,7 @@ function HITS_WRITE_LOGGED_OUT () {
         `    <a href="https://turkopticon.ucsd.edu/main/php_search?field=name&query=${hit.reqname}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" title="Logged Out">N/A</a>` +
         `  </td>` +
         // Masters
-        `  <td>${hit.masters}</td>` +
+        `  <td>${hit.masters ? `Y` : `N`}</td>` +
         `</tr>`
       ;
     }
@@ -1263,6 +1265,14 @@ function NEW_HIT_SOUND () {
   audio.play();
 }
 
+function DATE () {
+  const today = new Date();
+  const dd = today.getDate() < 10 ? `0${today.getDate()}` : today.getDate();
+  const mm = (today.getMonth() + 1) < 10 ? `0${today.getMonth() + 1}` : today.getMonth();
+  const yyyy = today.getFullYear();
+  return `${mm}/${dd}/${yyyy}`;
+}
+
 // Turkopticon IndexedDB
 let TODB;
 const TODB_request = indexedDB.open(`TODB`, 1);
@@ -1338,15 +1348,22 @@ function TODB_HIT_EXPORT (id) {
 
 // HIT Finder IndexedDB
 let HFDB;
-const HFDB_request = indexedDB.open(`HFDB`, 1);
+const HFDB_request = indexedDB.open(`HFDB`, 2);
 HFDB_request.onsuccess = function (event) {
   HFDB = event.target.result;
 };
 HFDB_request.onupgradeneeded = function (event) {
   const HFDB = event.target.result;
+
+  if (event.oldVersion === 1) {
+    HFDB.close();
+    indexedDB.deleteDatabase(`HFDB`);
+    window.location.reload();
+  }
+  
   const createObjectStore = HFDB.createObjectStore(`hit`, {keyPath: `groupid`});
-  for (let index of [`reqid`, `reqname`, `title`, `reward`]) {
-    createObjectStore.createIndex(index, index, { unique: false });
+  for (let index of [`reqid`, `reqname`, `title`, `reward`, `date`]) {
+    createObjectStore.createIndex(index, index, {unique: false});
   }
 };
 
