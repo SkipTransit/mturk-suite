@@ -1,4 +1,5 @@
 function HIT_CAPSULE () {
+  const reqname = document.getElementsByClassName(`capsule_field_text`)[0].textContent;
   const reqid =
         document.getElementsByName(`requesterId`)[0] ?
         document.getElementsByName(`requesterId`)[0].value :
@@ -6,8 +7,7 @@ function HIT_CAPSULE () {
         document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)[1]:
         null
   ;
-  const reqname = document.getElementsByClassName(`capsule_field_text`)[0].textContent;
-
+  
   const aa = document.getElementsByName(`hitAutoAppDelayInSeconds`)[0].value;
   const dd = Math.floor(aa / 86400);
   const hh = Math.floor(aa / 3600 % 24);
