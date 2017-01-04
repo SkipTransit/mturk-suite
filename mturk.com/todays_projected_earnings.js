@@ -60,7 +60,7 @@ if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
     }
   });
   
-  document.addEventListener('click', function (event) {
+  document.addEventListener(`click`, function (event) {
     const element = event.target;
     
     if (element.closest(`#tpe`)) {
