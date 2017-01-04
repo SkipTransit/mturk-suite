@@ -21,42 +21,42 @@ function EXPORTS_WRITE () {
 
 function HIT_EXPORT_MAIN () {
   for (let hit of document.querySelectorAll(`table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr`)) {
-    const key = hit.querySelector('[href*="roupId="]').getAttribute('href').match(/roupId=(.*)/)[1];
+    const key = hit.querySelector(`[href*="roupId="]`).getAttribute(`href`).match(/roupId=(.*)/)[1];
     
     HITS[key] = {
       reqname: 
-      hit.getElementsByClassName('requesterIdentity')[0].textContent.trim(),
+      hit.getElementsByClassName(`requesterIdentity`)[0].textContent.trim(),
       
       reqid:
-      hit.querySelector('[href*="requesterId="]').getAttribute('href').match(/requesterId=(.*)/)[1],      
+      hit.querySelector(`[href*="requesterId="]`).getAttribute(`href`).match(/requesterId=(.*)/)[1],      
       
       title:
-      hit.getElementsByClassName('capsulelink')[0].textContent.trim(),
+      hit.getElementsByClassName(`capsulelink`)[0].textContent.trim(),
                
       desc:
-      hit.getElementsByClassName('capsule_field_text')[5].textContent.trim(),
+      hit.getElementsByClassName(`capsule_field_text`)[5].textContent.trim(),
 
       time:
-      hit.getElementsByClassName('capsule_field_text')[2].textContent.trim(),
+      hit.getElementsByClassName(`capsule_field_text`)[2].textContent.trim(),
           
       reward:
-      hit.getElementsByClassName('capsule_field_text')[3].textContent.trim(),
+      hit.getElementsByClassName(`capsule_field_text`)[3].textContent.trim(),
           
       avail:
-      hit.getElementsByClassName('capsule_field_text')[4].textContent.trim(),
+      hit.getElementsByClassName(`capsule_field_text`)[4].textContent.trim(),
       
       groupid:
-      hit.querySelector('[href*="roupId="]').getAttribute('href').match(/roupId=(.*)/)[1],
+      hit.querySelector(`[href*="roupId="]`).getAttribute(`href`).match(/roupId=(.*)/)[1],
       
       prevlink:
-      `https://www.mturk.com/mturk/preview?groupId=${hit.querySelector('[href*="roupId="]').getAttribute('href').match(/roupId=(.*)/)[1]}`,
+      `https://www.mturk.com/mturk/preview?groupId=${hit.querySelector(`[href*="roupId="]`).getAttribute(`href`).match(/roupId=(.*)/)[1]}`,
       
       pandlink:
-      `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.querySelector('[href*="roupId="]').getAttribute('href').match(/roupId=(.*)/)[1]}`,  
+      `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.querySelector(`[href*="roupId="]`).getAttribute(`href`).match(/roupId=(.*)/)[1]}`,  
       
       quals: 
-      hit.querySelector('td[style="padding-right: 2em; white-space: nowrap;"]') ?
-      [...hit.querySelectorAll('td[style="padding-right: 2em; white-space: nowrap;"]')].map(element => `${element.textContent.trim().replace(/\s+/g, ' ')};`).join(` `):
+      hit.querySelector(`td[style="padding-right: 2em; white-space: nowrap;"]`) ?
+      [...hit.querySelectorAll(`td[style="padding-right: 2em; white-space: nowrap;"]`)].map(element => `${element.textContent.trim().replace(/\s+/g, ` `)};`).join(` `) :
       `None;`
     };
   }
@@ -67,14 +67,14 @@ function HIT_EXPORT_CAPSULE () {
   const key = document.getElementsByName(`groupId`)[0].value;
   
   const aa = document.getElementsByName(`hitAutoAppDelayInSeconds`)[0].value;
-  const d = Math.floor(aa / 86400);
-  const h = Math.floor(aa / 3600 % 24);
-  const m = Math.floor(aa / 60 % 60);
+  const dd = Math.floor(aa / 86400);
+  const hh = Math.floor(aa / 3600 % 24);
+  const mm = Math.floor(aa / 60 % 60);
 
   const aa_time =   
-      (d > 0 ? `${d} day${d > 1 ? `s` : ``} ` : ``) +
-      (h > 0 ? `${h} hour${h > 1 ? `s` : ``} ` : ``) +
-      (m > 0 ? `${m} minute${m > 1 ? `s` : ``} ` : ``)
+      (dd > 0 ? `${dd} day${dd > 1 ? `s` : ``} ` : ``) +
+      (hh > 0 ? `${hh} hour${hh > 1 ? `s` : ``} ` : ``) +
+      (mm > 0 ? `${mm} minute${mm > 1 ? `s` : ``} ` : ``)
   ;
 
   HITS[key] = {
@@ -122,11 +122,8 @@ function EXPORTS_WRITE_MAIN () {
   chrome.storage.local.get(`user`, function (data) {
     const user = data.user || {hit_export: true};
     
-    const hits = document.querySelectorAll('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
-    
-    for (let i = 0; i < hits.length; i ++) {
-      const hit = hits[i];
-      const key = hit.querySelectorAll('[href*="roupId="]')[0].getAttribute('href').match(/roupId=(.*)/)[1];
+    for (let hit of document.querySelectorAll(`table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr`)) {
+      const key = hit.querySelectorAll(`[href*="roupId="]`)[0].getAttribute(`href`).match(/roupId=(.*)/)[1];
       
       const html = 
             user.hit_export ?
@@ -144,7 +141,7 @@ function EXPORTS_WRITE_MAIN () {
         hit.getElementsByClassName(`exports`)[0].innerHTML = html;
       }
       else {
-        document.getElementById(`capsule${i}-0`).insertAdjacentHTML(`beforebegin`, `<span class="exports">${html}</span>`);
+        hit.getElementsByClassName(`capsulelink`)[0].insertAdjacentHTML(`beforebegin`, `<span class="exports">${html}</span>`);
       }
     }
   });
@@ -255,7 +252,7 @@ function EXPORT_TO_CLIP (template) {
   document.getElementById(`clipboard`).select();
   
   try {
-    const copy = document.execCommand('copy');
+    const copy = document.execCommand(`copy`);
     if (copy) {
       alert(`HIT export has been copied to your clipboard.`);
     }
@@ -279,36 +276,36 @@ function EXPORT_TO_MTC (template) {
 }
 
 if (document.querySelector(`a[href*="roupId="]`) || document.getElementsByName(`groupId`)[0] && document.getElementsByName(`groupId`)[0].value !== ``) {
+  chrome.runtime.onMessage.addListener( function (request) {
+    if (request.msg == `hitexport.js`) {
+      EXPORT_HIT(request.data);
+    }
+  }); 
+  
+  chrome.storage.onChanged.addListener( function (changes) {
+    for (let key in changes) {
+      if (key === `user`) {
+        EXPORTS_WRITE();
+      }
+    }
+  });
+  
+  document.addEventListener(`click`, function (event) {
+    const element = event.target;
+  
+    const dropdowns = document.getElementsByClassName(`dropdown-content`);
+    for (let i = 0; i < dropdowns.length; i ++) {dropdowns[i].style.display = `none`;}
+  
+    if (element.matches(`.dropbtn`)) {
+      element.nextElementSibling.style.display = `block`;
+    }
+  
+    if (element.matches(`.export_hit`)) {
+      EXPORT.key = element.dataset.key;
+      EXPORT.type = element.dataset.type;
+      chrome.runtime.sendMessage({msg: `hitexport`, data: HITS[EXPORT.key].reqid});
+    }
+  });
+  
   HIT_EXPORT();
 }
-
-chrome.runtime.onMessage.addListener( function (request) {
-  if (request.msg == `hitexport.js`) {
-    EXPORT_HIT(request.data);
-  }
-});
-
-chrome.storage.onChanged.addListener( function (changes) {
-  for (let key in changes) {
-    if (key === `user`) {
-      EXPORTS_WRITE();
-    }
-  }
-});
-
-document.addEventListener('click', function (event) {
-  const element = event.target;
-  
-  const dropdowns = document.getElementsByClassName(`dropdown-content`);
-  for (let i = 0; i < dropdowns.length; i ++) {dropdowns[i].style.display = 'none';}
-  
-  if (element.matches(`.dropbtn`)) {
-    element.nextElementSibling.style.display = 'block';
-  }
-  
-  if (element.matches(`.export_hit`)) {
-    EXPORT.key = element.dataset.key;
-    EXPORT.type = element.dataset.type;
-    chrome.runtime.sendMessage({msg: `hitexport`, data: HITS[EXPORT.key].reqid});
-  }
-});
