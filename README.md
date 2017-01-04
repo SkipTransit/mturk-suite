@@ -1,5 +1,5 @@
 # Mturk Suite
-A Chrome extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
+An extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
 
 # Features
 - Right clicking inside an input field gives the option to paste your Worker ID
@@ -19,3 +19,11 @@ A Chrome extension for https://www.mturk.com/ and in the future https://worker.m
 - The HIT workspace can be scrolled to and resized to your screen on/off toggle in the extension dropdown
 - Queue page shows the total value of HITs for that page
 - Automatically accept the next HIT checkbox can be toggled to be checked automatically in the extension dropdown
+
+# Known Issues Chrome
+- Not all inputs validate paste worker id
+
+# Known Issues Firefox
+- Not all inputs validate paste worker id
+- Exporting HITs not working in HIT Finder
+- All copy to clipboard events fail
