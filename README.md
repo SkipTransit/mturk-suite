@@ -1,7 +1,8 @@
 # Mturk Suite
 An extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
 
-- ([Chrome Web Store](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf))
+# Install
+- [Chrome Web Store](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
 
 # Features
 - Right clicking inside an input field gives the option to paste your Worker ID
