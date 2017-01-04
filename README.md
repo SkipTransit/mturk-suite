@@ -29,4 +29,4 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 # Known Issues Firefox
 - Not all inputs validate paste worker id
 - Exporting HITs not working in HIT Finder
-- All copy to clipboard events fail
+- Copy to clipboard events fail (Requester breakdown suceeds)
