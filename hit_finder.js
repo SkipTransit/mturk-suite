@@ -331,7 +331,7 @@ function PARSE_NEW_HITS (data) {
       
       masters: false,
       new: true,
-      time: TIME(),
+      time: new Date().getTime(),
       date: DATE()
     }
     
@@ -437,7 +437,7 @@ function PARSE_OLD_HITS (data) {
       
       masters: false,
       new: true,
-      time: TIME(),
+      time: new Date().getTime(),
       date: DATE()
     };
         
