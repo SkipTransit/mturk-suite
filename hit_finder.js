@@ -506,7 +506,7 @@ function HITS_WRITE_LOGGED_IN (data) {
     }
     if (hit.masters === 'Y') {
       classes += CONFIG.hide_m ? ' m_hidden' : ' m';
-      log = false;
+      if (CONFIG.hide_m) {log = false;}
     }
     if (Number(CONFIG.min_avail) > Number(hit.avail) || data && Number(CONFIG.min_to) > Number(data[hit.reqid].attrs.pay)) {
       classes += ' hidden';
@@ -612,7 +612,7 @@ function HITS_WRITE_LOGGED_OUT () {
     }
     if (hit.masters === 'Y') {
       classes += CONFIG.hide_m ? ' m_hidden' : ' m';
-      log = false;
+      if (CONFIG.hide_m) {log = false;}
     }
     if (Number(CONFIG.min_avail) > Number(hit.avail)) {
       classes += ' hidden';
