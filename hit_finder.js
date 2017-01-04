@@ -330,7 +330,8 @@ function PARSE_NEW_HITS (data) {
       `None;`,
       
       masters: false,
-      new: true, 
+      new: true,
+      time: TIME(),
       date: DATE()
     }
     
@@ -435,7 +436,8 @@ function PARSE_OLD_HITS (data) {
       `None;`,
       
       masters: false,
-      new: true, 
+      new: true,
+      time: TIME(),
       date: DATE()
     };
         
@@ -716,15 +718,6 @@ function TO_COLOR (rating) {
   if (rating > 3.99) {color = 'toHigh';}
   if (rating < 0.01) {color = 'toNone';}
   return color;
-}
-
-function TIME () {
-  const date = new Date();
-  let hours = date.getHours(), minutes = date.getMinutes(), ampm = hours >= 12 ? `pm` : `am`;
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  minutes = minutes < 10 ? `0` + minutes : minutes;
-  return `${hours}:${minutes}${ampm}`;
 }
 
 function SECONDS_TO_STRING (s) {
@@ -1271,6 +1264,15 @@ function DATE () {
   const mm = (today.getMonth() + 1) < 10 ? `0${today.getMonth() + 1}` : today.getMonth();
   const yyyy = today.getFullYear();
   return `${mm}/${dd}/${yyyy}`;
+}
+
+function TIME () {
+  const date = new Date();
+  let hours = date.getHours(), minutes = date.getMinutes(), ampm = hours >= 12 ? `pm` : `am`;
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  minutes = minutes < 10 ? `0` + minutes : minutes;
+  return `${hours}:${minutes}${ampm}`;
 }
 
 // Turkopticon IndexedDB
