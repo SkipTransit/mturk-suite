@@ -174,7 +174,6 @@ let HFDB;
 const HFDB_request = indexedDB.open(`HFDB`, 1);
 HFDB_request.onsuccess = function (event) {
   HFDB = event.target.result;
-  DISPLAY_ALL();
 };
 HFDB_request.onupgradeneeded = function (event) {
   const HFDB = event.target.result;
@@ -185,13 +184,30 @@ HFDB_request.onupgradeneeded = function (event) {
   }
 };
 
-function DISPLAY_ALL () {
+function GET_RESULTS (MATCH) {
   const transaction = HFDB.transaction([`hit`], 'readonly');
   const objectStore = transaction.objectStore(`hit`);
   
   objectStore.getAll().onsuccess = function (event) {
-    TURKOPTICON_DB(event.target.result);
+    FILTER_RESULTS(MATCH, event.target.result);
   };
+}
+
+function FILTER_RESULTS (MATCH, RESULTS) {
+  const filtered = []; const match = MATCH.toLowerCase().trim();
+
+  if (!match.length) {TURKOPTICON_DB(RESULTS); return;}
+  
+  for (let i = 0; i < RESULTS.length; i ++) {
+    const hit = RESULTS[i];
+    if (hit.reqname.toLowerCase() === match) {filtered.push(hit); continue;}
+    if (hit.reqid.toLowerCase()   === match) {filtered.push(hit); continue;}
+    if (hit.title.toLowerCase()   === match) {filtered.push(hit); continue;}
+    if (hit.groupid.toLowerCase() === match) {filtered.push(hit); continue;}
+    if (hit.reward.toLowerCase()  === match) {filtered.push(hit); continue;}
+  }
+  
+  TURKOPTICON_DB(filtered);
 }
 
 function WRITE_DATABASE (HITS, TO) {
@@ -250,3 +266,11 @@ function TO_COLOR (rating) {
   if (rating < 0.01) {color = 'toNone';}
   return color;
 }
+
+document.addEventListener(`click`, function (event) {
+  const element = event.target;
+  
+  if (element.matches(`#search`)) {
+    GET_RESULTS(document.getElementById(`matching`).value);
+  }
+});

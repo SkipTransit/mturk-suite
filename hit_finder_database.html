@@ -12,7 +12,37 @@
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
   </head>
   <body style="padding: 3px;">
-    <br>
+    
+    <!-- Logged HITs -->
+    <div class="panel panel-primary">
+      <div class="panel-heading toggle">
+        <b>Search</b>
+      </div>
+      <div class="panel-body row">
+        
+        <!--
+        <div class="col-xs-4">
+          <div class="input-group input-group-sm form-group">
+            <div class="input-group-addon">Filter</div>
+            <select id="sort_by" value="all">
+              <option value="all">All</option>
+            </select>
+          </div>
+        </div>
+        -->
+        
+        <div class="col-xs-12">
+          <div class="input-group input-group-sm">
+            <div class="input-group-addon">HITs Matching</div>
+            <input id="matching" type="text" class="form-control" placeholder="Leave Blank for All / Requester Name or ID / Title / GroupID / Reward">
+            <span class="input-group-btn">
+              <button id="search" type="button" class="btn btn-primary">Search</button>
+            </span>
+          </div>
+          
+        </div>
+      </div>
+    </div>
      
     <!-- Logged HITs -->
     <div class="panel panel-primary">
