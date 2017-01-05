@@ -24,9 +24,9 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Automatically accept the next HIT checkbox can be toggled to be checked automatically in the extension dropdown
 
 # Known Issues Chrome
-- Not all inputs validate paste worker id
+- Not all inputs validate paste worker id (Possibly fixed in 1.1.13, waiting for feedback)
 
 # Known Issues Firefox
-- Not all inputs validate paste worker id
+- Not all inputs validate paste worker id (Possibly fixed in 1.1.13, waiting for feedback)
 - Exporting HITs not working in HIT Finder
 - Copy to clipboard events fail (Requester breakdown suceeds)
