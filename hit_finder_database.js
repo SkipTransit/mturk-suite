@@ -200,11 +200,18 @@ function FILTER_RESULTS (MATCH, RESULTS) {
   
   for (let i = 0; i < RESULTS.length; i ++) {
     const hit = RESULTS[i];
+    if (hit.reqname.toLowerCase().indexOf(match) !== -1) {filtered.push(hit); continue;}
+    if (hit.reqid.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+    if (hit.title.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+    if (hit.groupid.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+    if (hit.reward.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+    /*
     if (hit.reqname.toLowerCase() === match) {filtered.push(hit); continue;}
     if (hit.reqid.toLowerCase()   === match) {filtered.push(hit); continue;}
     if (hit.title.toLowerCase()   === match) {filtered.push(hit); continue;}
     if (hit.groupid.toLowerCase() === match) {filtered.push(hit); continue;}
     if (hit.reward.toLowerCase()  === match) {filtered.push(hit); continue;}
+    */
   }
   
   TURKOPTICON_DB(filtered);
