@@ -173,6 +173,90 @@ function SEND_TH (tab, message) {
   });
 }
 
+chrome.webRequest.onBeforeRequest.addListener( function (data) {
+  if (data.tabId === -1) {
+    MAKE_HIT(data);
+  }
+}, { urls: [`http://www.mturkcrowd.com/threads/*/add-reply`, `https://turkerhub.com/threads/*/add-reply`] }, [`requestBody`]);
+
+function MAKE_HIT (data) {
+  const forum = data.url.match(/mturkcrowd|turkerhub/);
+  const thread = data.url.split(`threads/`)[1].split(`/`)[0];
+  const regex = new RegExp(`.+${forum}\.com\/threads\/.+\.${thread}`);
+
+  chrome.tabs.query({}, function (tabs) {
+    for (let i = 0; i < tabs.length; i ++) {
+      if (tabs[i].url.match(regex)) {
+        chrome.tabs.executeScript(tabs[i].id, {
+          frameId: tabs[i].frameId,
+          code: 
+          `document.getElementById('messageList').insertAdjacentHTML('beforeend', ` +
+          `'<li class="sectionMain message">' +` +
+          `'<div class="uix_message">' +` +
+          
+          `'<div class="messageUserInfo" itemscope="itemscope" itemtype="http://data-vocabulary.org/Person">' +` +
+          `'<div class="messageUserBlock ">' +`	+
+		  `'<div class="avatarHolder">' +` +
+          `'<div class="uix_avatarHolderInner">' +` +
+          `'<span class="helper"></span>' +` +
+          `'<a href="members/kadauchi.44/" class="avatar" >'+` +
+          `'<img src="${chrome.runtime.getURL(`media/icon_128.png`)}" width="96" height="96" alt="MTS">' +` +
+          `'</a>' +` +
+          `'</div>' +` +
+          `'</div>' +` +
+          `'<span class="arrow"><span></span></span>' +` +
+          `'</div>' +` +
+          `'</div>' +` +
+          
+          `'<div class="messageInfo primaryContent">' +` +
+          `'<div class="messageContentt">' +` +
+          `'<article>' +` +
+          `'<blockquote class="messageText SelectQuoteContainer ugc baseHtml">' +` +
+          `'${BBCODE_TO_HTML(data.requestBody.formData.message_html[0])}' +` +
+          `'</blockquote>' +` +
+          `'</article>' +` +
+          `'</div>' +` +
+          `'</div>' +` +
+          
+          `'</div>' +` +
+          `'</li>'` +
+          `);`
+        });
+      }
+    }
+  });
+}
+
+function BBCODE_TO_HTML (BBCODE) {
+  let bbcode = BBCODE;
+  bbcode = bbcode.replace(/(?:\r\n|\r|\n)/g, ``); // Remove line breaks
+  bbcode = bbcode.replace(/<p>/gi, ``).replace(/<\/p>/gi, `<br>`);
+  bbcode = bbcode.replace(/\[table\]/gi, `<table class="ctaBbcodeTable">`).replace(/\[\/table\]/gi, `</table>`);
+  bbcode = bbcode.replace(/\[tr\]/gi, `<tr class="ctaBbcodeTableRowTransparent">`).replace(/\[\/tr\]/gi, `</tr>`);
+  bbcode = bbcode.replace(/\[td\]/gi, `<td class="ctaBbcodeTableCellLeft">`).replace(/\[\/td\]/gi, `</td>`);
+  bbcode = bbcode.replace(/\[b\]/gi, `<b>`).replace(/\[\/b\]/gi, `</b>`);
+  bbcode = bbcode.replace(/\[center\]/gi, `<div style="text-align: center">`).replace(/\[\/center\]/gi, `</div>`);
+  bbcode = bbcode.replace(/\[size=2\]/gi, `<span style="font-size: 10px">`).replace(/\[\/size\]/gi, `</span>`);
+    
+  function url_color (string) {
+    const color_matches = string.match(/\[color=.+?\]/gi);
+    for (let i = 0; i < color_matches.length; i ++) {
+      const color = color_matches[i].match(/color=([#\w]+)/gi)[0].replace(/color=|]/gi, ``);
+      const replacer = `<span style="color: ${color}">`;
+      string = string.replace(color_matches[i], replacer).replace(/\[\/color\]/gi, `</span>`);
+    }
+    
+    const url_matches = string.match(/\[url=.+?\]/gi);
+    for (let i = 0; i < url_matches.length; i ++) {
+      const url = url_matches[i].match(/url=([:/.?=\w]+)/gi)[0].replace(/url=|]/gi, ``);
+      const replacer = `<a href="${url}" target="_blank" class="externalLink">`;
+      string = string.replace(url_matches[i], replacer).replace(/\[\/url\]/gi, `</a>`);
+    }
+    return string;
+  }
+  return url_color(bbcode);
+}
+
 //******* Experimental *******//
 let hits  = {};
 let requests = {};
