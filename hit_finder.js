@@ -432,7 +432,7 @@ function PARSE_OLD_HITS (data) {
   
       quals: 
       hit('td[style="padding-right: 2em; white-space: nowrap;"]')[0] ?
-      [...hit('td[style="padding-right: 2em; white-space: nowrap;"]')].map(element => `${element.textContent.trim().replace(/\s+/g, ' ')};`).join(` `):
+      [...hit('td[style="padding-right: 2em; white-space: nowrap;"]')].map(element => `${element.textContent.trim().replace(/\s+/g, ' ')};`).join(` `) :
       `None;`,
       
       masters: false,
