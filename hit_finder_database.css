@@ -28,6 +28,10 @@ select {
   height: 30px;
 }
 
+.panel {
+  margin-bottom: 5px !important;
+}
+
 .panel-heading {
   padding: 5px 15px !important;
 }

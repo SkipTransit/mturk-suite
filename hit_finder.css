@@ -83,6 +83,10 @@ select {
   height: 30px;
 }
 
+.panel {
+  margin-bottom: 5px !important;
+}
+
 .panel-heading {
   padding: 5px 15px !important;
 }
@@ -105,10 +109,6 @@ select {
   font-size: 12px !important;
   line-height: 1.4 !important;
   border-radius: 3px !important;
-}
-
-.panel-body {
-  padding-bottom: 0px !important;
 }
 
 .panel-heading.toggle {
