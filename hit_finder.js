@@ -437,8 +437,7 @@ function PARSE_OLD_HITS (data) {
       
       masters: false,
       new: true,
-      seen: new Date().getTime(),
-      date: new Date().toISOString().slice(0,10)
+      seen: new Date().getTime()
     };
         
     const key = obj.groupid !== `null` ? obj.groupid : obj.reqid + obj.title + obj.reward;
@@ -527,7 +526,7 @@ function HITS_WRITE_LOGGED_IN (data) {
         (logged ? `<td>${time}</td>` : ``) +
         // Requester
         `  <td>` +
-        `    <div class="btn-group btn-group-xs">` +
+        `    <div class="btn-group btn-group-xxs">` +
         `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
         `        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>` +
         `        <span class="caret"></span>` +
@@ -543,7 +542,7 @@ function HITS_WRITE_LOGGED_IN (data) {
         `  </td>` +
         // Project
         `  <td>` +
-        `    <div class="btn-group btn-group-xs">` +
+        `    <div class="btn-group btn-group-xxs">` +
         `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
         `        Export <span class="caret"></span>` +
         `      </button>` +
