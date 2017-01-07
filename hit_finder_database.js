@@ -66,29 +66,35 @@ function TODB_HIT_EXPORT (id) {
   };
 }
 
-function GET_RESULTS (match) {
+function GET_RESULTS () {
   const transaction = HFDB.transaction([`hit`], `readonly`);
   const objectStore = transaction.objectStore(`hit`);
   
   objectStore.getAll().onsuccess = function (event) {
-    FILTER_RESULTS(match, event.target.result);
+    FILTER_RESULTS(event.target.result);
   };
 }
 
-function FILTER_RESULTS (MATCH, RESULTS) {
-  const filtered = []; const match = MATCH.toLowerCase().trim();
-
-  if (!match.length) {TURKOPTICON_DB(RESULTS); return;}
+function FILTER_RESULTS (results) {
+  const filtered = [];
+  const date_from =  DATE_TO_TIME_FROM(document.getElementById(`date_from`).value);
+  const date_to = DATE_TO_TIME_TO(document.getElementById(`date_to`).value);
+  const match = document.getElementById(`matching`).value.toLowerCase().trim();
+  const find = document.getElementById(`find`).value;
   
-  for (let i = 0; i < RESULTS.length; i ++) {
-    const hit = RESULTS[i];
-    if (hit.reqname.toLowerCase().indexOf(match) !== -1) {filtered.push(hit); continue;}
-    if (hit.reqid.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
-    if (hit.title.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
-    if (hit.groupid.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
-    if (hit.reward.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+  for (let i = 0; i < results.length; i ++) {
+    const hit = results[i];
+    const filter = find === `all` ? true : IS_INCLUDED(hit);
+    
+    if (date_from < hit.seen && hit.seen < date_to && filter) {
+      if (!match.length) {filtered.push(hit); continue;}
+      if (hit.reqname.toLowerCase().indexOf(match) !== -1) {filtered.push(hit); continue;}
+      if (hit.reqid.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+      if (hit.title.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+      if (hit.groupid.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+      if (hit.reward.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
+    }
   }
-  
   TURKOPTICON_DB(filtered);
 }
 
@@ -154,6 +160,29 @@ function FORMAT_DATE (date) {
   const dd = d.getDate() > 10 ? d.getDate() : `0${d.getDate()}`;
   const yy = d.getFullYear();
   return `${mm}/${dd}/${yy}`;
+}
+
+function IS_INCLUDED (hit) {
+  const include_list = JSON.parse(localStorage.getItem(`INCLUDE_LIST`)) || {};
+
+  for (let key in include_list) {
+    const il = include_list[key];
+    if (il.term.toLowerCase() === hit.reqname.toLowerCase() || il.term.toLowerCase() === hit.title.toLowerCase()   || 
+        il.term.toLowerCase() === hit.reqid.toLowerCase()   || il.term.toLowerCase() === hit.groupid.toLowerCase() ){
+      return true;
+    }
+  }
+  return false;
+}
+
+function DATE_TO_TIME_FROM (date) {
+  if (!date.length) return 0;
+  return new Date(date).getTime() + new Date(date).getTimezoneOffset() * 60000 - 1;
+}
+
+function DATE_TO_TIME_TO (date) {
+  if (!date.length) return new Date().getTime();
+  return new Date(date).getTime() + new Date(date).getTimezoneOffset() * 60000 + 86400000 - 1;
 }
 
 function HIT_EXPORT (to) {
@@ -239,3 +268,5 @@ document.addEventListener(`click`, function (event) {
     TODB_HIT_EXPORT(HITS[EXPORT.key].reqid);
   }
 });
+
+

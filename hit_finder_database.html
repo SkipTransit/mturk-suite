@@ -23,20 +23,30 @@
         <div class="col-xs-6">
           <div class="input-group input-group-sm">
             <div class="input-group-addon">From</div>
-            <input id="from" type="date" class="form-control">
+            <input id="date_from" type="date" class="form-control">
           </div>
         </div>
         
         <div class="col-xs-6">
           <div class="input-group input-group-sm">
             <div class="input-group-addon">To</div>
-            <input id="to" type="date" class="form-control">
+            <input id="date_to" type="date" class="form-control">
           </div>
         </div>
         
         <br><br>
         
-        <div class="col-xs-12">
+        <div class="col-xs-3">
+          <div class="input-group input-group-sm form-group">
+            <div class="input-group-addon">Find</div>
+            <select id="find" value="all">
+              <option value="all">All</option>
+              <option value="include_list">Include List</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="col-xs-9">
           <div class="input-group input-group-sm">
             <div class="input-group-addon">HITs Matching</div>
             <input id="matching" type="text" class="form-control" placeholder="Leave Blank for All / Requester Name or ID / Title / GroupID / Reward">
