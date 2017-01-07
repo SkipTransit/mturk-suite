@@ -1,98 +1,5 @@
-const DB_HITS = {};
+const HITS = {};
 const EXPORT = {key: null, type: null};
-
-// Export Stuff
-$('html').on('click', '.vb', function () {
-  const key = $(this).data('key');
-  EXPORT.key = key;
-  EXPORT.type = 'vb';
-  TODB_HIT_EXPORT(DB_HITS[key].reqid);
-});
-
-$('html').on('click', '.vb_th', function () {
-  const key = $(this).data('key');
-  EXPORT.key = key;
-  EXPORT.type = 'vb_th';
-  TODB_HIT_EXPORT(DB_HITS[key].reqid);
-});
-
-$('html').on('click', '.vb_mtc', function () {
-  const key = $(this).data('key');
-  EXPORT.key = key;
-  EXPORT.type = 'vb_mtc';
-  TODB_HIT_EXPORT(DB_HITS[key].reqid);
-});
-
-function VB_EXPORT (data) {
-  const hit = DB_HITS[EXPORT.key];
-  
-  function attr (type, rating) {
-    let color = '#B30000';
-    if (rating > 1.99) {color = '#B37400';}
-    if (rating > 2.99) {color = '#B3B300';}
-    if (rating > 3.99) {color = '#00B300';}
-    if (rating < 0.01) {color = 'grey'; rating = 'N/A';}
-    return `[b][${type}: [color=${color}]${rating}[/color]][/b]`;
-  }
-  
-  const template =
-        `[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]\n` +
-        `[b]Requester:[/b] [URL=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/URL] [${hit.reqid}] ([URL=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/URL])\n` +
-        `[b][URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]:[/b] ` +
-        `${attr('Pay', data.attrs.pay)} ${attr('Fair', data.attrs.fair)} ` +
-        `${attr('Comm', data.attrs.comm)} ${attr('Fast', data.attrs.fast)} ` +
-        `[b][Reviews: ${data.reviews}][/b] ` +
-        `[b][ToS: ${data.tos_flags === 0 ? '[color=green]' + data.tos_flags : '[color=red]' + data.tos_flags}[/color]][/b]\n` +
-        `[b]Description:[/b] ${hit.desc}\n` +
-        `[b]Time:[/b] ${hit.time}\n` +
-        `[b]HITs Available:[/b] ${hit.avail}\n` +
-        `[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]\n` +
-        `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}\n` +
-        `[/td][/tr][/table]`
-  ;
-  
-  const direct_template =
-        `<p>[table][tr][td][b]Title:[/b] [URL=${hit.prevlink}]${hit.title}[/URL] | [URL=${hit.pandlink}]PANDA[/URL]</p>` +
-        `<p>[b]Requester:[/b] [URL=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/URL] [${hit.reqid}] ([URL=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/URL])</p>` +
-        `<p>[b][URL=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/URL]:[/b] ` +
-        `${attr('Pay', data.attrs.pay)} ${attr('Fair', data.attrs.fair)} ` +
-        `${attr('Comm', data.attrs.comm)} ${attr('Fast', data.attrs.fast)} ` +
-        `[b][Reviews: ${data.reviews}][/b] ` +
-        `[b][ToS: ${data.tos_flags === 0 ? '[color=green]' + data.tos_flags : '[color=red]' + data.tos_flags}[/color]][/b]\n</p>` +
-        `<p>[b]Description:[/b] ${hit.desc}</p>` +
-        `<p>[b]Time:[/b] ${hit.time}</p>` +
-        `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
-        `<p>[b]Reward:[/b] [COLOR=green][b] ${hit.reward}[/b][/COLOR]</p>` +
-        `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
-        `<p>[tr][td][CENTER][SIZE=2]HIT Finder Database last saw this HIT on [b]${new Date(hit.seen).toString()}[/b][/SIZE]</p>` +
-        `<p>[SIZE=2]HIT posted from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version}[/SIZE][/CENTER][/td][/tr][/table]</p>`
-  ;
-
-  if (EXPORT.type === 'vb') {
-    COPY_TO_CLIP(template, 'HIT export has been copied to your clipboard.');
-  }
-  if (EXPORT.type === 'vb_th') {
-    const confirm_post = prompt('Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
-    if (confirm_post !== null) {
-      EXPORT_TO_TH(direct_template + `<p>${confirm_post}</p>`);
-    }
-  }
-  if (EXPORT.type === 'vb_mtc') {
-    const confirm_post = prompt('Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok"', '');
-    if (confirm_post !== null) {
-      EXPORT_TO_MTC(direct_template + `<p>${confirm_post}</p>`);
-    }
-  }
-}
-
-function EXPORT_TO_TH (template) {
-  chrome.runtime.sendMessage({msg: 'send_th', data: template});
-}
-
-function EXPORT_TO_MTC (template) {
-  chrome.runtime.sendMessage({msg: 'send_mtc', data: template});
-}
-
 
 // Turkopticon IndexedDB
 let TODB;
@@ -104,70 +11,6 @@ TODB_request.onupgradeneeded = function (event) {
   const TODB = event.target.result;
   TODB.createObjectStore(`requester`, {keyPath: `id`});
 };
-
-function TURKOPTICON_DB (HITS) {
-  const ids = [];
-  for (let i = 0; i < HITS.length; i ++) {if (ids.indexOf(HITS[i].reqid) === -1) ids.push(HITS[i].reqid);}
-  let grab = false;
-  const to = {};
-  const time = new Date().getTime();
-  const transaction = TODB.transaction([`requester`], `readonly`);
-  const objectStore = transaction.objectStore(`requester`);
-  
-  for (let i = 0; i < ids.length; i ++) {
-    const request = objectStore.get(ids[i]);
-    request.onsuccess = function (event) {
-      if (request.result && request.result.edited > time - 21600000) {
-        to[ids[i]] = request.result;
-      }
-      else {
-        grab = true;
-      }
-    };
-  }
-  
-  transaction.oncomplete = function (event) {
-    if (grab) {
-      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`, function (data) {
-        const transaction = TODB.transaction([`requester`], `readwrite`);
-        const objectStore = transaction.objectStore(`requester`);
-
-        const json = JSON.parse(data);
-        for (let i = 0; i < ids.length; i ++) {
-          const id = ids[i];
-          if (json[id]) {
-            to[id] = json[id];
-            json[id].id = id;
-            json[id].edited = time;
-            objectStore.put(json[id]);
-          }
-          else {
-            to[id] = {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0};
-          }
-        }
-        WRITE_DATABASE(HITS, to);
-      });
-    }
-    else {
-      WRITE_DATABASE(HITS, to);
-    }
-  };
-}
-
-function TODB_HIT_EXPORT (id) {
-  const transaction = TODB.transaction([`requester`]);
-  const objectStore = transaction.objectStore(`requester`);
-  const request = objectStore.get(id);
-
-  request.onsuccess = function (event) {
-    if (request.result) {
-      VB_EXPORT(request.result);
-    }
-    else {
-      VB_EXPORT({attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0});
-    }
-  };
-}
 
 // HIT Finder IndexedDB
 let HFDB; 
@@ -184,12 +27,51 @@ HFDB_request.onupgradeneeded = function (event) {
   }
 };
 
-function GET_RESULTS (MATCH) {
-  const transaction = HFDB.transaction([`hit`], 'readonly');
+function TURKOPTICON_DB (hits) {
+  const to = {};
+  const transaction = TODB.transaction([`requester`], `readonly`);
+  const objectStore = transaction.objectStore(`requester`);
+  
+  for (let i = 0; i < hits.length; i ++) {
+    const id = hits[i].reqid;
+    const request = objectStore.get(id);
+    
+    request.onsuccess = function (event) {
+      if (request.result) {
+        to[id] = request.result;
+      }
+      else {
+        to[id] = {attrs: {comm: `0.00`, fair: `0.00`, fast: `0.00`, pay: `0.00`}, reviews: 0, tos_flags: 0};
+      }
+    };
+  }
+
+  transaction.oncomplete = function (event) {
+    WRITE_DATABASE(hits, to);
+  };
+}
+
+function TODB_HIT_EXPORT (id) {
+  const transaction = TODB.transaction([`requester`]);
+  const objectStore = transaction.objectStore(`requester`);
+  const request = objectStore.get(id);
+
+  request.onsuccess = function (event) {
+    if (request.result) {
+      HIT_EXPORT(request.result);
+    }
+    else {
+      HIT_EXPORT({attrs: {comm: `0.00`, fair: `0.00`, fast: `0.00`, pay: `0.00`}, reviews: 0, tos_flags: 0});
+    }
+  };
+}
+
+function GET_RESULTS (match) {
+  const transaction = HFDB.transaction([`hit`], `readonly`);
   const objectStore = transaction.objectStore(`hit`);
   
   objectStore.getAll().onsuccess = function (event) {
-    FILTER_RESULTS(MATCH, event.target.result);
+    FILTER_RESULTS(match, event.target.result);
   };
 }
 
@@ -205,73 +87,143 @@ function FILTER_RESULTS (MATCH, RESULTS) {
     if (hit.title.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
     if (hit.groupid.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
     if (hit.reward.toLowerCase().indexOf(match) !== -1)  {filtered.push(hit); continue;}
-    /*
-    if (hit.reqname.toLowerCase() === match) {filtered.push(hit); continue;}
-    if (hit.reqid.toLowerCase()   === match) {filtered.push(hit); continue;}
-    if (hit.title.toLowerCase()   === match) {filtered.push(hit); continue;}
-    if (hit.groupid.toLowerCase() === match) {filtered.push(hit); continue;}
-    if (hit.reward.toLowerCase()  === match) {filtered.push(hit); continue;}
-    */
   }
   
   TURKOPTICON_DB(filtered);
 }
 
-function WRITE_DATABASE (HITS, TO) {
-  let html = '';
-  console.log(TO);
-
-  for (let i = 0; i < HITS.length; i ++) {
-    const hit = HITS[i]; DB_HITS[hit.groupid] = hit;
-    const tr_color = TO_COLOR(TO[hit.reqid].attrs.pay);
+function WRITE_DATABASE (hits, to) {
+  let html = ``; hits.sort( (a, b) => b.seen - a.seen);
+  
+  for (let i = 0; i < hits.length; i ++) {
+    const hit = hits[i]; HITS[hit.groupid] = hit;
+    const tr_color = TO_COLOR(to[hit.reqid].attrs.pay);
         
     html += 
-      `<tr class="${tr_color}">` +
+    `<tr class="${tr_color}">` +
       // Date
-        `<td class="text-center" data-toggle="tooltip" data-placement="right" data-container="body" title="${new Date(hit.seen).toString()}">${hit.date}</td>` +
+      `<td class="text-center" data-toggle="tooltip" data-placement="right" data-container="body" title="${new Date(hit.seen)}">${FORMAT_DATE(hit.seen)}</td>` +
       // Requester
-        `<td>` +
-          `<a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
-        `</td>` +
+      `<td>` +
+        `<a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
+      `</td>` +
       // Project
-      `  <td>` +
-      `    <div class="btn-group btn-group-xs">` +
-      `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
-      `        Export <span class="caret"></span>` +
-      `      </button>` +
-      `      <ul class="dropdown-menu">` +
-      `        <li><a class="vb" data-key="${hit.groupid}">Forum</a></li>` +
-      `        <li><a class="vb_th" data-key="${hit.groupid}">TH Direct</a></li>` +
-      `        <li><a class="vb_mtc" data-key="${hit.groupid}">MTC Direct</a></li>` +
-      `      </ul>` +
-      `    </div>` +
-      `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${hit.quals.replace(/; /g, `;<br>`)}">${hit.title}</a>` +
-      `  </td>` +
+      `<td>` +
+        `<div class="btn-group btn-group-xxs">` +
+          `<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
+            `Export <span class="caret"></span>` +
+          `</button>` +
+          `<ul class="dropdown-menu">` +
+            `<li><a class="hit_export" data-type="vb" data-key="${hit.groupid}">Forum</a></li>` +
+            `<li><a class="hit_export" data-type="vb_th" data-key="${hit.groupid}">TH Direct</a></li>` +
+            `<li><a class="hit_export" data-type="vb_mtc" data-key="${hit.groupid}">MTC Direct</a></li>` +
+          `</ul>` +
+        `</div> ` +
+        `<a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${hit.quals.replace(/; /g, `;<br>`)}">${hit.title}</a>` +
+      `</td>` +
       // Accept and Reward
-      `  <td class="text-center"><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+      `<td class="text-center"><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
       // TO
-      `  <td class="text-center">` +
-      `    <a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" ` +
-      `title="Pay: ${TO[hit.reqid].attrs.pay} Fair: ${TO[hit.reqid].attrs.fair}<br>Comm: ${TO[hit.reqid].attrs.comm} Fast: ${TO[hit.reqid].attrs.fast}<br>Reviews: ${TO[hit.reqid].reviews} ToS: ${TO[hit.reqid].tos_flags}">${TO[hit.reqid].attrs.pay}</a>` +
-      `  </td>` +
+      `<td class="text-center">` +
+        `<a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" ` +
+        `title="Pay: ${to[hit.reqid].attrs.pay} Fair: ${to[hit.reqid].attrs.fair}<br>Comm: ${to[hit.reqid].attrs.comm} Fast: ${to[hit.reqid].attrs.fast}<br>Reviews: ${to[hit.reqid].reviews} ToS: ${to[hit.reqid].tos_flags}">${to[hit.reqid].attrs.pay}</a>` +
+      `</td>` +
       // Masters
-      `  <td class="text-center">${hit.masters ? `Y` : `N`}</td>` +
-      `</tr>`
+      `<td class="text-center">${hit.masters ? `Y` : `N`}</td>` +
+    `</tr>`
     ;
   }
 
-  document.getElementById(`shown`).textContent = HITS.length;
+  document.getElementById(`shown`).textContent = hits.length;
   document.getElementById(`results`).innerHTML = html;
-  $('[data-toggle="tooltip"]').tooltip();
+  $(document.querySelectorAll(`[data-toggle="tooltip"]`)).tooltip();
 }
 
 function TO_COLOR (rating) {
-  let color = 'toLow';
-  if (rating > 1.99) {color = 'toAverage';}
-  if (rating > 2.99) {color = 'toGood';}
-  if (rating > 3.99) {color = 'toHigh';}
-  if (rating < 0.01) {color = 'toNone';}
+  let color = `toLow`;
+  if (rating > 1.99) {color = `toAverage`;}
+  if (rating > 2.99) {color = `toGood`;}
+  if (rating > 3.99) {color = `toHigh`;}
+  if (rating < 0.01) {color = `toNone`;}
   return color;
+}
+
+function FORMAT_DATE (date) {
+  const d = new Date(date)
+  const mm = d.getMonth() + 1 > 10 ? d.getMonth() + 1 : `0${d.getMonth() + 1}`;
+  const dd = d.getDate() > 10 ? d.getDate() : `0${d.getDate()}`;
+  const yy = d.getFullYear();
+  return `${mm}/${dd}/${yy}`;
+}
+
+function HIT_EXPORT (to) {
+  const hit = HITS[EXPORT.key];
+  
+  function attr (type, rating) {
+    let color = `#B30000`;
+    if (rating > 1.99) {color = `#B37400`;}
+    if (rating > 2.99) {color = `#B3B300`;}
+    if (rating > 3.99) {color = `#00B300`;}
+    if (rating < 0.01) {color = `grey`; rating = `N/A`;}
+    return `[b][${type}: [color=${color}]${rating}[/color]][/b]`;
+  }
+  
+  const template =
+  `[table][tr][td][b]Title:[/b] [url=${hit.prevlink}]${hit.title}[/url] | [url=${hit.pandlink}]PANDA[/url]\n` +
+  `[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])\n` +
+  `[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/url]:[/b] ` +
+  `${attr(`Pay`, to.attrs.pay)} ${attr(`Fair`, to.attrs.fair)} ` +
+  `${attr(`Comm`, to.attrs.comm)} ${attr(`Fast`, to.attrs.fast)} ` +
+  `[b][Reviews: ${to.reviews}][/b] ` +
+  `[b][ToS: ${to.tos_flags === 0 ? `[color=green]${to.tos_flags}` : `[color=red]${to.tos_flags}`}[/color]][/b]\n` +
+  `[b]Description:[/b] ${hit.desc}\n` +
+  `[b]Time:[/b] ${hit.time}\n` +
+  `[b]HITs Available:[/b] ${hit.avail}\n` +
+  `[b]Reward:[/b] [color=green][b]${hit.reward}[/b][/color]\n` +
+  `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]\n` +
+  `[tr][td][center][size=2]HIT Finder Database last saw this HIT on [b]${new Date(hit.seen).toString()}[/b][/size][/center][/td][/tr][/table]`
+  ;
+  
+  const direct_template =
+  `<p>[table][tr][td][b]Title:[/b] [url=${hit.prevlink}]${hit.title}[/url] | [url=${hit.pandlink}]PANDA[/url]</p>` +
+  `<p>[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])</p>` +
+  `<p>[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/url]:[/b] ` +
+  `${attr(`Pay`, to.attrs.pay)} ${attr(`Fair`, to.attrs.fair)} ` +
+  `${attr(`Comm`, to.attrs.comm)} ${attr(`Fast`, to.attrs.fast)} ` +
+  `[b][Reviews: ${to.reviews}][/b] ` +
+  `[b][ToS: ${to.tos_flags === 0 ? `[color=green]${to.tos_flags}` : `[color=red]${to.tos_flags}`}[/color]][/b]\n</p>` +
+  `<p>[b]Description:[/b] ${hit.desc}</p>` +
+  `<p>[b]Time:[/b] ${hit.time}</p>` +
+  `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
+  `<p>[b]Reward:[/b] [color=green][b]${hit.reward}[/b][/color]</p>` +
+  `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
+  `<p>[tr][td][center][size=2]HIT Finder Database last saw this HIT on [b]${new Date(hit.seen).toString()}[/b][/size]</p>` +
+  `<p>[size=2]HIT posted from [url=http://mturksuite.com/]Mturk Suite[/url] v${chrome.runtime.getManifest().version}[/size][/center][/td][/tr][/table]</p>`
+  ;
+
+  switch (EXPORT.type) {
+    case `vb`: COPY_TO_CLIP(template, `HIT export has been copied to your clipboard.`); break;
+    case `vb_th`: DIRECT_TH(direct_template); break;
+    case `vb_mtc`: DIRECT_MTC(direct_template); break;
+  }
+}
+
+function DIRECT_TH (template) {
+  const confirm_post = prompt(`Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok" or hit "Enter"`, ``);
+  if (confirm_post !== null) chrome.runtime.sendMessage({msg: `send_th`, data: `${template}<p>${confirm_post}</p>`});
+}
+
+function DIRECT_MTC (template) {
+  const confirm_post = prompt(`Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok" or hit "Enter"`, ``);
+  if (confirm_post !== null) chrome.runtime.sendMessage({msg: `send_mtc`, data: `${template}<p>${confirm_post}</p>`});
+}
+
+function COPY_TO_CLIP (string, message) {
+  $(`body`).append(`<textarea id="clipboard" style="opacity: 0;">${string}</textarea>`);
+  $(`#clipboard`).select();
+  document.execCommand(`Copy`);
+  $(`#clipboard`).remove();
+  alert(message);
 }
 
 document.addEventListener(`click`, function (event) {
@@ -279,5 +231,11 @@ document.addEventListener(`click`, function (event) {
   
   if (element.matches(`#search`)) {
     GET_RESULTS(document.getElementById(`matching`).value);
+  }
+  
+  if (element.matches(`.hit_export`)) {
+    EXPORT.key = element.dataset.key;
+    EXPORT.type = element.dataset.type;
+    TODB_HIT_EXPORT(HITS[EXPORT.key].reqid);
   }
 });

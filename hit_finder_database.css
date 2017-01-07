@@ -19,11 +19,35 @@
   font-weight: bold;
 }
 
-.vb, .vb_th, .vb_mtc, .rt_block, .rt_include {
+.hit_export {
   cursor: pointer;
 }
 
 select {
   width: 100%;
   height: 30px;
+}
+
+.panel-heading {
+  padding: 5px 15px !important;
+}
+
+.table-extra-condensed > tbody > tr > th,
+.table-extra-condensed > tfoot > tr > th,
+.table-extra-condensed > thead > tr > th {
+  padding: 0px 2px !important;
+}
+
+.table-extra-condensed > tbody > tr > td,
+.table-extra-condensed > tfoot > tr > td,
+.table-extra-condensed > thead > tr > td {
+  padding: 1px 2px !important;
+}
+
+.btn-group-xxs > .btn,
+.btn-xxs {
+  padding: 1px 2px !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  border-radius: 3px !important;
 }
