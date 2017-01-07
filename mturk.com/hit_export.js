@@ -1,7 +1,7 @@
 const HITS = {};
 const EXPORT = {key: null, type: null};
 
-function HIT_EXPORT() {
+function HIT_EXPORT () {
   if (document.querySelector(`a[href*="roupId="]`)) {
     HIT_EXPORT_MAIN();
   }
