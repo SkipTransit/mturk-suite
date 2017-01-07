@@ -482,7 +482,7 @@ HFDB_request.onsuccess = function (event) {
   
   const transaction = HFDB.transaction([`hit`], `readonly`).objectStore(`hit`).indexNames
   const check = $.map(transaction, value => value);
-  if (check.indexOf(`date`) === -1) {
+  if (check.indexOf(`seen`) === -1) {
     console.log(`no date`);
     HFDB.close();
     indexedDB.deleteDatabase(`HFDB`);
@@ -494,7 +494,7 @@ HFDB_request.onupgradeneeded = function (event) {
   const HFDB = event.target.result;
   
   const createObjectStore = HFDB.createObjectStore(`hit`, {keyPath: `groupid`});
-  for (let index of [`reqid`, `reqname`, `title`, `reward`, `date`]) {
+  for (let index of [`reqid`, `reqname`, `title`, `reward`, `seen`]) {
     createObjectStore.createIndex(index, index, {unique: false});
   }
 };
