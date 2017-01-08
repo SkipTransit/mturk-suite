@@ -13,7 +13,7 @@ function TURKOPTICON_WRITE (data) {
   function to (id) {
     const html = 
     `<div style="float:left;">` +
-      `<div class="MTS-circle" style="background-color: ${color(data[id].attrs.pay)};">TO</div>` +
+      `<div class="MTS-circle ${color(data[id].attrs.pay)}">TO</div>` +
       `<div class="MTS-ratings">` +
         rating(`Fair`, data[id].attrs.fair) +
         rating(`Fast`, data[id].attrs.fast) +
@@ -32,6 +32,7 @@ function TURKOPTICON_WRITE (data) {
   
   function rating (type, rating) {
     let html = ``;
+    
     if (rating > 0.01) {
       html =
       `<div style="display: table; width: 100%; cursor: default; height: 25px;">` +
@@ -39,7 +40,7 @@ function TURKOPTICON_WRITE (data) {
         `<div style="display: table-cell; width:20%;">${rating} / 5</div>` +
         `<div style="display: table-cell; width:60%;">` +
           `<div style="width: 100%; height: 12px; border: 1px solid; border-radius: 3px; overflow: hidden;">` +
-            `<div style="height: 100%; background-color: ${color(rating)}; user-select: none; width: ${rating / 5 * 100}%;"></div>` +
+            `<div class="${color(rating)}" style="height: 100%; user-select: none; width: ${rating / 5 * 100}%;"></div>` +
           `</div>` +
         `</div>` +
       `</div>`;
@@ -58,12 +59,11 @@ function TURKOPTICON_WRITE (data) {
   }
   
   function color (rating) {
-    let color = `255, 0, 0, 0.65`;
-    if (rating > 1.99) {color = `255, 140, 0, 0.65`;}
-    if (rating > 2.99) {color = `255, 255, 0, 0.65`;}
-    if (rating > 3.99) {color = `0, 255, 0, 0.65`;}
-    if (rating < 0.01) {color = `160, 160, 160, 0.65`;}
-    return `rgba(${color})`;
+    if (rating > 3.99) return `MTS-toHigh`;
+    if (rating > 2.99) return `MTS-toGood`;
+    if (rating > 1.99) return `MTS-toAverage`;
+    if (rating > 0.01) return `MTS-toLow`;
+    return `MTS-toNone`;
   }
   
   for (let element of document.getElementsByClassName(`requesterIdentity`)) {
