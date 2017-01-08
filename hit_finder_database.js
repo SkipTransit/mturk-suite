@@ -256,14 +256,15 @@ function COPY_TO_CLIP (string, message) {
 function IMPORT_HFDB (file) {  
   const reader = new FileReader();
   reader.onload = function () {
-    const hits = VALID_JSON(reader.result);
-    
-    if (hits) {
+    const json = VALID_JSON(reader.result);
+    console.log(json);
+    if (json) {
       const transaction = HFDB.transaction([`hit`], `readwrite`);
       const objectStore = transaction.objectStore(`hit`);
       
-      for (let key in hits) {
-        const hit = hits[key];
+      for (let i = 0; i < json.HITS.length; i ++) { 
+        const hit = json.HITS[i];
+        
         if (HAS_PROPERTY(hit, [`reqid`, `reqname`, `title`, `desc`, `time`, `reward`, `groupid`, `quals`, `masters`, `seen`])) {
           objectStore.put(hit);
           console.log(`Valid HIT: Imported`);
@@ -285,12 +286,7 @@ function EXPORT_HFDB () {
   const objectStore = transaction.objectStore(`hit`);
 
   objectStore.getAll().onsuccess = function (event) {
-    const data = {};
-
-    for (let i = 0; i < event.target.result.length; i ++) {
-      const result = event.target.result[i]; 
-      data[result.groupid] = result;
-    }
+    const data = {HITS: event.target.result};
     
     document.getElementById(`export_link`).href = window.URL.createObjectURL(new Blob([JSON.stringify(data)], {'type': `application/json`}));
     document.getElementById(`export_link`).download = `HFDB_${FORMAT_DATE(new Date().getTime())}.json`;
@@ -344,5 +340,3 @@ document.addEventListener(`change`, function (event) {
     IMPORT_HFDB(element.files[0]);
   }
 });
-
-
