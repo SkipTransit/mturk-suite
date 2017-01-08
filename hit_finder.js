@@ -331,8 +331,7 @@ function PARSE_NEW_HITS (data) {
       
       masters: false,
       new: true,
-      seen: new Date().getTime(),
-      date: new Date().toISOString().slice(0,10)
+      seen: new Date().getTime()
     }
     
     const key = obj.groupid;
@@ -1359,7 +1358,18 @@ function HIT_FINDER_DB () {
   const objectStore = transaction.objectStore(`hit`);
 
   for (let i = 0; i < KEYS.length; i ++) {
-    const key = KEYS[i];
-    objectStore.put(HITS[key]);
+    const hit = HITS[KEYS[i]];
+    objectStore.put({
+      reqid: hit.reqid,
+      reqname: hit.reqname,
+      title: hit.title,
+      desc: hit.desc,
+      time: hit.time,
+      reward: hit.reward,
+      groupid: hit.groupid,
+      quals: hit.quals,
+      masters: hit.masters,
+      seen: hit.seen
+    });
   }
 }
