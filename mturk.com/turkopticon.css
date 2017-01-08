@@ -1,4 +1,4 @@
-.circle {
+.MTS-circle {
   cursor: default;
   width: 18px;
   height: 18px;
@@ -11,11 +11,11 @@
   margin-right: 2px;
 }
 
-.circle:hover + .ratings, .ratings:hover {
+.MTS-circle:hover + .MTS-ratings, .MTS-ratings:hover {
   display: block;
 }
 
-.ratings {
+.MTS-ratings {
   width: 300px;
   position:absolute;
   display: none;
