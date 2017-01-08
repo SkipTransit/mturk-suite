@@ -155,7 +155,7 @@ function TO_COLOR (rating) {
 }
 
 function FORMAT_DATE (date) {
-  const d = new Date(date)
+  const d = new Date(date);
   const mm = d.getMonth() + 1 > 10 ? d.getMonth() + 1 : `0${d.getMonth() + 1}`;
   const dd = d.getDate() > 10 ? d.getDate() : `0${d.getDate()}`;
   const yy = d.getFullYear();
@@ -257,7 +257,7 @@ function IMPORT_HFDB (file) {
   const reader = new FileReader();
   reader.onload = function () {
     const json = VALID_JSON(reader.result);
-    console.log(json);
+
     if (json) {
       const transaction = HFDB.transaction([`hit`], `readwrite`);
       const objectStore = transaction.objectStore(`hit`);
@@ -275,7 +275,7 @@ function IMPORT_HFDB (file) {
       }
     }
     else {
-      alert(`File is not a valid HIT Finder Database file.`)
+      alert(`File is not a valid HIT Finder Database file.`);
     }
   };
   reader.readAsText(file);
