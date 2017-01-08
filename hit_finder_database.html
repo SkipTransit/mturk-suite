@@ -12,11 +12,16 @@
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
   </head>
   <body style="padding: 3px;">
+    <input id="import_file" type="file" class="hide" />
+    <a id="export_link" class="hide" href download></a>
     
-    <!-- Logged HITs -->
     <div class="panel panel-primary">
       <div class="panel-heading toggle">
-        <b>Search</b>
+        <b>HIT Finder Database</b>
+        <div class="pull-right">
+          <button id="import" type="button" class="btn btn-xxs btn-default">Import</button>
+          <button id="export" type="button" class="btn btn-xxs btn-default">Export</button>
+        </div>
       </div>
       <div class="panel-body row">
         
@@ -61,7 +66,7 @@
     <!-- Logged HITs -->
     <div class="panel panel-primary">
       <div class="panel-heading toggle">
-        <b>HIT Finder Database</b>
+        <b>Results</b>
         <span class="pull-right" style="font-size: 70%;"><b>Results Found: </b><span id="shown">0</span></span>
       </div>
 
