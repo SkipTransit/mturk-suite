@@ -111,7 +111,7 @@ function WRITE_DATABASE (hits, to) {
       `<td class="text-center" data-toggle="tooltip" data-placement="right" data-container="body" title="${new Date(hit.seen)}">${FORMAT_DATE(hit.seen)}</td>` +
       // Requester
       `<td>` +
-        `<a href="${hit.reqlink}" target="_blank">${hit.reqname}</a>` +
+        `<a href="https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}" target="_blank">${hit.reqname}</a>` +
       `</td>` +
       // Project
       `<td>` +
@@ -125,10 +125,10 @@ function WRITE_DATABASE (hits, to) {
             `<li><a class="hit_export" data-type="vb_mtc" data-key="${hit.groupid}">MTC Direct</a></li>` +
           `</ul>` +
         `</div> ` +
-        `<a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${hit.quals.replace(/; /g, `;<br>`)}">${hit.title}</a>` +
+        `<a href="https://www.mturk.com/mturk/preview?groupId=${hit.groupid}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${hit.quals.replace(/; /g, `;<br>`)}">${hit.title}</a>` +
       `</td>` +
       // Accept and Reward
-      `<td class="text-center"><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
+      `<td class="text-center"><a href="https://www.mturk.com/mturk/previewandaccept?groupId=${hit.groupid}" target="_blank">${hit.reward}</a></td>` +
       // TO
       `<td class="text-center">` +
         `<a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" ` +
@@ -198,7 +198,7 @@ function HIT_EXPORT (to) {
   }
   
   const template =
-  `[table][tr][td][b]Title:[/b] [url=${hit.prevlink}]${hit.title}[/url] | [url=${hit.pandlink}]PANDA[/url]\n` +
+  `[table][tr][td][b]Title:[/b] [url=https://www.mturk.com/mturk/preview?groupId=${hit.groupid}]${hit.title}[/url] | [url=https://www.mturk.com/mturk/previewandaccept?groupId=${hit.groupid}]PANDA[/url]\n` +
   `[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])\n` +
   `[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/url]:[/b] ` +
   `${attr(`Pay`, to.attrs.pay)} ${attr(`Fair`, to.attrs.fair)} ` +
@@ -207,14 +207,13 @@ function HIT_EXPORT (to) {
   `[b][ToS: ${to.tos_flags === 0 ? `[color=green]${to.tos_flags}` : `[color=red]${to.tos_flags}`}[/color]][/b]\n` +
   `[b]Description:[/b] ${hit.desc}\n` +
   `[b]Time:[/b] ${hit.time}\n` +
-  `[b]HITs Available:[/b] ${hit.avail}\n` +
   `[b]Reward:[/b] [color=green][b]${hit.reward}[/b][/color]\n` +
   `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]\n` +
   `[tr][td][center][size=2]HIT Finder Database last saw this HIT on [b]${new Date(hit.seen).toString()}[/b][/size][/center][/td][/tr][/table]`
   ;
   
   const direct_template =
-  `<p>[table][tr][td][b]Title:[/b] [url=${hit.prevlink}]${hit.title}[/url] | [url=${hit.pandlink}]PANDA[/url]</p>` +
+  `<p>[table][tr][td][b]Title:[/b] [url=https://www.mturk.com/mturk/preview?groupId=${hit.groupid}]${hit.title}[/url] | [url=https://www.mturk.com/mturk/previewandaccept?groupId=${hit.groupid}]PANDA[/url]</p>` +
   `<p>[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])</p>` +
   `<p>[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/url]:[/b] ` +
   `${attr(`Pay`, to.attrs.pay)} ${attr(`Fair`, to.attrs.fair)} ` +
@@ -223,7 +222,6 @@ function HIT_EXPORT (to) {
   `[b][ToS: ${to.tos_flags === 0 ? `[color=green]${to.tos_flags}` : `[color=red]${to.tos_flags}`}[/color]][/b]\n</p>` +
   `<p>[b]Description:[/b] ${hit.desc}</p>` +
   `<p>[b]Time:[/b] ${hit.time}</p>` +
-  `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
   `<p>[b]Reward:[/b] [color=green][b]${hit.reward}[/b][/color]</p>` +
   `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
   `<p>[tr][td][center][size=2]HIT Finder Database last saw this HIT on [b]${new Date(hit.seen).toString()}[/b][/size]</p>` +
@@ -255,6 +253,68 @@ function COPY_TO_CLIP (string, message) {
   alert(message);
 }
 
+function IMPORT_HFDB (file) {  
+  const reader = new FileReader();
+  reader.onload = function () {
+    const hits = VALID_JSON(reader.result);
+    
+    if (hits) {
+      const transaction = HFDB.transaction([`hit`], `readwrite`);
+      const objectStore = transaction.objectStore(`hit`);
+      
+      for (let key in hits) {
+        const hit = hits[key];
+        if (HAS_PROPERTY(hit, [`reqid`, `reqname`, `title`, `desc`, `time`, `reward`, `groupid`, `quals`, `masters`, `seen`])) {
+          objectStore.put(hit);
+          console.log(`Valid HIT: Imported`);
+        }
+        else {
+          console.error(`Invalid HIT: Not Imported`);
+        }
+      }
+    }
+    else {
+      alert(`File is not a valid HIT Finder Database file.`)
+    }
+  };
+  reader.readAsText(file);
+}
+
+function EXPORT_HFDB () {
+  const transaction = HFDB.transaction([`hit`], `readonly`);
+  const objectStore = transaction.objectStore(`hit`);
+
+  objectStore.getAll().onsuccess = function (event) {
+    const data = {};
+
+    for (let i = 0; i < event.target.result.length; i ++) {
+      const result = event.target.result[i]; 
+      data[result.groupid] = result;
+    }
+    
+    document.getElementById(`export_link`).href = window.URL.createObjectURL(new Blob([JSON.stringify(data)], {'type': `application/json`}));
+    document.getElementById(`export_link`).download = `HFDB_${FORMAT_DATE(new Date().getTime())}.json`;
+    document.getElementById(`export_link`).click();
+  };
+}
+
+function VALID_JSON (data) {
+  try {
+    const json = JSON.parse(data);
+    return json;
+  }
+  catch (e) {
+    return false;
+  }
+}
+
+function HAS_PROPERTY (obj, prop) {
+  for (let i = 0; i < prop.length; i++) {
+    if (!obj.hasOwnProperty(prop[i])) return false;
+  }
+  return true;
+}
+
 document.addEventListener(`click`, function (event) {
   const element = event.target;
   
@@ -262,10 +322,26 @@ document.addEventListener(`click`, function (event) {
     GET_RESULTS(document.getElementById(`matching`).value);
   }
   
+  if (element.matches(`#import`)) {
+    document.getElementById(`import_file`).click();
+  }
+  
+  if (element.matches(`#export`)) {
+    EXPORT_HFDB();
+  }
+  
   if (element.matches(`.hit_export`)) {
     EXPORT.key = element.dataset.key;
     EXPORT.type = element.dataset.type;
     TODB_HIT_EXPORT(HITS[EXPORT.key].reqid);
+  }
+});
+
+document.addEventListener(`change`, function (event) {
+  const element = event.target;
+  
+  if (element.matches(`#import_file`)) {
+    IMPORT_HFDB(element.files[0]);
   }
 });
 
