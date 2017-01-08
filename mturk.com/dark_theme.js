@@ -81,7 +81,7 @@ html > body {
   background-color : #16181d !important;
 }
 
-.ratings {
+.MTS-ratings {
   color            : #FFFFFF !important;
   background-color : #16181d !important;
   border-style: solid;
