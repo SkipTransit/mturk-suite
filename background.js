@@ -265,6 +265,7 @@ chrome.storage.local.get(`hits`, function (data) {
   hits = data.hits || {}; update_tpe();
   
   chrome.webRequest.onBeforeRequest.addListener( function (data) {
+    //console.log(data);
     if (data.requestBody) {
       requests[data.requestId] = {
         hitid : data.requestBody.formData.hitId ? data.requestBody.formData.hitId[0] : null,
@@ -280,6 +281,7 @@ chrome.storage.local.get(`hits`, function (data) {
   }, { urls: [`https://www.mturk.com/mturk/submit`, `https://www.mturk.com/mturk/externalSubmit*`] }, [`requestBody`]);
   
   chrome.webRequest.onCompleted.addListener( function (data) {
+    //console.log(data);
     if (data.statusCode == `200`) {
       if (requests[data.requestId].hitid) {
         const key = requests[data.requestId].hitid;
@@ -318,6 +320,7 @@ chrome.storage.local.get(`hits`, function (data) {
 });
 
 function ADD_HIT (data) {
+  //console.log(data);
   if (!hits[data.hitid]) {
     hits[data.hitid] = {
       reqname   : data.reqname,
