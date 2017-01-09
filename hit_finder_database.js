@@ -229,29 +229,30 @@ function HIT_EXPORT (to) {
   ;
 
   switch (EXPORT.type) {
-    case `vb`: COPY_TO_CLIP(template, `HIT export has been copied to your clipboard.`); break;
-    case `vb_th`: DIRECT_TH(direct_template); break;
-    case `vb_mtc`: DIRECT_MTC(direct_template); break;
+    case `vb`: EXPORT_TO_CLIP(template, `HIT export has been copied to your clipboard.`); break;
+    case `vb_th`: EXPORT_TO_TH(direct_template); break;
+    case `vb_mtc`: EXPORT_TO_MTC(direct_template); break;
   }
 }
 
-function DIRECT_TH (template) {
-  const confirm_post = prompt(`Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok" or hit "Enter"`, ``);
-  if (confirm_post !== null) chrome.runtime.sendMessage({msg: `send_th`, data: `${template}<p>${confirm_post}</p>`});
-}
-
-function DIRECT_MTC (template) {
-  const confirm_post = prompt(`Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok" or hit "Enter"`, ``);
-  if (confirm_post !== null) chrome.runtime.sendMessage({msg: `send_mtc`, data: `${template}<p>${confirm_post}</p>`});
-}
-
-function COPY_TO_CLIP (string, message) {
-  $(`body`).append(`<textarea id="clipboard" style="opacity: 0;">${string}</textarea>`);
+function EXPORT_TO_CLIP (template, message) {
+  $(`body`).append(`<textarea id="clipboard" style="opacity: 0;">${template}</textarea>`);
   $(`#clipboard`).select();
   document.execCommand(`Copy`);
   $(`#clipboard`).remove();
   alert(message);
 }
+
+function EXPORT_TO_TH (template) {
+  const confirm_post = prompt(`Do you want to post this HIT to TurkerHub.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok" or hit "Enter"`, ``);
+  if (confirm_post !== null) chrome.runtime.sendMessage({msg: `send_th`, data: `${template}<p>${confirm_post}</p>`});
+}
+
+function EXPORT_TO_MTC (template) {
+  const confirm_post = prompt(`Do you want to post this HIT to MturkCrowd.com?\n\nWant to add a comment about your HIT? Fill out the box below.\n\nTo send the HIT, click "Ok" or hit "Enter"`, ``);
+  if (confirm_post !== null) chrome.runtime.sendMessage({msg: `send_mtc`, data: `${template}<p>${confirm_post}</p>`});
+}
+
 
 function IMPORT_HFDB (file) {  
   const reader = new FileReader();
