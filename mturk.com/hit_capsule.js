@@ -1,11 +1,11 @@
 function HIT_CAPSULE () {
   const reqname = document.getElementsByClassName(`capsule_field_text`)[0].textContent;
   const reqid =
-        document.getElementsByName(`requesterId`)[0] ?
-        document.getElementsByName(`requesterId`)[0].value :
-        document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/) ?
-        document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)[1]:
-        null
+    document.getElementsByName(`requesterId`)[0] ?
+    document.getElementsByName(`requesterId`)[0].value :
+    document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/) ?
+    document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)[1] :
+    null
   ;
   
   const aa = document.getElementsByName(`hitAutoAppDelayInSeconds`)[0].value;
