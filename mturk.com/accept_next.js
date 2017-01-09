@@ -1,13 +1,7 @@
 function ACCEPT_NEXT () {
   chrome.storage.local.get(`user`, function (data) {
     const user = data.user || {accept_next: true};
-
-    if (user.accept_next) {
-      document.getElementsByName(`autoAcceptEnabled`)[0].checked = true;
-    }
-    else {
-      document.getElementsByName(`autoAcceptEnabled`)[0].checked = false;
-    }
+    document.getElementsByName(`autoAcceptEnabled`)[0].checked = user.accept_next ? true : false;
   });
 }
 
