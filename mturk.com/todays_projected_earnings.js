@@ -1,19 +1,18 @@
 function TODAYS_PROJECTED_EARNINGS () {
   chrome.storage.local.get(`tpe`, function (data) {
     const tpe = data.tpe || {tpe: 0, goal: 20};
-
     TPE_WRITE(tpe.tpe, tpe.goal);
   });
 }
 
 function TPE_WRITE (earnings, goal) {
   const html =
-      `<div>` +
-        `<div id="tpe_goal_outer">` +
-          `<div id="tpe_goal_inner" style="width: ${Number(earnings) / Number(goal) * 100}%;"></div>` +
-        `</div>` +
-        `<div id="tpe_earnings">$${Number(earnings).toFixed(2)}/${Number(goal).toFixed(2)}<div>` +
-      `</div>`
+    `<div>` +
+      `<div id="tpe_goal_outer">` +
+        `<div id="tpe_goal_inner" style="width: ${Number(earnings) / Number(goal) * 100}%;"></div>` +
+      `</div>` +
+      `<div id="tpe_earnings">$${Number(earnings).toFixed(2)}/${Number(goal).toFixed(2)}<div>` +
+    `</div>`
   ;
   
   if (document.getElementById(`tpe`)) {
@@ -41,21 +40,17 @@ function TPE_MENU_CLOSE () {
 
 if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
   chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
-    if (request.msg == `sync_tpe_done`) {
-      TPE_MENU_WRITE();
-    }
-    if (request.msg == `close_tpe_menu`) {
-      TPE_MENU_CLOSE();
+    switch (request.msg) {
+      case `sync_tpe_done`: TPE_MENU_WRITE(); break;
+      case `close_tpe_menu`: TPE_MENU_CLOSE(); break;
     }
   });
   
   chrome.storage.onChanged.addListener( function (changes) {
     for (let key in changes) {
       if (key === `tpe`) {
-        TPE_WRITE(
-          changes[key].newValue.tpe !== undefined ? changes[key].newValue.tpe : changes[key].oldValue.tpe,
-          changes[key].newValue.goal !== undefined ? changes[key].newValue.goal : changes[key].oldValue.goal
-        );
+        const newVal = changes[key].newValue, oldVal = changes[key].oldValue;
+        TPE_WRITE(newVal.tpe !== undefined ? newVal.tpe : oldVal.tpe, newVal.goal !== undefined ? newVal.goal : oldVal.goal);
       }
     }
   });
