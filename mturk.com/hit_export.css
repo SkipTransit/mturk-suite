@@ -1,4 +1,4 @@
-.export {
+.MTS-export {
   display: inline-block;
   font-weight: normal;
   text-align: center;
@@ -17,20 +17,20 @@
   margin-right: 3px;
 }
 
-.export:focus {
+.MTS-export:focus {
   outline: none;
 }
 
-.dropbtn:hover, .dropbtn:focus {
+.MTS-dropdown-btn:hover, ..MTS-dropdown-btn:focus {
   background-color: #3e8e41;
 }
 
-.dropdown {
+.MTS-dropdown {
   position: relative;
   display: inline-block;
 }
 
-.dropdown-content {
+.MTS-dropdown-content {
   display: none;
   position: absolute;
   background-color: #f9f9f9;
@@ -39,14 +39,14 @@
   z-index: 9999;
 }
 
-.dropdown-content a {
+.MTS-dropdown-content a {
   color: black;
   padding: 6px 16px;
   text-decoration: none;
   display: block;
 }
 
-.dropdown-content a:hover {
+.MTS-dropdown-content a:hover {
   cursor: pointer; 
   background-color: #f1f1f1
 }
