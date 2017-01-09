@@ -83,7 +83,7 @@ select {
   height: 30px;
 }
 
-.panel {
+.panel, .panel-top {
   margin-bottom: 5px !important;
 }
 
