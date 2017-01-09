@@ -169,10 +169,6 @@ $('html').on('click', '#advanced_settings', function () {
   SHOW_ADVANCED_SETTINGS();
 });
 
-$('html').on('click', '#save_advanced_settings', function () {
-  SAVE_ADVANCED_SETTINGS();
-});
-
 $('html').on('change', '#include_voice', function () {
   SPEAK(`This is my voice.`);
 });
@@ -232,8 +228,8 @@ function FIND () {
         `&pageSize=${CONFIG.size}` +
         `&minReward=${CONFIG.min_reward}` +
         `&qualifiedFor=${(CONFIG.qualified ? 'on' : 'off')}`
-  ;  
-  GET_HITS(url, PARSE_OLD_HITS);
+  ;
+    GET_HITS(url);
   }
   
   if (CONFIG.site_to_scan === `worker`) {
@@ -274,20 +270,19 @@ function FIND () {
   }
 }
 
-function GET_HITS (url, callback) {
+function GET_HITS (url) {
   const xhr = new XMLHttpRequest();
-  xhr.open('get', url, true);
+  xhr.open(`get`, url, true);
+  xhr.responseType = `document`;
   xhr.send();
   xhr.onload = function () {
-    if (this.status === 200) {
-      callback(this.response);
-    }
-    else {
-      console.log(`Error: ${this.status} | ${this.statusText}`);
-    }
+    if (this.status === 200)
+      PARSE_OLD_HITS(this.response);
+    else
+      console.error(`Error: ${this.status} | ${this.statusText}`);
   };
   xhr.onerror = function () {
-    console.log(`Error: ${this.status} | ${this.statusText}`);
+    console.error(`Error: ${this.status} | ${this.statusText}`);
   };
 }
 
@@ -332,7 +327,7 @@ function PARSE_NEW_HITS (data) {
       masters: false,
       new: true,
       seen: new Date().getTime()
-    }
+    };
     
     const key = obj.groupid;
     KEYS.push(key);
@@ -368,7 +363,7 @@ function PARSE_NEW_HITS (data) {
 function PARSE_OLD_HITS (data) {
   const ids = []; KEYS = [];
   
-  const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = data;
+  const doc = data;
   const hits = doc.querySelectorAll('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
   const logged_in = doc.querySelector(`a[href="/mturk/beginsignout"]`);
  
