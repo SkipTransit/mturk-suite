@@ -1,3 +1,5 @@
+"use strict";
+
 document.addEventListener('DOMContentLoaded', function () {
   SET_CONFIG();
   BLOCK_LIST_WRITE();
@@ -221,152 +223,58 @@ $('html').on('click', '.panel-heading.toggle', function () {
 function FIND () {
   clearTimeout(timeout);
   
-  if (CONFIG.site_to_scan === `mturk`) {
-  const  url = 
-        `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups` +
-        `&sortType=${SEARCH_TYPE()}` +
-        `&pageSize=${CONFIG.size}` +
-        `&minReward=${CONFIG.min_reward}` +
-        `&qualifiedFor=${(CONFIG.qualified ? 'on' : 'off')}`
-  ;
-    GET_HITS(url);
+  switch (CONFIG.site_to_scan) {
+    case `mturk`: GET_OLD(); break;
+    case `worker`: GET_NEW(); break;
   }
-  
-  if (CONFIG.site_to_scan === `worker`) {
-    $.ajax({
-      url: `https://worker.mturk.com/`,
-      type: `GET`,
-      data: {
-        page_size: CONFIG.size,
-        sort: CONFIG.sort_by === 'latest' ? `updated_desc` : CONFIG.sort_by === 'most' ? `num_hits_desc` : `reward_desc`,
-        filters : {
-          qualified: CONFIG.qualified ? true : false, 
-          masters: false,
-          min_reward: CONFIG.min_reward
-        }
-      },
-      statusCode: {
-        200: function (response) {
-          if ($.type(response) === `object`) {
-            PARSE_NEW_HITS(response);
-          }
-          else {
-            if (LOGGED_IN) {
-              LOGGED_IN = false;
-              SPEAK(`Attention, You are logged out.`);
-              $('.panel').removeClass('panel-primary').addClass('panel-danger');
-            }
-            $(`#total_scans`).text(TOTAL_SCANS ++);
-            timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
-          }
-        },
-        429: function () {
-          $(`#total_scans`).text(TOTAL_SCANS ++);
-          $(`#request_errors`).text(REQUEST_ERRORS ++);
-          timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
-        }
+}
+
+function GET_OLD () {
+  $.ajax({
+    url: `https://www.mturk.com/mturk/searchbar`,
+    type: `GET`,
+    data: {
+      selectedSearchType: `hitgroups`,
+      sortType: CONFIG.sort_by === `latest` ? `LastUpdatedTime:1` : CONFIG.sort_by === `most` ? `NumHITs:1` : `Reward:1`,
+      pageSize: CONFIG.size,
+      minReward: CONFIG.min_reward,
+      qualifiedFor: CONFIG.qualified ? `on` : `off`
+    }
+  }).then(PARSE_OLD, GET_ERROR);
+}
+
+function GET_NEW () {
+  $.ajax({
+    url: `https://worker.mturk.com/`,
+    type: `GET`,
+    data: {
+      page_size: CONFIG.size,
+      sort: CONFIG.sort_by === `latest` ? `updated_desc` : CONFIG.sort_by === `most` ? `num_hits_desc` : `reward_desc`,
+      filters : {
+        qualified: CONFIG.qualified ? true : false, 
+        masters: false,
+        min_reward: CONFIG.min_reward
       }
-    });
-  }
-}
-
-function GET_HITS (url) {
-  const xhr = new XMLHttpRequest();
-  xhr.open(`get`, url, true);
-  xhr.responseType = `document`;
-  xhr.send();
-  xhr.onload = function () {
-    if (this.status === 200)
-      PARSE_OLD_HITS(this.response);
-    else
-      console.error(`Error: ${this.status} | ${this.statusText}`);
-  };
-  xhr.onerror = function () {
-    console.error(`Error: ${this.status} | ${this.statusText}`);
-  };
-}
-
-function SEARCH_TYPE () {
-  if (CONFIG.sort_by === 'latest') {
-    return 'LastUpdatedTime%3A1';
-  }
-  if (CONFIG.sort_by === 'most') {
-    return 'NumHITs%3A1';
-  }
-  if (CONFIG.sort_by === 'reward') {
-    return 'Reward%3A1';
-  }
-}
-
-function PARSE_NEW_HITS (data) {
-  const ids = []; KEYS = [];
-
-  const hits = data.results;
-
-  for (let i = 0; i < hits.length; i ++) {
-    const hit = hits[i];
-    
-    const obj = {
-      reqid: hit.requester_id,
-      reqname: hit.requester_name,
-      reqlink: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit.requester_id}`,
-      title: hit.title,
-      desc: hit.description,
-      time: SECONDS_TO_STRING(hit.assignment_duration_in_seconds),
-      reward: `$${hit.monetary_reward.amount_in_dollars.toFixed(2)}`,
-      avail: hit.assignable_hits_count,
-      groupid: hit.hit_set_id,
-      prevlink: `https://www.mturk.com/mturk/preview?groupId=${hit.hit_set_id}`,
-      pandlink: `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.hit_set_id}`,
-      
-      quals:
-      hit.hit_requirements.length ?
-      hit.hit_requirements.map(obj => `${obj.qualification_type.name} ${obj.comparator} ${obj.qualification_values.map(val => val).join(`, `)};`).join(` `):
-      `None;`,
-      
-      masters: false,
-      new: true,
-      seen: new Date().getTime()
-    };
-    
-    const key = obj.groupid;
-    KEYS.push(key);
-    
-    if (ids.indexOf(obj.reqid) === -1) {
-      ids.push(obj.reqid);
-    } 
-    if (obj.quals.indexOf('Masters Exists') !== -1) {
-      obj.masters = true;
     }
-    if (HITS[key]) {
-      obj.new = false;
-    }
-    HITS[key] = obj;
-  }
-  
-  HIT_FINDER_DB();
-  
-  if (CONFIG.enable_to) {
-    TURKOPTICON_DB(ids);
-  }
-  else {
-    HITS_WRITE_LOGGED_IN(false);
-  }
-
-  if (!LOGGED_IN) {
-    LOGGED_IN = true;
-    SPEAK(`Attention, You are logged in.`);
-    $('.panel').removeClass('panel-danger').addClass('panel-primary');
-  }
+  }).then(PARSE_NEW, GET_ERROR);
 }
 
-function PARSE_OLD_HITS (data) {
+function GET_ERROR (result, status, xhr) {
+  console.error(status, xhr);
+  if (result.status === 429) {
+    $(`#total_scans`).text(TOTAL_SCANS ++);
+    $(`#request_errors`).text(REQUEST_ERRORS ++);
+  }
+  timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
+}
+
+function PARSE_OLD (result, status, xhr) {
   const ids = []; KEYS = [];
   
-  const doc = data;
+  const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
   const hits = doc.querySelectorAll('table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr');
   const logged_in = doc.querySelector(`a[href="/mturk/beginsignout"]`);
- 
+   
   const request_error = doc.querySelector(`.error_title`) ? doc.querySelector(`.error_title`).textContent.match(/You have exceeded/) ? true : false : false;
   if (request_error) {
     document.getElementById(`total_scans`).textContent = TOTAL_SCANS ++;
@@ -479,7 +387,83 @@ function PARSE_OLD_HITS (data) {
   }
 }
 
+function PARSE_NEW (result, status, xhr) {
+  console.log(status);
+  
+  if ($.type(result) !== `object`) {
+    if (LOGGED_IN) {
+      LOGGED_IN = false;
+      SPEAK(`Attention, You are logged out.`);
+      $('.panel').removeClass('panel-primary').addClass('panel-danger');
+    }
+    $(`#total_scans`).text(TOTAL_SCANS ++);
+    return timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
+  }
+
+  
+  const ids = []; KEYS = [];
+
+  const hits = result.results;
+
+  for (let i = 0; i < hits.length; i ++) {
+    const hit = hits[i];
+    
+    const obj = {
+      reqid: hit.requester_id,
+      reqname: hit.requester_name,
+      reqlink: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit.requester_id}`,
+      title: hit.title,
+      desc: hit.description,
+      time: SECONDS_TO_STRING(hit.assignment_duration_in_seconds),
+      reward: `$${hit.monetary_reward.amount_in_dollars.toFixed(2)}`,
+      avail: hit.assignable_hits_count,
+      groupid: hit.hit_set_id,
+      prevlink: `https://www.mturk.com/mturk/preview?groupId=${hit.hit_set_id}`,
+      pandlink: `https://www.mturk.com/mturk/previewandaccept?groupId=${hit.hit_set_id}`,
+      
+      quals:
+      hit.hit_requirements.length ?
+      hit.hit_requirements.map(obj => `${obj.qualification_type.name} ${obj.comparator} ${obj.qualification_values.map(val => val).join(`, `)};`).join(` `):
+      `None;`,
+      
+      masters: false,
+      new: true,
+      seen: new Date().getTime()
+    };
+    
+    const key = obj.groupid;
+    KEYS.push(key);
+    
+    if (ids.indexOf(obj.reqid) === -1) {
+      ids.push(obj.reqid);
+    } 
+    if (obj.quals.indexOf('Masters Exists') !== -1) {
+      obj.masters = true;
+    }
+    if (HITS[key]) {
+      obj.new = false;
+    }
+    HITS[key] = obj;
+  }
+  
+  HIT_FINDER_DB();
+  
+  if (CONFIG.enable_to) {
+    TURKOPTICON_DB(ids);
+  }
+  else {
+    HITS_WRITE_LOGGED_IN(false);
+  }
+
+  if (!LOGGED_IN) {
+    LOGGED_IN = true;
+    SPEAK(`Attention, You are logged in.`);
+    $('.panel').removeClass('panel-danger').addClass('panel-primary');
+  }
+}
+
 function HITS_WRITE_LOGGED_IN (data) {
+  
   let found_html = '', logged_html = '', hits_hidden = 0, logged = false;
   
   for (let i = 0; i < KEYS.length; i ++) {
@@ -549,7 +533,7 @@ function HITS_WRITE_LOGGED_IN (data) {
         `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${hit.quals.replace(/; /g, `;<br>`)}">${hit.title}</a>` +
         `  </td>` +
         // Tasks
-        (!logged ? `<td class="text-center">${hit.avail}</td>>` : ``) +
+        (!logged ? `<td class="text-center">${hit.avail}</td>` : ``) +
         // Accept and Reward
         `  <td class="text-center"><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
         // TO
@@ -571,15 +555,15 @@ function HITS_WRITE_LOGGED_IN (data) {
       logged_html += hit_write(data, true);
     }
   }
-  if (logged && CONFIG.new_hit) { NEW_HIT_SOUND(); }
-  $('#hits_found').text(KEYS.length);
-  $('#hits_hidden').text(hits_hidden);
-  $('#total_scans').text(TOTAL_SCANS ++);
-  $('#hits_logged').text(LOGGED_HITS);
-  $('#found_tbody').html(found_html);
-  $('#logged_tbody').prepend(logged_html);
+  if (logged && CONFIG.new_hit) NEW_HIT_SOUND();
+  document.getElementById(`hits_found`).textContent = KEYS.length ++;
+  document.getElementById(`hits_hidden`).textContent = hits_hidden;
+  document.getElementById(`total_scans`).textContent = TOTAL_SCANS ++;
+  document.getElementById(`hits_logged`).textContent = LOGGED_HITS;
+  document.getElementById(`found_tbody`).innerHTML = found_html;
+  document.getElementById(`logged_tbody`).insertAdjacentHTML(`afterbegin`, logged_html);
+  
   $('[data-toggle="tooltip"]').tooltip();
-
   if ($('#scan').text() === 'Stop') {
     timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
   }
@@ -692,12 +676,13 @@ function HITS_WRITE_LOGGED_OUT () {
       ;
     }
   }
-  $('#hits_found').text(KEYS.length);
-  $('#total_scans').text(TOTAL_SCANS);
-  $('#hits_logged').text(LOGGED_HITS);
-  $('#found_tbody').html(found_html);
-  $('#logged_tbody').prepend(logged_html);
-  $('[data-toggle="tooltip"]').tooltip();
+  
+  document.getElementById(`hits_found`).textContent = KEYS.length ++;
+  //document.getElementById(`hits_hidden`).textContent = hits_hidden;
+  document.getElementById(`total_scans`).textContent = TOTAL_SCANS ++;
+  document.getElementById(`hits_logged`).textContent = LOGGED_HITS;
+  document.getElementById(`found_tbody`).innerHTML = found_html;
+  document.getElementById(`logged_tbody`).insertAdjacentHTML(`afterbegin`, logged_html);
   
   if ($('#scan').text() === 'Stop') {
     timeout = setTimeout(FIND, CONFIG.scan_delay * 1000);
