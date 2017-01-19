@@ -320,7 +320,6 @@ chrome.storage.local.get(`hits`, function (data) {
 });
 
 function ADD_HIT (data) {
-  //console.log(data);
   if (!hits[data.hitid]) {
     hits[data.hitid] = {
       reqname   : data.reqname,
