@@ -97,7 +97,7 @@ function HIT_EXPORT_CAPSULE () {
     avail:
       document.getElementsByClassName(`capsule_field_text`)[2].textContent.trim(),
     
-    groupid: 
+    groupid:
       document.getElementsByName(`groupId`)[0].value,
 
     quals:
@@ -208,7 +208,7 @@ function EXPORT_HIT (data) {
   ;
 
   switch (EXPORT.type) {
-    case `vb`: EXPORT_TO_CLIP(template, `HIT export has been copied to your clipboard.`); break;
+    case `vb`: EXPORT_TO_CLIP(template); break;
     case `vb_th`: EXPORT_TO_TH(direct_template); break;
     case `vb_mtc`: EXPORT_TO_MTC(direct_template); break;
   }
@@ -219,12 +219,7 @@ function EXPORT_TO_CLIP (template) {
   document.getElementById(`clipboard`).select();
   
   const copy = document.execCommand(`copy`);
-  if (copy) {
-    alert(`HIT export has been copied to your clipboard.`);
-  }
-  else {
-    prompt(`Copy the HIT Export below with Ctrl+C`, template);
-  }
+  alert(copy ? `HIT export has been copied to your clipboard.` : template);
 
   document.body.removeChild(document.getElementById(`clipboard`));
 }
