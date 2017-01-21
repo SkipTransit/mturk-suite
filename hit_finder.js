@@ -51,8 +51,8 @@ $(`html`).on(`click`, `#scan`, function () {
   $(this).toggleClass(`btn-success btn-danger`);
  
   switch ($(this).text()) {
-    case `Stop`: $(this).text(`Stop`); FIND(); break;
-    case `Start`: $(this).text(`Start`); break;
+    case `Stop`: $(this).text(`Start`); break;
+    case `Start`: $(this).text(`Stop`); FIND(); break;
   }
 });
 
