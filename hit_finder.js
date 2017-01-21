@@ -235,7 +235,8 @@ function GET_OLD () {
       pageSize: CONFIG.size,
       minReward: CONFIG.min_reward,
       qualifiedFor: CONFIG.qualified ? `on` : `off`
-    }
+    },
+    timeout: 5000
   }).then(PARSE_OLD, GET_ERROR);
 }
 
@@ -251,7 +252,8 @@ function GET_NEW () {
         masters: false,
         min_reward: CONFIG.min_reward
       }
-    }
+    },
+    timeout: 5000
   }).then(PARSE_NEW, GET_ERROR);
 }
 
@@ -1300,8 +1302,14 @@ function TURKOPTICON_DB (ids) {
       console.error(status, xhr);
       HITS_WRITE_LOGGED_IN(false);
     }
+    
+    $.ajax({
+      url: `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`,
+      type: `GET`,
+      timeout: 5000
+    }).then(to_success, to_error);
       
-    $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`).then(to_success, to_error);
+    //$.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`).then(to_success, to_error);
   };
 }
 
