@@ -74,32 +74,24 @@ function HIT_EXPORT_CAPSULE () {
   HITS[key] = {
     reqname:
       document.getElementsByClassName(`capsule_field_text`)[0].textContent.trim(),
-      
     reqid:
       document.getElementsByName(`requesterId`)[0] ?
       document.getElementsByName(`requesterId`)[0].value :
       document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/) ?
       document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)[1] :
       null,
-    
     title:
       document.getElementsByClassName(`capsulelink_bold`)[0].textContent.trim(),
-      
     aa:
       aa !== 0 ? aa_time : `0 seconds`,
-      
     time:
       document.getElementsByClassName(`capsule_field_text`)[3].textContent.trim(),
-      
     reward:
       document.getElementsByClassName(`reward`)[1].textContent.trim(),
-      
     avail:
       document.getElementsByClassName(`capsule_field_text`)[2].textContent.trim(),
-    
     groupid:
       document.getElementsByName(`groupId`)[0].value,
-
     quals:
       `${document.getElementsByClassName(`capsule_field_text`)[5].textContent.trim()};`
   };
