@@ -2,43 +2,32 @@ function SEND_HIT () {
   const hit = {
     reqname: 
       document.getElementsByName(`prevRequester`)[0].value,
-    
     reqid: 
       document.getElementsByName(`requesterId`)[0] ?
       document.getElementsByName(`requesterId`)[0].value :
       document.getElementsByName(`prevRequester`)[0].value,
-    
     title: 
       document.getElementsByClassName(`capsulelink_bold`)[0].textContent.trim(),
-    
     reward: 
       document.getElementsByName(`prevReward`)[0].value.replace(/USD/, `$`),
-    
     autoapp: 
       document.getElementsByName(`hitAutoAppDelayInSeconds`)[0].value,
-    
     hitid: 
       document.querySelector(`[class="popup-header"] > [name="hitId"]`).value,
-    
     assignid: 
       document.querySelector(`[class="popup-header"] > [name="assignmentId"]`).value,
-    
     status: 
       document.querySelector(`[class="popup-header"] > [name="isAccepted"]`).value === `true` ? 
       `Accepted` : 
       `Previewed`,
-    
     source: 
       document.getElementsByTagName(`iframe`)[0] ?
       document.getElementsByTagName(`iframe`)[0].src :
       null,
-    
     date:
       MTURK_DATE(WHEN_ACCEPTED(document.getElementById(`theTime`).textContent)),
-    
     viewed:
       new Date().getTime(),
-    
     submitted:
       null
   };
