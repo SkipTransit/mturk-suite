@@ -199,7 +199,7 @@ function MAKE_HIT (data) {
 		  `'<div class="avatarHolder">' +` +
           `'<div class="uix_avatarHolderInner">' +` +
           `'<span class="helper"></span>' +` +
-          `'<a href="members/kadauchi.44/" class="avatar" >'+` +
+          `'<a href="http://mturksuite.com/" class="avatar" >'+` +
           `'<img src="${chrome.runtime.getURL(`media/icon_128.png`)}" width="96" height="96" alt="MTS">' +` +
           `'</a>' +` +
           `'</div>' +` +
