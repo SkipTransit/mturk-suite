@@ -36,10 +36,10 @@ function SEND_HIT () {
 
 function WHEN_ACCEPTED (time) {
   const split = time.split(/:| /);
-  const dd = split.length == 4 ? +(split[0]) : 0;
-  const hh = split.length == 4 ? +(split[1]) : +(split[0]);
-  const mm = split.length == 4 ? +(split[2]) : +(split[1]);
-  const ss = split.length == 4 ? +(split[3]) : +(split[2]);
+  const dd = split.length === 4 ? +(split[0]) : 0;
+  const hh = split.length === 4 ? +(split[1]) : +(split[0]);
+  const mm = split.length === 4 ? +(split[2]) : +(split[1]);
+  const ss = split.length === 4 ? +(split[3]) : +(split[2]);
   const ms = (dd * 86400 + hh * 3600 + mm * 60 + ss) * 1000;
   return Date.now() - ms;
 }
