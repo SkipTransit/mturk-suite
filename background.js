@@ -49,7 +49,7 @@ chrome.contextMenus.create({
     chrome.tabs.executeScript(tab.id, {
         frameId: info.frameId,
         code: 
-      `const element = document.activeElement;` +
+      `element = document.activeElement;` +
       `element.value += '${dashboard.id}';` +
       `element.dispatchEvent(new Event('change', {'bubbles': true}));`
     });
