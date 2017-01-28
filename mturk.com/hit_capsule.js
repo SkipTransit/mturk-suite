@@ -26,7 +26,7 @@ function HIT_CAPSULE () {
   );
   
   document.getElementsByClassName(`capsule_field_text`)[0].innerHTML =
-    `<a href="/mturk/searchbar?selectedSearchType=hitgroups&${reqid ? `requesterId=${reqid}` : `searchWords=${reqname.replace(/ /g, `+`)}`}" target="_blank">${reqname}</a>`
+    `<a href="/mturk/searchbar?selectedSearchType=hitgroups&${reqid ? `requesterId=${reqid}` : `searchWords=${reqname.trim().replace(/ /g, `+`)}`}" target="_blank">${reqname}</a>`
   ;
 }
 
