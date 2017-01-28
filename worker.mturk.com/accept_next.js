@@ -2,7 +2,6 @@ function ACCEPT_NEXT () {
   chrome.storage.local.get(`user`, function (data) {
     const user = data.user || {accept_next: true};
     $(`label:contains(Auto-accept Next Task)`).children()[0].checked = user.accept_next ? true : false;
-    //document.getElementsByName(`autoAcceptEnabled`)[0].checked = user.accept_next ? true : false;
   });
 }
 
