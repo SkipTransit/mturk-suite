@@ -1,4 +1,4 @@
-let user = {}, dashboard = {}, tpe = {};
+let user = {}, dashboard = {}, tpe = {}, hits  = {}, requests = {};
 let syncing_tpe = {tab: null, running: false};
 
 chrome.storage.local.get(`user`, function (data) {
@@ -258,8 +258,7 @@ function BBCODE_TO_HTML (BBCODE) {
 }
 
 //******* Experimental *******//
-let hits  = {};
-let requests = {};
+
 
 chrome.storage.local.get(`hits`, function (data) {
   hits = data.hits || {}; update_tpe();
