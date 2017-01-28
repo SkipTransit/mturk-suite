@@ -5,7 +5,7 @@ function UNQUALLED_CONTACT () {
       const reqname = element.closest(`table`).getElementsByClassName(`requesterIdentity`)[0].textContent;
       const title = element.closest(`table`).getElementsByClassName(`capsulelink`)[0].textContent;
     
-      element.getElementsByTagName('table')[1].getElementsByTagName('tr')[0].children[1].insertAdjacentHTML(`beforeend`,
+      element.getElementsByTagName(`table`)[1].getElementsByTagName(`tr`)[0].children[1].insertAdjacentHTML(`beforeend`,
         `<a href="contact?&requesterId=${reqid}&requesterName=${reqname.replace(/ /g, `+`)}&subject=Regarding HIT Titled: ${title.trim().replace(/ /g, `+`)}">Contact the Requester of this HIT</a>`
       );
     }
