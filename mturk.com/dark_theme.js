@@ -17,7 +17,7 @@ function CSS_WRITE (data) {
 
 function DARK_THEME () {
   chrome.storage.local.get(`user`, function (data) {
-    const user = data.user || {dark: true};
+    const user = data.user || {dark: false};
   
     if (user.dark) {
       if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|finder_).)*$/)) {
