@@ -144,11 +144,11 @@ function DASHBOARD () {
   ;
   
   if (document.getElementById(`table_yearly_earnings`)) {
-    const yearly_earnings = [...document.getElementById(`table_yearly_earnings`).getElementsByClassName(`reward`)].map(element => +(element.textContent.replace(/[^0-9.]/g, ``))).reduce((a, b) => a + b, 0);
+    const yearly_earnings = [...document.getElementById(`table_yearly_earnings`).getElementsByClassName(`reward`)].map(element => +element.textContent.replace(/[^0-9.]/g, ``)).reduce((a, b) => a + b, 0);
     document.getElementById(`table_yearly_earnings`).getElementsByClassName(`metrics-table-header-row`)[0].insertAdjacentHTML(`afterend`, 
       `<tr class="odd">` +
         `<td class="metrics-table-first-value">${+(document.getElementById(`table_yearly_earnings`).getElementsByClassName(`metrics-table-first-value`)[0].textContent) + 1}</td>` +
-        `<td><span class="reward">$${(dash.earn_total - yearly_earnings).toFixed(2)}</span></td>` +
+        `<td><span class="reward">$${((dash.earn_total - yearly_earnings)).toLocaleString(undefined, {minimumFractionDigits: 2})}</span></td>` +
       `</tr>`                                                                                                                      
     );
   }
