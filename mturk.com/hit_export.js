@@ -244,11 +244,7 @@ if (document.querySelector(`a[href*="roupId="]`) || document.getElementsByName(`
   }); 
   
   chrome.storage.onChanged.addListener( function (changes) {
-    for (let key in changes) {
-      if (key === `user`) {
-        EXPORTS_WRITE();
-      }
-    }
+    for (let key in changes) if (key === `user`) EXPORTS_WRITE();
   });
   
   document.addEventListener(`click`, function (event) {

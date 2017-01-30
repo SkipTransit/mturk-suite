@@ -7,11 +7,7 @@ function ACCEPT_NEXT () {
 
 if (document.getElementsByName(`autoAcceptEnabled`)[0]) {
   chrome.storage.onChanged.addListener( function (changes) {
-    for (let key in changes) {
-      if (key === `user`) {
-        ACCEPT_NEXT();
-      }
-    }
+    for (let key in changes) if (key === `user`) ACCEPT_NEXT();
   });
 
   ACCEPT_NEXT();

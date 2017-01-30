@@ -1,11 +1,7 @@
 DARK_THEME();
 
 chrome.storage.onChanged.addListener( function (changes) {
-  for (let change in changes) {
-    if (change === `user`) {
-      DARK_THEME();
-    }
-  }
+  for (let change in changes) if (change === `user`) DARK_THEME();
 });
 
 function CSS_WRITE (data) {

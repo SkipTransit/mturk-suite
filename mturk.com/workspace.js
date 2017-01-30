@@ -24,11 +24,7 @@ function WORKSPACE () {
 
 if (document.getElementsByName(`isAccepted`)[0] && !document.getElementsByName(`userCaptchaResponse`)[0]) {
   chrome.storage.onChanged.addListener( function (changes) {
-    for (let key in changes) {
-      if (key === `user`) {
-        WORKSPACE();
-      }
-    }
+    for (let key in changes) if (key === `user`) WORKSPACE();
   });
   
   WORKSPACE();
