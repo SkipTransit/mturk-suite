@@ -11,7 +11,9 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Today's Projected Earnings displayed on every page and updates when you submit a HIT
   - Progress bar live updates with TPE and goal is set in the extension dropdown
 - HIT export for the forums
-  - ([TurkerHub](https://turkerhub.com)) and ([MturkCrowd](http://www.mturkcrowd.com)) both have direct exporting available
+  - Forum export
+  - ([TurkerHub](https://turkerhub.com)) direct export
+  - ([MturkCrowd](http://www.mturkcrowd.com)) direct export
   - All export buttons can be toggles on/off in the extension dropdown
 - Turkopticon links and values displayed on hover of TO circle
 - Requester link and auto approval time added to the HIT capsule for HITs
@@ -28,4 +30,4 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - None
 
 # Known Issues Firefox
-- Live Today's Projected Earnings not working until FF v52
+- Today's Projected Earnings live updating not working until FF v52
