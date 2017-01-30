@@ -6,20 +6,20 @@ function DASHBOARD () {
     id: document.getElementsByClassName(`orange_text_right`)[0].textContent.split(`ID: `)[1],
     date: hit_status[0].children[0].href.split(`encodedDate=`)[1],
 
-    earn_hits: +(document.getElementById(`approved_hits_earnings_amount`).textContent.replace(/[^0-9.]/g, ``)),
-    earn_bonus: +(document.getElementById(`bonus_earnings_amount`).textContent.replace(/[^0-9.]/g, ``)),
-    earn_total: +(document.getElementById(`total_earnings_amount`).textContent.replace(/[^0-9.]/g, ``)),
-    earn_trans: +(document.getElementById(`transfer_earnings`).textContent.replace(/[^0-9.]/g, ``)),
+    earn_hits: +document.getElementById(`approved_hits_earnings_amount`).textContent.replace(/[^0-9.]/g, ``),
+    earn_bonus: +document.getElementById(`bonus_earnings_amount`).textContent.replace(/[^0-9.]/g, ``),
+    earn_total: +document.getElementById(`total_earnings_amount`).textContent.replace(/[^0-9.]/g, ``),
+    earn_trans: +document.getElementById(`transfer_earnings`).textContent.replace(/[^0-9.]/g, ``),
     
-    today_sub: +(hit_status[1].textContent),
-    today_app: +(hit_status[2].textContent),
-    today_rej: +(hit_status[3].textContent),
-    today_pen: +(hit_status[4].textContent),
+    today_sub: +hit_status[1].textContent,
+    today_app: +hit_status[2].textContent,
+    today_rej: +hit_status[3].textContent,
+    today_pen: +hit_status[4].textContent,
 
-    total_sub: +(hit_totals[1].children[1].textContent),
-    total_app: +(hit_totals[2].children[1].textContent),
-    total_rej: +(hit_totals[3].children[1].textContent),
-    total_pen: +(hit_totals[4].children[1].textContent),
+    total_sub: +hit_totals[1].children[1].textContent,
+    total_app: +hit_totals[2].children[1].textContent,
+    total_rej: +hit_totals[3].children[1].textContent,
+    total_pen: +hit_totals[4].children[1].textContent,
   };
     
   chrome.storage.local.get(`dashboard`, function (data) {
