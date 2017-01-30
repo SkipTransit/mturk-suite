@@ -126,8 +126,8 @@ function DASHBOARD () {
   });
   
   hit_totals[4].children[0].insertAdjacentHTML(`beforeend`,
-    `<span style="color: orange;" title=""> (${Math.floor((dash.total_rej - 0.01 * dash.total_sub) / -0.99)} ≥ 99%)</span>` + 
-    `<span style="color: red;"> (${Math.floor((dash.total_rej - 0.05 * dash.total_sub) / -0.95)} ≥ 95%)</span>`
+    `<span style="color: orange;" title=""> (${Math.floor((dash.total_rej - 0.01 * dash.total_sub) / -0.99).toLocaleString()} ≥ 99%)</span>` + 
+    `<span style="color: red;"> (${Math.floor((dash.total_rej - 0.05 * dash.total_sub) / -0.95).toLocaleString()} ≥ 95%)</span>`
   );
     
   hit_totals[4].children[2].innerHTML =
@@ -152,6 +152,13 @@ function DASHBOARD () {
       `</tr>`                                                                                                                      
     );
   }
+  
+  for (let element of document.getElementById(`user_activities.date_column_header.tooltip`).parentElement.parentElement.children) {
+    if (!element.className.match(/even|odd/)) continue;
+    for (let i = 1; i < 5; i ++) element.children[i].textContent = (+element.children[i].textContent).toLocaleString();
+  }
+  
+  for (let i = 1; i < 5; i ++) hit_totals[i].children[1].textContent = (+hit_totals[i].children[1].textContent).toLocaleString();
 }
 
 if (document.getElementById(`total_earnings_amount`)) {
