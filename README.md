@@ -2,7 +2,8 @@
 An extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
 
 # Install
-- [Chrome Web Store](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
+- [Chrome](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
+- [Firefox](https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/)
 
 # Features
 - Right clicking inside an input field gives the option to paste your Worker ID
@@ -24,9 +25,7 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Automatically accept the next HIT checkbox can be toggled to be checked automatically in the extension dropdown
 
 # Known Issues Chrome
-- Not all inputs validate paste worker id (Possibly fixed in 1.1.13, waiting for feedback)
+- None
 
 # Known Issues Firefox
-- Not all inputs validate paste worker id (Possibly fixed in 1.1.13, waiting for feedback)
-- Exporting HITs not working in HIT Finder
-- Copy to clipboard events fail (Requester breakdown suceeds)
+- Live Today's Projected Earnings not working until FF v52
