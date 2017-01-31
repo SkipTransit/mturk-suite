@@ -282,7 +282,7 @@ function PARSE_OLD (result, status, xhr) {
   
   for (let i = 0; i < hits.length; i ++) {
     const hit = selector => hits[i].querySelectorAll(selector);
-    
+        
     const obj = {
       reqid:
         logged_in ?
