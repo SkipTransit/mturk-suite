@@ -268,7 +268,6 @@ chrome.storage.local.get(`hits`, function (data) {
   hits = data.hits || {}; update_tpe();
   
   chrome.webRequest.onBeforeRequest.addListener( function (data) {
-    //console.log(data);
     if (data.requestBody) {
       requests[data.requestId] = {
         hitid : data.requestBody.formData.hitId ? data.requestBody.formData.hitId[0] : null,
@@ -284,7 +283,6 @@ chrome.storage.local.get(`hits`, function (data) {
   }, { urls: [`https://www.mturk.com/mturk/submit`, `https://www.mturk.com/mturk/externalSubmit*`] }, [`requestBody`]);
   
   chrome.webRequest.onCompleted.addListener( function (data) {
-    //console.log(data);
     if (data.statusCode == `200`) {
       if (requests[data.requestId].hitid) {
         const key = requests[data.requestId].hitid;
@@ -472,14 +470,12 @@ HFDB_request.onsuccess = function (event) {
   const HFDB = event.target.result;
     
   if (HFDB.version !== 1) {
-    console.log(`version mismatch`);
     HFDB.close();
     indexedDB.deleteDatabase(`HFDB`);
     return;
   }
   
   if (!HFDB.objectStoreNames.length) {
-    console.log(`no objectStore`);
     HFDB.close();
     indexedDB.deleteDatabase(`HFDB`);
     return;
@@ -488,7 +484,6 @@ HFDB_request.onsuccess = function (event) {
   const transaction = HFDB.transaction([`hit`], `readonly`).objectStore(`hit`).indexNames
   const check = $.map(transaction, value => value);
   if (check.indexOf(`seen`) === -1) {
-    console.log(`no date`);
     HFDB.close();
     indexedDB.deleteDatabase(`HFDB`);
     return;
