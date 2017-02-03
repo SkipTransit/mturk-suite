@@ -1,0 +1,35 @@
+.MTS-TO {
+  margin-right: 2px;
+}
+
+.MTS-TO:hover + .MTS-RATINGS, .MTS-RATINGS:hover {
+  display: block;
+}
+
+.MTS-RATINGS {
+  z-index: 9999;
+  width: 300px;
+  position: absolute;
+  transform: translate(-3px, -3px);
+  display: none;
+  border: 1px solid;
+  border-color: #000000;
+  background-color: #f4f4f4;
+  padding: 3px;
+}
+
+.MTS-toHigh {
+  background-color: #00cc00;
+}
+.MTS-toGood {
+  background-color: #cccc00;
+}
+.MTS-toAverage {
+  background-color: #cc6600;
+}
+.MTS-toLow {
+  background-color: #cc0000;
+}
+.MTS-toNone {
+  background-color: grey;
+}
