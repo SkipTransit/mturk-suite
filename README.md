@@ -28,7 +28,10 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Contact link added for HITs that you are not qualified for
 
 # Features for https://worker.mturk.com/
+- Turkopticon
+- Accept Next Checked
 - Workspace
+- Enable Unqualified Filter
 
 # Known Issues Chrome
 - None
