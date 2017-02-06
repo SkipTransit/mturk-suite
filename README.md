@@ -27,6 +27,9 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Automatically accept the next HIT checkbox automatically checked with on/off toggle in the extension dropdown dropdown
 - Contact link added for HITs that you are not qualified for
 
+## https://worker.mturk.com
+- Workspace
+
 # Known Issues Chrome
 - None
 
