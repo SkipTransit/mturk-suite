@@ -5,7 +5,7 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - [Chrome](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/)
 
-# Features
+# Features for https://www.mturk.com/
 - Right clicking inside an input field gives the option to paste your Worker ID
 - Right clicking highlighted text gives the option to search for it on Mturk
 - Today's Projected Earnings displayed on every page and updates when you submit a HIT
@@ -27,7 +27,7 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Automatically accept the next HIT checkbox automatically checked with on/off toggle in the extension dropdown dropdown
 - Contact link added for HITs that you are not qualified for
 
-## https://worker.mturk.com
+# Features for https://worker.mturk.com/
 - Workspace
 
 # Known Issues Chrome
