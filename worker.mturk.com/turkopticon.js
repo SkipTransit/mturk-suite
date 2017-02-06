@@ -12,23 +12,22 @@ function TURKOPTICON () {
 function TURKOPTICON_WRITE (data) {
   function to (id) {
     const html = 
-    `<span class="label MTS-TO ${color(data[id].attrs.pay)}">TO</span>` +
-    `<div class="MTS-RATINGS">` +
-      rating(`Fair`, data[id].attrs.fair) +
-      rating(`Fast`, data[id].attrs.fast) +
-      rating(`Pay`, data[id].attrs.pay) +
-      rating(`Comm`, data[id].attrs.comm) +
-      `Scores based on <a href="https://turkopticon.ucsd.edu/${id}" target="_blank">${data[id].reviews} review(s)</a><br>` +
-      `Terms of Service violation flags: ${data[id].tos_flags}<br>` +
-      `<a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}" target="_blank">Report your experience with this requester »</a>` +
-    `</div>`
+      `<span class="label MTS-TO ${color(data[id].attrs.pay)}">TO</span>` +
+      `<div class="MTS-RATINGS">` +
+        rating(`Fair`, data[id].attrs.fair) +
+        rating(`Fast`, data[id].attrs.fast) +
+        rating(`Pay`, data[id].attrs.pay) +
+        rating(`Comm`, data[id].attrs.comm) +
+        `Scores based on <a href="https://turkopticon.ucsd.edu/${id}" target="_blank">${data[id].reviews} review(s)</a><br>` +
+        `Terms of Service violation flags: ${data[id].tos_flags}<br>` +
+        `<a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}" target="_blank">Report your experience with this requester »</a>` +
+      `</div>`
     ;
     return html;
   }
   
   function rating (type, rating) {
     let html = ``;
-    
     
     if (rating > 0.01) {
       html =
