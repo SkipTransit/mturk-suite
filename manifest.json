@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.7.0",
+  "version": "1.7.1",
 
   "icons": {
     "16": "media/icon_16.png",
@@ -77,6 +77,7 @@
         "jquery-3.1.1.min.js",
         "worker.mturk.com/accept_next.js",
         "worker.mturk.com/enable_unqual_filter.js",
+        "worker.mturk.com/queue_count_value.js",
         "worker.mturk.com/turkopticon.js",
         "worker.mturk.com/workspace.js"
       ],
