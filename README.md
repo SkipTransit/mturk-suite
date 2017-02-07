@@ -1,11 +1,12 @@
 # Mturk Suite
 An extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
----
+___
 
 # Install
 - [Chrome](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/)
----
+___
+
 # Features
 
 ## General
@@ -38,12 +39,12 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Workspace
 - Enable Unqualified Filter
 - Queue Count and Value
----
+___
 
 # Known Issues Chrome
 - None
----
+___
 
 # Known Issues Firefox
 - Today's Projected Earnings live updating not working until FF v52
----
+___
