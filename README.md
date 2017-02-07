@@ -9,7 +9,7 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Right clicking inside an input field gives the option to paste your Worker ID
 - Right clicking highlighted text gives the option to search for it on Mturk
 
-# Features - https://www.mturk.com/
+## Features - https://www.mturk.com/
 - Today's Projected Earnings displayed on every page and updates when you submit a HIT
   - Progress bar live updates with TPE and goal is set in the extension dropdown
 - **HIT Export**
@@ -29,7 +29,7 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Automatically accept the next HIT checkbox automatically checked with on/off toggle in the extension dropdown dropdown
 - Contact link added for HITs that you are not qualified for
 
-# Features - https://worker.mturk.com/
+## Features - https://worker.mturk.com/
 - Turkopticon
 - Accept Next Checked
 - Workspace
