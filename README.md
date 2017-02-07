@@ -1,19 +1,15 @@
 # Mturk Suite
 An extension for https://www.mturk.com/ and in the future https://worker.mturk.com/
-___
 
 # Install
 - [Chrome](https://chrome.google.com/webstore/detail/mturk-suite/iglbakfobmoijpbigmlfklckogbefnlf)
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/mturk-suite/)
-___
 
-# Features
-
-## General
+# Features - General
 - Right clicking inside an input field gives the option to paste your Worker ID
 - Right clicking highlighted text gives the option to search for it on Mturk
 
-## https://www.mturk.com/
+# Features - https://www.mturk.com/
 - Today's Projected Earnings displayed on every page and updates when you submit a HIT
   - Progress bar live updates with TPE and goal is set in the extension dropdown
 - **HIT Export**
@@ -33,18 +29,15 @@ ___
 - Automatically accept the next HIT checkbox automatically checked with on/off toggle in the extension dropdown dropdown
 - Contact link added for HITs that you are not qualified for
 
-## https://worker.mturk.com/
+# Features - https://worker.mturk.com/
 - Turkopticon
 - Accept Next Checked
 - Workspace
 - Enable Unqualified Filter
 - Queue Count and Value
-___
 
 # Known Issues Chrome
 - None
-___
 
 # Known Issues Firefox
 - Today's Projected Earnings live updating not working until FF v52
-___
