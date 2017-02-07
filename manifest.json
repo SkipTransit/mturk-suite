@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.7.1",
+  "version": "1.8.0",
 
   "icons": {
     "16": "media/icon_16.png",
@@ -64,6 +64,7 @@
         "https://worker.mturk.com/*"
       ],
       "css": [
+        "worker.mturk.com/todays_projected_earnings.css",
         "worker.mturk.com/turkopticon.css"
       ],
       "run_at": "document_start"
@@ -78,6 +79,7 @@
         "worker.mturk.com/accept_next.js",
         "worker.mturk.com/enable_unqual_filter.js",
         "worker.mturk.com/queue_count_value.js",
+        "worker.mturk.com/todays_projected_earnings.js",
         "worker.mturk.com/turkopticon.js",
         "worker.mturk.com/workspace.js"
       ],
