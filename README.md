@@ -32,6 +32,7 @@ An extension for https://www.mturk.com/ and in the future https://worker.mturk.c
 - Accept Next Checked
 - Workspace
 - Enable Unqualified Filter
+- Queue Count and Value
 
 # Known Issues Chrome
 - None
