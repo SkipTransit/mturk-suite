@@ -467,13 +467,14 @@ function HITS_WRITE_LOGGED_IN (to) {
     const included = IS_INCLUDED(hit);
     
     let classes = ``, log = true;
-    if (blocked) {
-      classes += CONFIG.hide_bl ? ` bl_hidden` : ` bl`;
-      classes += CONFIG.hide_nl ? ` nl_hidden` : ` nl`;
-    }
-    else if (included) {
+    
+    if (included) {
       classes += ` il`;
       INCLUDED_ALERTS(included, hit);
+    }
+    else if (blocked) {
+      classes += CONFIG.hide_bl ? ` bl_hidden` : ` bl`;
+      classes += CONFIG.hide_nl ? ` nl_hidden` : ` nl`;
     }
     else {
       classes += CONFIG.hide_nl ? ` nl_hidden` : ` nl`;
@@ -571,13 +572,13 @@ function HITS_WRITE_LOGGED_OUT () {
     const included = IS_INCLUDED(hit);
     
     let classes = ``, log = true;
-    if (blocked) {
-      classes += CONFIG.hide_bl ? ` bl_hidden` : ` bl`;
-      classes += CONFIG.hide_nl ? ` nl_hidden` : ` nl`;
-    }
-    else if (included) {
+    if (included) {
       classes += ` il`;
       INCLUDED_ALERTS(included, hit);
+    }
+    else if (blocked) {
+      classes += CONFIG.hide_bl ? ` bl_hidden` : ` bl`;
+      classes += CONFIG.hide_nl ? ` nl_hidden` : ` nl`;
     }
     else {
       classes += CONFIG.hide_nl ? ` nl_hidden` : ` nl`;
