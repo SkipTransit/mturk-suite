@@ -363,6 +363,8 @@ function ADD_HIT (data) {
 function sync_tpe (tab) {
   const date = mturk_date(Date.now());
   
+  for (let key in hits) if (hits[key].status === `Submitted`) hits[key].status = `Accepted`;
+  
   function scrape (page) {
     $.get(`https://www.mturk.com/mturk/statusdetail?encodedDate=${date}&pageNumber=${page}`, function (data) {
       const $data = $(data);
