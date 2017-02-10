@@ -92,3 +92,8 @@
   float: left;
   cursor: context-menu;
 }
+
+#export_overview, #export_breakdown {
+  cursor: pointer;
+}
+

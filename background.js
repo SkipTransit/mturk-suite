@@ -262,7 +262,24 @@ function BBCODE_TO_HTML (BBCODE) {
 }
 
 //******* Experimental *******//
-
+chrome.webRequest.onCompleted.addListener( 
+  function (data) {
+    if (data.statusCode == `200`) {
+      const key = data.url.match(/hitId=(\w+)/)[1];
+      if (hits[key]) {
+        hits[key].status = `Returned`;
+      }
+      else {
+        for (let key in hits) {
+          if (hits[key].assignid === data.url.match(/hitId=(\w+)/)[1]) {
+            hits[key].status = `Returned`;
+          }
+        }
+      }
+    } 
+  },
+  { urls: [`https://www.mturk.com/mturk/return?*`] }, [`responseHeaders`]
+);
 
 chrome.storage.local.get(`hits`, function (data) {
   hits = data.hits || {}; update_tpe();

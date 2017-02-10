@@ -9,6 +9,7 @@ chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
 });
 
 let tpeexport = ``;
+let overview_export = ``;
 
 function WRITE () {
   $(`#overview`).html(
@@ -46,11 +47,14 @@ function WRITE () {
     const hits = data.hits || {};
     let breakdown = {}, breakdown_html = ``, detailed_html = ``;
     
-    const total = Object.keys(hits).length;
+    const total = Object.keys(hits).length; let total_pe = 0;
     let submitted = 0, submitted_pe = 0;
     let approved = 0, approved_pe = 0;
+    let returned = 0, returned_pe = 0;
     
     for (let key in hits) {
+      total_pe += +hits[key].reward.replace(/[^0-9.]/g, ``);
+      
       if (hits[key].status.match(/Submitted|Paid|Approved|Pending/)) {
         submitted ++;
         submitted_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
@@ -67,6 +71,10 @@ function WRITE () {
           }
         }
       }
+      else if (hits[key].status.match(/Returned/)) {
+        returned ++;
+        returned_pe += +hits[key].reward.replace(/[^0-9.]/g, ``);
+      }
     }
     
     $(`#overview`).html(
@@ -79,8 +87,20 @@ function WRITE () {
       `  <br>` +
       `  <br>` +
       `  <span><b>${approved}</b> HITs have been approved today for a total value of <b>$${approved_pe.toFixed(2)}</b>.</span>` +
+      `  <br>` +
+      `  <br>` +
+      `  <span><b>${returned}</b> HITs have been returned today for a total value of <b>$${returned_pe.toFixed(2)}</b>.</span>` +
       `</div>`
     );
+    
+    overview_export = 
+      `[b]Today's Projected Earnings: $${submitted_pe.toFixed(2)}[/b] [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version})[/SIZE]\n\n` +
+      `[table][tr][th][b]&#8291;[/b][/th][th][b]HITs[/b][/th][th][b]Value[/b][/th][/tr]\n` +
+      `[tr][td]Submitted[/td][td]${submitted}[/td][td]$${submitted_pe.toFixed(2)}[/td][/tr]\n` +
+      `[tr][td]Approved[/td][td]${approved}[/td][td]$${approved_pe.toFixed(2)}[/td][/tr]\n` +
+      `[tr][td]Returned[/td][td]${returned}[/td][td]$${returned_pe.toFixed(2)}[/td][/tr]\n` +
+      `[tr][td]Total[/td][td]${total}[/td][td]$${total_pe.toFixed(2)}[/td][/tr][/table]`
+    ;
     
     tpeexport =
       `[b]Today's Projected Earnings: $${submitted_pe.toFixed(2)}[/b] [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version})[/SIZE]\n` +
@@ -107,7 +127,7 @@ function WRITE () {
       }
     }
     
-    const breakdown_sorted = Object.keys(breakdown).sort( (a, b) => { return breakdown[a].reward - breakdown[b].reward;});
+    const breakdown_sorted = Object.keys(breakdown).sort( (a, b) => breakdown[a].reward - breakdown[b].reward);
     for (let i = breakdown_sorted.length - 1; i > -1; i --) {
       let hit = breakdown[breakdown_sorted[i]], reqlink = ``;
       
@@ -250,18 +270,18 @@ function SYNC_PROGRESS (current, total) {
   );
 }
 
+
 function COPY_TO_CLIPBOARD (template) {
-  $(`body`).append(`<textarea id="COPY_TO_CLIPBOARD" style="opacity: 0;">${template}</textarea>`);
-  $(`#COPY_TO_CLIPBOARD`).select();
-  document.execCommand(`Copy`);
-  $(`#COPY_TO_CLIPBOARD`).remove();
-  alert(`Today's HITs Breakdown has been copied to your clipboard.`);
+  document.body.insertAdjacentHTML(`afterbegin`, `<textarea id="clipboard" style="opacity: 0;">${template}</textarea>`);
+  document.getElementById(`clipboard`).select();
+  
+  const copy = document.execCommand(`copy`);
+  alert(copy ? `Export has been copied to your clipboard.` : template);
+
+  document.body.removeChild(document.getElementById(`clipboard`));
 }
 
-$(`html`).on(`click`, `#export`, function () {
-  COPY_TO_CLIPBOARD(tpeexport);
-});
-
+/*
 $(`html`).on(`click`, `#sync`, function () {
   SYNC_PROGRESS(1, `???`);
   chrome.runtime.sendMessage({msg: `sync_tpe`});
@@ -270,4 +290,22 @@ $(`html`).on(`click`, `#sync`, function () {
 $(`html`).on(`click`, `#close`, function () {
   chrome.runtime.sendMessage({msg: `close_tpe_menu`});
 });
+*/
 
+ document.addEventListener(`click`, function (event) {
+   const element = event.target;
+      
+   if (element.matches(`#export_overview`)) {
+     COPY_TO_CLIPBOARD(overview_export);
+   }
+   if (element.matches(`#export_breakdown`)) {
+     COPY_TO_CLIPBOARD(tpeexport);
+   }
+   if (element.matches(`#sync`)) {
+     SYNC_PROGRESS(1, `???`);
+     chrome.runtime.sendMessage({msg: `sync_tpe`});
+   }
+   if (element.matches(`#close`)) {
+     chrome.runtime.sendMessage({msg: `close_tpe_menu`});
+   }
+});

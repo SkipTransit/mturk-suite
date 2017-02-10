@@ -17,10 +17,20 @@
       </div>
       <div style="margin-right: 15px;">
         <div class="text-right">
-          <button id="export" type="button" class="btn btn-primary">Export</button>
+          <div class="btn-group">
+          <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="glyphiconh" aria-hidden="true">Export</span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li><a id="export_overview">Overview</a></li>
+            <li><a id="export_breakdown">Requester Breakdown</a></li>
+          </ul>
+            </div>
           <button id="sync" type="button" class="btn btn-primary">Sync</button>
           <button id="close" type="button" class="btn btn-danger">Close</button>
-        </div>
+        
+          </div>
       </div>
     </div>
     <div>
