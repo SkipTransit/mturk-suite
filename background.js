@@ -1,10 +1,12 @@
-let user = {}, dashboard = {}, tpe = {}, hits  = {}, requests = {};
+let dashboard = {}, tpe = {}, hits  = {}, requests = {};
 let syncing_tpe = { tab: null, running: false };
+
+let USER = { goal: 20, dark_theme: false, hit_export: true, accept_next: true, workspace: true, pre_reloader: true };
 let BONUS = { date: null, starting: null, current: null };
 
-chrome.storage.local.get(`user`, function (data) {
-  user = data.user || {goal: 20, dark: false, hit_export: true, accept_next: true, workspace: false};
-  tpe.goal = user.goal;
+chrome.storage.local.get(`user`, function (result) {
+  if (result.user) USER = result.user;
+  tpe.goal = USER.goal;
 });
 
 chrome.storage.local.get(`dashboard`, function (data) {
@@ -13,15 +15,14 @@ chrome.storage.local.get(`dashboard`, function (data) {
 
 chrome.storage.local.get(`bonus`, function (result) {
   if (result.bonus) BONUS = result.bonus;
-  console.log(BONUS);
   GET_BONUS();
 });
 
 chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
   switch (request.msg) {
     case `user`: 
-      user = request.data; chrome.storage.local.set({user: user});
-      tpe.goal = user.goal; chrome.storage.local.set({tpe: tpe});
+      USER = request.data; chrome.storage.local.set({user: USER});
+      tpe.goal = USER.goal; chrome.storage.local.set({tpe: tpe});
       break;
     case `dashboard`:
       dashboard = request.data; chrome.storage.local.set({dashboard: request.data});
@@ -77,7 +78,7 @@ chrome.contextMenus.create({
 
 // Turkopticon IndexedDB
 let TODB;
-const TODB_request = indexedDB.open(`TODB`, 1);
+const TODB_request = window.indexedDB.open(`TODB`, 1);
 TODB_request.onsuccess = function (event) {
   TODB = event.target.result;
 };
@@ -482,27 +483,27 @@ function dst () {
 
 
 /********** HIT Finder Database **********/
-const HFDB_request = indexedDB.open(`HFDB`);
+const HFDB_request = window.indexedDB.open(`HFDB`);
 HFDB_request.onsuccess = function (event) {
   const HFDB = event.target.result;
     
   if (HFDB.version !== 1) {
     HFDB.close();
-    indexedDB.deleteDatabase(`HFDB`);
+    window.indexedDB.deleteDatabase(`HFDB`);
     return;
   }
   
   if (!HFDB.objectStoreNames.length) {
     HFDB.close();
-    indexedDB.deleteDatabase(`HFDB`);
+    window.indexedDB.deleteDatabase(`HFDB`);
     return;
   }
   
-  const transaction = HFDB.transaction([`hit`], `readonly`).objectStore(`hit`).indexNames
+  const transaction = HFDB.transaction([`hit`], `readonly`).objectStore(`hit`).indexNames;
   const check = $.map(transaction, value => value);
   if (check.indexOf(`seen`) === -1) {
     HFDB.close();
-    indexedDB.deleteDatabase(`HFDB`);
+    window.indexedDB.deleteDatabase(`HFDB`);
     return;
   }
   HFDB.close();
