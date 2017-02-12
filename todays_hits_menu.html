@@ -42,9 +42,71 @@
       </ul>
       <!-- Tab panes -->
       <div class="tab-content">
-        <div id="overview" role="tabpanel" class="tab-pane active">Loading Information...</div>
-        <div id="requester" role="tabpanel" class="tab-pane">Loading Information...</div>
-        <div id="detailed" role="tabpanel" class="tab-pane">Loading Information...</div>
+        <div id="overview" role="tabpanel" class="tab-pane active">
+          <table class="table table-striped table-bordered">
+            <thead>
+              <tr>
+                <th></th>
+                <th class="text-center" style="width: 30%">HITs</th>
+                <th class="text-center" style="width: 30%">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Today's <u>Viewed</u> HITs</td>
+                <td id="all" class="text-center">0</td>
+                <td id="all_val" class="text-center">$0.00</td>
+              </tr>
+              <tr>
+                <td>Today's <u>Submitted</u> HITs</td>
+                <td id="sub" class="text-center">0</td>
+                <td id="sub_val" class="text-center">$0.00</td>
+              </tr>
+              <tr>
+                <td>Today's <u>Approved</u> HITs</td>
+                <td id="app" class="text-center">0</td>
+                <td id="app_val" class="text-center">$0.00</td>
+              </tr>
+              <tr>
+                <td>Today's <u>Returned</u> HITs</td>
+                <td id="ret" class="text-center">0</td>
+                <td id="ret_val" class="text-center">$0.00</td>
+              </tr>
+              <tr>
+                <td>Today's <u>Bonuses</u></td>
+                <td class="text-center">N/A</td>
+                <td id="bonus" class="text-center">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div id="requester" role="tabpanel" class="tab-pane">
+          <table class="table table-striped table-condensed table-bordered table-fixed table-requester">
+            <thead>
+              <tr>
+                <th>Requester</th>
+                <th>HITs</th>
+                <th>Reward</th>
+              </tr>
+            </thead>
+            <tbody id="requester_tbody"></tbody>
+          </table>
+        </div>
+        
+        <div id="detailed" role="tabpanel" class="tab-pane">
+          <table class="table table-striped table-condensed table-bordered table-fixed table-detailed">
+            <thead>
+              <tr>
+                <th>Requester</th>
+                <th>Title</th>
+                <th>Reward</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="detailed_tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </body>

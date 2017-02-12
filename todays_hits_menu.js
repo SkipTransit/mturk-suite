@@ -1,76 +1,13 @@
-document.addEventListener(`DOMContentLoaded`, function () {
-  WRITE();
-});
-
-chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
-  switch (request.msg) {
-    case `sync_tpe_running`:
-      SYNC_PROGRESS(request.data.current, request.data.total);
-      break;
-    case `bonus`:
-      BONUS(request.data.starting, request.data.current);
-      break;
-  }
-});
-
-let tpeexport = ``;
-
-const OVERVIEW = {
-  all: 0, all_val: 0,
-  sub: 0, sub_val: 0,
-  app: 0, app_val: 0,
-  ret: 0, ret_val: 0,
-  bonus: 0
-};
-
-const BREAKDOWN = {
-  bonus: {reqname: `Bonuses`, hits: `N/A`, reward: 0}
-};
+const OVERVIEW = { all: 0, all_val: 0, sub: 0, sub_val: 0, app: 0, app_val: 0, ret: 0, ret_val: 0, bonus: 0 };
+const BREAKDOWN = { bonus: { reqname: `Bonuses`, hits: `N/A`, reward: 0 } };
 
 function WRITE () {
-  $(`#overview`).html(
-    `<h3>Loading Information.....</h3>`
-  );
+  chrome.runtime.sendMessage({ msg: `bonus` });
   
-  $(`#requester`).html(
-    `    <table class="table table-striped table-condensed table-bordered table-fixed table-requester">` +
-    `      <thead>` +
-    `        <tr>` +
-    `          <th>Requester</th>` +
-    `          <th>HITs</th>` +
-    `          <th>Reward</th>` +
-    `        </tr>` +
-    `      </thead>` +
-    `      <tbody id="requester_tbody"></tbody>` +
-    `    </table>`
-  );
-  
-  $(`#detailed`).html(
-    `    <table class="table table-striped table-condensed table-bordered table-fixed table-detailed">` +
-    `      <thead>` +
-    `        <tr>` +
-    `          <th>Requester</th>` +
-    `          <th>Title</th>` +
-    `          <th>Reward</th>` +
-    `          <th>Status</th>` +
-    `        </tr>` +
-    `      </thead>` +
-    `      <tbody id="detailed_tbody"></tbody>` +
-    `    </table>`
-  );
-  
-  chrome.runtime.sendMessage({msg: `bonus`});
-  
-  chrome.storage.local.get(`hits`, function (data) {
-    const hits = data.hits || {};
+  chrome.storage.local.get(`hits`, function (result) {
+    const hits = result.hits || {};
     
-    let breakdown_html = ``, detailed_html = ``;
-    
-    const total = Object.keys(hits).length; let total_pe = 0;
-    let submitted = 0, submitted_pe = 0;
-    let approved = 0, approved_pe = 0;
-    let returned = 0, returned_pe = 0;
-    
+    // Overview
     for (let key in hits) {
       OVERVIEW.all ++;
       OVERVIEW.all_val += +hits[key].reward.replace(/[^0-9.]/g, ``);
@@ -83,7 +20,7 @@ function WRITE () {
           OVERVIEW.app ++;
           OVERVIEW.app_val += +hits[key].reward.replace(/[^0-9.]/g, ``);
         }
-        if (hits[key].status.match(/Submitted|Pending/)) {
+        else if (hits[key].status.match(/Submitted|Pending/)) {
           const apped = IS_APPROVED(hits[key].autoapp, hits[key].submitted);
           if (apped) {
             OVERVIEW.app ++;
@@ -97,25 +34,21 @@ function WRITE () {
       }
     }
     
-    document.getElementById(`overview`).innerHTML =
-      `<div style="font-size: 20px; line-height: normal;">` +
-      `  <br>` +
-      `  <span><b>${OVERVIEW.all}</b> HITs have been viewed, submitted or returned today.</span>` +
-      `  <br>` +
-      `  <br>` +
-      `  <span><b>${OVERVIEW.sub}</b> HITs have been submitted today for a total value of <b>$${OVERVIEW.sub_val.toFixed(2)}</b>.</span>` +
-      `  <br>` +
-      `  <br>` +
-      `  <span><b>${OVERVIEW.app}</b> HITs have been approved today for a total value of <b>$${OVERVIEW.app_val.toFixed(2)}</b>.</span>` +
-      `  <br>` +
-      `  <br>` +
-      `  <span><b>${OVERVIEW.ret}</b> HITs have been returned today for a total value of <b>$${OVERVIEW.ret_val.toFixed(2)}</b>.</span>` +
-      `  <br>` +
-      `  <br>` +
-      `  <span>You have recieved <b id="bonus">$${OVERVIEW.bonus.toFixed(2)}</b> in bonuses today.</span>` +
-      `</div>`
-    ;
+    document.getElementById(`all`).textContent = OVERVIEW.all;
+    document.getElementById(`all_val`).textContent = `$${OVERVIEW.all_val.toFixed(2)}`;
     
+    document.getElementById(`sub`).textContent = OVERVIEW.sub;
+    document.getElementById(`sub_val`).textContent = `$${OVERVIEW.sub_val.toFixed(2)}`;
+    
+    document.getElementById(`app`).textContent = OVERVIEW.app;
+    document.getElementById(`app_val`).textContent = `$${OVERVIEW.app_val.toFixed(2)}`;
+    
+    document.getElementById(`ret`).textContent = OVERVIEW.ret;
+    document.getElementById(`ret_val`).textContent = `$${OVERVIEW.ret_val.toFixed(2)}`;
+    
+    document.getElementById(`bonus`).textContent = OVERVIEW.bonus;    
+    
+    // Requester Breakdown
     for (let key in hits) {
       if (hits[key].status.match(/(Submitted|Paid|Approved|Pending)/)) {
         const id = hits[key].reqid;
@@ -129,7 +62,7 @@ function WRITE () {
           };
         }
         else {
-          BREAKDOWN[id].hits   += 1;
+          BREAKDOWN[id].hits ++;
           BREAKDOWN[id].reward += +hits[key].reward.replace(/[^0-9.]/g, ``);
         }
       }
@@ -137,30 +70,18 @@ function WRITE () {
     
     const breakdown_sorted = Object.keys(BREAKDOWN).sort( (a, b) => BREAKDOWN[a].reward - BREAKDOWN[b].reward);
     for (let i = breakdown_sorted.length - 1; i > -1; i --) {
-      let hit = BREAKDOWN[breakdown_sorted[i]], reqlink = ``;
+      let hit = BREAKDOWN[breakdown_sorted[i]];
       
-      if (hit.reqname !== hit.reqid) {
-        reqlink =
-          `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${hit.reqid}`
-        ;
-      }
-      else {
-        reqlink =
-          `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.reqid.replace(/ /, `+`)}`
-        ;
-      }
-
-      breakdown_html +=
+      document.getElementById(`requester_tbody`).insertAdjacentHTML(`beforeend`,
         `<tr>` +
-        `  <td><a href="${reqlink}" target="_blank">${hit.reqname}</td>` +
-        `  <td>${hit.hits}</td>` +
-        `  <td>$${hit.reward.toFixed(2)}</td>` +
+          `<td><a href="https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&${hit.reqname !== hit.reqid ? `requesterId=${hit.reqid}` : `searchWords=${hit.reqid.replace(/ /, `+`)}`}" target="_blank">${hit.reqname}</td>` +
+          `<td>${hit.hits}</td>` +
+          `<td>$${hit.reward.toFixed(2)}</td>` +
         `</tr>`
-      ;
+      );
     }
     
-    $(`#requester_tbody`).html(breakdown_html);
-    
+    // Detailed Breakdown
     const sorted = Object.keys(hits).sort( (a, b) => {return hits[a].viewed - hits[b].viewed;});
     for (let i = 0; i < sorted.length; i ++) {
       let hit = hits[sorted[i]], contact = ``, reqlink = ``, color = ``, source = ``, autoapp = ``, pend = false, trclass = ``;
@@ -191,7 +112,7 @@ function WRITE () {
       if (hit.reqname !== hit.reqid) {
         contact =
           `<a href="https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}&hitId=${hit.hitid}&requesterName=${hit.reqname}&subject=Regarding+Amazon+Mechanical+Turk+HIT+${hit.hitid}" target="_blank">` +
-          `  <span class="glyphicon glyphicon-envelope" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Contact the requester about this HIT."></span>` +
+            `<span class="glyphicon glyphicon-envelope" aria-hidden="true" data-toggle="tooltip" data-placement="right" title="Contact the requester about this HIT."></span>` +
           `</a>`
         ;
         reqlink =
@@ -206,19 +127,18 @@ function WRITE () {
           `<a href="https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${hit.reqid.replace(/ /, `+`)}" target="_blank">${hit.reqname}</a>`
         ;
       }
-
-      detailed_html +=
+      
+      document.getElementById(`detailed_tbody`).insertAdjacentHTML(`beforeend`, 
         `<tr class="${status} ${trclass}">` +
-        `  <td>${contact} ${reqlink}</div></td>` +
-        `  <td>${source} ${hit.title}</td>` +
-        `  <td>${hit.reward}</td>` +
-        `  <td style="color: ${color};" data-toggle="tooltip" data-placement="left" title="${autoapp}">${hit.status.split(/\s/)[0]}</td>` +
+          `<td>${contact} ${reqlink}</div></td>` +
+          `<td>${source} ${hit.title}</td>` +
+          `<td>${hit.reward}</td>` +
+          `<td style="color: ${color};" data-toggle="tooltip" data-placement="left" title="${autoapp}">${hit.status.split(/\s/)[0]}</td>` +
         `</tr>`
-      ;
+      );
     }
   
-    $(`#detailed_tbody`).html(detailed_html);
-    $(`[data-toggle="tooltip"]`).tooltip();
+    $(document.querySelectorAll(`[data-toggle="tooltip"]`)).tooltip();
   });  
 }
 
@@ -258,14 +178,16 @@ function APPROVES_WHEN (aa, sub) {
 
 function SYNC_PROGRESS (current, total) {
   const width = total === `???` ? 0 : Math.round(current / total * 100);
-  $(`#overview, #requester, #detailed`).html(
-    `<div class="text-center">` +
-    `  <h1>Syncing page ${current} of ${total}</h1>` +
-    `</div>` +
-    `<div class="progress">` +
-    `  <div class="progress-bar" role="progressbar" aria-valuenow="${width}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: ${width}%">${width}%</div>` +
-    `</div>`
-  );
+  for (let id of [`overview`, `requester`, `detailed`]) {
+    document.getElementById(id).innerHTML =
+      `<div class="text-center">` +
+        `<h1>Syncing page ${current} of ${total}</h1>` +
+      `</div>` +
+      `<div class="progress">` +
+        `<div class="progress-bar" role="progressbar" aria-valuenow="${width}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: ${width}%">${width}%</div>` +
+      `</div>`
+    ;
+  }
 }
 
 function BONUS (starting, current) {
@@ -291,7 +213,7 @@ function EXPORT_OVERVIEW () {
   COPY_TO_CLIPBOARD(template);
 }
 
-function EXPORT_REQUESTER_BREAKDOWN () {
+function EXPORT_BREAKDOWN () {
   let template = 
     `[b]Today's Projected Earnings: $${OVERVIEW.sub_val.toFixed(2)}[/b] ${OVERVIEW.bonus !== 0 ? `[b]+ Bonuses: $${OVERVIEW.bonus.toFixed(2)} = $${(OVERVIEW.sub_val + OVERVIEW.bonus).toFixed(2)}[/b]` : ``} [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version})[/SIZE]\n\n` +
     `[spoiler=Today's Projected Earnings - Requester Breakdown]\n` +
@@ -302,7 +224,7 @@ function EXPORT_REQUESTER_BREAKDOWN () {
   const sorted = Object.keys(BREAKDOWN).sort( (a, b) => BREAKDOWN[a].reward - BREAKDOWN[b].reward);
   
   for (let i = sorted.length - 1; i > -1; i --) {
-    let hit = BREAKDOWN[sorted[i]], reqlink = ``;
+    let hit = BREAKDOWN[sorted[i]];
     
     if (hit.reqname === `Bonuses`) {
       template +=
@@ -324,7 +246,7 @@ function EXPORT_REQUESTER_BREAKDOWN () {
     ;
   }
   
-  tpeexport += `[/table][/spoiler]`
+  template += `[/table][/spoiler]`;
   
   COPY_TO_CLIPBOARD(template);
 }
@@ -339,20 +261,35 @@ function COPY_TO_CLIPBOARD (template) {
   document.body.removeChild(document.getElementById(`clipboard`));
 }
 
- document.addEventListener(`click`, function (event) {
-   const element = event.target;
+document.addEventListener(`DOMContentLoaded`, function () {
+  chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
+    switch (request.msg) {
+      case `sync_tpe_running`:
+        SYNC_PROGRESS(request.data.current, request.data.total);
+        break;
+      case `bonus`:
+        BONUS(request.data.starting, request.data.current);
+        break;
+    }
+  });
+
+  document.addEventListener(`click`, function (event) {
+    const element = event.target;
       
-   if (element.matches(`#export_overview`)) {
-     EXPORT_OVERVIEW();
-   }
-   if (element.matches(`#export_breakdown`)) {
-     EXPORT_REQUESTER_BREAKDOWN();
-   }
-   if (element.matches(`#sync`)) {
-     SYNC_PROGRESS(1, `???`);
-     chrome.runtime.sendMessage({msg: `sync_tpe`});
-   }
-   if (element.matches(`#close`)) {
-     chrome.runtime.sendMessage({msg: `close_tpe_menu`});
-   }
+    if (element.matches(`#export_overview`)) {
+      EXPORT_OVERVIEW();
+    }
+    if (element.matches(`#export_breakdown`)) {
+      EXPORT_BREAKDOWN();
+    }
+    if (element.matches(`#sync`)) {
+      SYNC_PROGRESS(1, `???`);
+      chrome.runtime.sendMessage({msg: `sync_tpe`});
+    }
+    if (element.matches(`#close`)) {
+      chrome.runtime.sendMessage({msg: `close_tpe_menu`});
+    }
+  });
+
+  WRITE();
 });
