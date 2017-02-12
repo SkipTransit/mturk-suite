@@ -131,6 +131,10 @@ a.subnavclass, a.nonboldsubnavclass, a.header_links {
   color: #336699 !important;
 }
 
+#tpe_earnings {
+  color: #FFFFFF !important;
+}
+
 /* Navigation "Your Account" Active */
 img[src="https://images-na.ssl-images-amazon.com/images/G/01/webservices/mechanical-turk/nav_youraccount_active.gif"] {
   height       : 0;
