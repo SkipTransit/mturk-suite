@@ -3,13 +3,29 @@ document.addEventListener(`DOMContentLoaded`, function () {
 });
 
 chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
-  if (request.msg == `sync_tpe_running`) {
-    SYNC_PROGRESS(request.data.current, request.data.total);
+  switch (request.msg) {
+    case `sync_tpe_running`:
+      SYNC_PROGRESS(request.data.current, request.data.total);
+      break;
+    case `bonus`:
+      BONUS(request.data.starting, request.data.current);
+      break;
   }
 });
 
 let tpeexport = ``;
-let overview_export = ``;
+
+const OVERVIEW = {
+  all: 0, all_val: 0,
+  sub: 0, sub_val: 0,
+  app: 0, app_val: 0,
+  ret: 0, ret_val: 0,
+  bonus: 0
+};
+
+const BREAKDOWN = {
+  bonus: {reqname: `Bonuses`, hits: `N/A`, reward: 0}
+};
 
 function WRITE () {
   $(`#overview`).html(
@@ -43,9 +59,12 @@ function WRITE () {
     `    </table>`
   );
   
+  chrome.runtime.sendMessage({msg: `bonus`});
+  
   chrome.storage.local.get(`hits`, function (data) {
     const hits = data.hits || {};
-    let breakdown = {}, breakdown_html = ``, detailed_html = ``;
+    
+    let breakdown_html = ``, detailed_html = ``;
     
     const total = Object.keys(hits).length; let total_pe = 0;
     let submitted = 0, submitted_pe = 0;
@@ -53,83 +72,72 @@ function WRITE () {
     let returned = 0, returned_pe = 0;
     
     for (let key in hits) {
-      total_pe += +hits[key].reward.replace(/[^0-9.]/g, ``);
+      OVERVIEW.all ++;
+      OVERVIEW.all_val += +hits[key].reward.replace(/[^0-9.]/g, ``);
       
       if (hits[key].status.match(/Submitted|Paid|Approved|Pending/)) {
-        submitted ++;
-        submitted_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
+        OVERVIEW.sub ++;
+        OVERVIEW.sub_val += +hits[key].reward.replace(/[^0-9.]/g, ``);
         
         if (hits[key].status.match(/Paid|Approved/)) {
-          approved ++;
-          approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
+          OVERVIEW.app ++;
+          OVERVIEW.app_val += +hits[key].reward.replace(/[^0-9.]/g, ``);
         }
-        else if (hits[key].status.match(/Submitted|Pending/)) {
+        if (hits[key].status.match(/Submitted|Pending/)) {
           const apped = IS_APPROVED(hits[key].autoapp, hits[key].submitted);
           if (apped) {
-            approved ++;
-            approved_pe += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
+            OVERVIEW.app ++;
+            OVERVIEW.app_val += +hits[key].reward.replace(/[^0-9.]/g, ``);
           }
         }
       }
       else if (hits[key].status.match(/Returned/)) {
-        returned ++;
-        returned_pe += +hits[key].reward.replace(/[^0-9.]/g, ``);
+        OVERVIEW.ret ++;
+        OVERVIEW.ret_val += +hits[key].reward.replace(/[^0-9.]/g, ``);
       }
     }
     
-    $(`#overview`).html(
+    document.getElementById(`overview`).innerHTML =
       `<div style="font-size: 20px; line-height: normal;">` +
       `  <br>` +
-      `  <span><b>${total}</b> HITs have been viewed, submitted or returned today.</span>` +
+      `  <span><b>${OVERVIEW.all}</b> HITs have been viewed, submitted or returned today.</span>` +
       `  <br>` +
       `  <br>` +
-      `  <span><b>${submitted}</b> HITs have been submitted today for a total value of <b>$${submitted_pe.toFixed(2)}</b>.</span>` +
+      `  <span><b>${OVERVIEW.sub}</b> HITs have been submitted today for a total value of <b>$${OVERVIEW.sub_val.toFixed(2)}</b>.</span>` +
       `  <br>` +
       `  <br>` +
-      `  <span><b>${approved}</b> HITs have been approved today for a total value of <b>$${approved_pe.toFixed(2)}</b>.</span>` +
+      `  <span><b>${OVERVIEW.app}</b> HITs have been approved today for a total value of <b>$${OVERVIEW.app_val.toFixed(2)}</b>.</span>` +
       `  <br>` +
       `  <br>` +
-      `  <span><b>${returned}</b> HITs have been returned today for a total value of <b>$${returned_pe.toFixed(2)}</b>.</span>` +
+      `  <span><b>${OVERVIEW.ret}</b> HITs have been returned today for a total value of <b>$${OVERVIEW.ret_val.toFixed(2)}</b>.</span>` +
+      `  <br>` +
+      `  <br>` +
+      `  <span>You have recieved <b id="bonus">$${OVERVIEW.bonus.toFixed(2)}</b> in bonuses today.</span>` +
       `</div>`
-    );
-    
-    overview_export = 
-      `[b]Today's Projected Earnings: $${submitted_pe.toFixed(2)}[/b] [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version})[/SIZE]\n\n` +
-      `[table][tr][th][b]&#8291;[/b][/th][th][b]HITs[/b][/th][th][b]Value[/b][/th][/tr]\n` +
-      `[tr][td]Submitted[/td][td]${submitted}[/td][td]$${submitted_pe.toFixed(2)}[/td][/tr]\n` +
-      `[tr][td]Approved[/td][td]${approved}[/td][td]$${approved_pe.toFixed(2)}[/td][/tr]\n` +
-      `[tr][td]Returned[/td][td]${returned}[/td][td]$${returned_pe.toFixed(2)}[/td][/tr]\n` +
-      `[tr][td]Total[/td][td]${total}[/td][td]$${total_pe.toFixed(2)}[/td][/tr][/table]`
     ;
     
-    tpeexport =
-      `[b]Today's Projected Earnings: $${submitted_pe.toFixed(2)}[/b] [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version})[/SIZE]\n` +
-      `[spoiler=Today's Projected Earnings Full Details][table][tr][th][b]Requester[/b][/th][th][b]HITs[/b][/th][th][b]Projected[/b][/th][/tr]` +
-      `[tr][td]Total[/td][td]${submitted}[/td][td]$${submitted_pe.toFixed(2)}[/td][/tr]\n`
-    ;
-
     for (let key in hits) {
       if (hits[key].status.match(/(Submitted|Paid|Approved|Pending)/)) {
         const id = hits[key].reqid;
         
-        if (!breakdown[id]) {
-          breakdown[id] = {
+        if (!BREAKDOWN[id]) {
+          BREAKDOWN[id] = {
             reqname : hits[key].reqname,
             reqid   : hits[key].reqid,
             hits    : 1,
-            reward  : Number(hits[key].reward.replace(/[^0-9.]/g, ``))
+            reward  : +hits[key].reward.replace(/[^0-9.]/g, ``)
           };
         }
         else {
-          breakdown[id].hits   += 1;
-          breakdown[id].reward += Number(hits[key].reward.replace(/[^0-9.]/g, ``));
+          BREAKDOWN[id].hits   += 1;
+          BREAKDOWN[id].reward += +hits[key].reward.replace(/[^0-9.]/g, ``);
         }
       }
     }
     
-    const breakdown_sorted = Object.keys(breakdown).sort( (a, b) => breakdown[a].reward - breakdown[b].reward);
+    const breakdown_sorted = Object.keys(BREAKDOWN).sort( (a, b) => BREAKDOWN[a].reward - BREAKDOWN[b].reward);
     for (let i = breakdown_sorted.length - 1; i > -1; i --) {
-      let hit = breakdown[breakdown_sorted[i]], reqlink = ``;
+      let hit = BREAKDOWN[breakdown_sorted[i]], reqlink = ``;
       
       if (hit.reqname !== hit.reqid) {
         reqlink =
@@ -149,17 +157,7 @@ function WRITE () {
         `  <td>$${hit.reward.toFixed(2)}</td>` +
         `</tr>`
       ;
-      
-      tpeexport +=
-        `[tr]` +
-        `[td][url=${reqlink}]${hit.reqname}[/url][/td]` +
-        `[td]${hit.hits}[/td]` +
-        `[td]$${hit.reward.toFixed(2)}[/td]` +
-        `[/tr]\n`
-      ;
     }
-    
-    tpeexport += `[/table][/spoiler]`
     
     $(`#requester_tbody`).html(breakdown_html);
     
@@ -270,6 +268,66 @@ function SYNC_PROGRESS (current, total) {
   );
 }
 
+function BONUS (starting, current) {
+  OVERVIEW.bonus = BREAKDOWN.bonus.reward = current - starting;
+  if (document.getElementById(`bonus`)) document.getElementById(`bonus`).textContent = `$${OVERVIEW.bonus.toFixed(2)}`;
+}
+
+function EXPORT_OVERVIEW () {
+  const template = 
+    `[b]Today's Projected Earnings: $${OVERVIEW.sub_val.toFixed(2)}[/b] ${OVERVIEW.bonus !== 0 ? `[b]+ Bonuses: $${OVERVIEW.bonus.toFixed(2)} = $${(OVERVIEW.sub_val + OVERVIEW.bonus).toFixed(2)}[/b]` : ``} [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version})[/SIZE]\n\n` +
+    `[spoiler=Today's Projected Earnings - Overview]\n` +
+    `[table]\n` +
+    `[tr][th][b]&#8291;[/b][/th][th][b]HITs[/b][/th][th][b]Value[/b][/th][/tr]\n` +
+    `[tr][td]All HITs[/td][td]${OVERVIEW.all}[/td][td]$${OVERVIEW.all_val.toFixed(2)}[/td][/tr]\n` +
+    `[tr][td]Submitted[/td][td]${OVERVIEW.sub}[/td][td]$${OVERVIEW.sub_val.toFixed(2)}[/td][/tr]\n` +
+    `[tr][td]Approved[/td][td]${OVERVIEW.app}[/td][td]$${OVERVIEW.app_val.toFixed(2)}[/td][/tr]\n` +
+    `[tr][td]Returned[/td][td]${OVERVIEW.ret}[/td][td]$${OVERVIEW.ret_val.toFixed(2)}[/td][/tr]\n` +
+    `[tr][td]Bonuses[/td][td]N/A[/td][td]$${OVERVIEW.bonus.toFixed(2)}[/td][/tr]\n` +
+    `[/table]\n` +
+    `[/spoiler]`
+  ;
+  
+  COPY_TO_CLIPBOARD(template);
+}
+
+function EXPORT_REQUESTER_BREAKDOWN () {
+  let template = 
+    `[b]Today's Projected Earnings: $${OVERVIEW.sub_val.toFixed(2)}[/b] ${OVERVIEW.bonus !== 0 ? `[b]+ Bonuses: $${OVERVIEW.bonus.toFixed(2)} = $${(OVERVIEW.sub_val + OVERVIEW.bonus).toFixed(2)}[/b]` : ``} [SIZE=2](Exported from [URL=http://mturksuite.com/]Mturk Suite[/URL] v${chrome.runtime.getManifest().version})[/SIZE]\n\n` +
+    `[spoiler=Today's Projected Earnings - Requester Breakdown]\n` +
+    `[table]\n` +
+    `[tr][th][b]Requester[/b][/th][th][b]HITs[/b][/th][th][b]Value[/b][/th][/tr]\n`
+  ;
+   
+  const sorted = Object.keys(BREAKDOWN).sort( (a, b) => BREAKDOWN[a].reward - BREAKDOWN[b].reward);
+  
+  for (let i = sorted.length - 1; i > -1; i --) {
+    let hit = BREAKDOWN[sorted[i]], reqlink = ``;
+    
+    if (hit.reqname === `Bonuses`) {
+      template +=
+        `[tr]` +
+        `[td]${hit.reqname}[/td]` +
+        `[td]${hit.hits}[/td]` +
+        `[td]$${hit.reward.toFixed(2)}[/td]` +
+        `[/tr]\n`
+      ;
+      continue;
+    }
+    
+    template +=
+      `[tr]` +
+      `[td][url=https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&${hit.reqname !== hit.reqid ? `requesterId=${hit.reqid}` : `searchWords=${hit.reqid.replace(/ /, `+`)}`}]${hit.reqname}[/url][/td]` +
+      `[td]${hit.hits}[/td]` +
+      `[td]$${hit.reward.toFixed(2)}[/td]` +
+      `[/tr]\n`
+    ;
+  }
+  
+  tpeexport += `[/table][/spoiler]`
+  
+  COPY_TO_CLIPBOARD(template);
+}
 
 function COPY_TO_CLIPBOARD (template) {
   document.body.insertAdjacentHTML(`afterbegin`, `<textarea id="clipboard" style="opacity: 0;">${template}</textarea>`);
@@ -281,25 +339,14 @@ function COPY_TO_CLIPBOARD (template) {
   document.body.removeChild(document.getElementById(`clipboard`));
 }
 
-/*
-$(`html`).on(`click`, `#sync`, function () {
-  SYNC_PROGRESS(1, `???`);
-  chrome.runtime.sendMessage({msg: `sync_tpe`});
-});
-
-$(`html`).on(`click`, `#close`, function () {
-  chrome.runtime.sendMessage({msg: `close_tpe_menu`});
-});
-*/
-
  document.addEventListener(`click`, function (event) {
    const element = event.target;
       
    if (element.matches(`#export_overview`)) {
-     COPY_TO_CLIPBOARD(overview_export);
+     EXPORT_OVERVIEW();
    }
    if (element.matches(`#export_breakdown`)) {
-     COPY_TO_CLIPBOARD(tpeexport);
+     EXPORT_REQUESTER_BREAKDOWN();
    }
    if (element.matches(`#sync`)) {
      SYNC_PROGRESS(1, `???`);

@@ -1,5 +1,6 @@
 let user = {}, dashboard = {}, tpe = {}, hits  = {}, requests = {};
-let syncing_tpe = {tab: null, running: false};
+let syncing_tpe = { tab: null, running: false };
+let BONUS = { date: null, starting: null, current: null };
 
 chrome.storage.local.get(`user`, function (data) {
   user = data.user || {goal: 20, dark: false, hit_export: true, accept_next: true, workspace: false};
@@ -10,34 +11,42 @@ chrome.storage.local.get(`dashboard`, function (data) {
   dashboard = data.dashboard || {id: `Visit Dashboard!`, date: null, earn_hits: 0, earn_bonus: 0, earn_total: 0, earn_trans: 0, total_sub: 0, total_app: 0, total_rej: 0, total_pen: 0, today_sub: 0, today_app: 0, today_rej: 0, today_pen: 0};
 });
 
+chrome.storage.local.get(`bonus`, function (result) {
+  if (result.bonus) BONUS = result.bonus;
+  console.log(BONUS);
+  GET_BONUS();
+});
+
 chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
-  if (request.msg == `user`) {
-    user = request.data;
-    chrome.storage.local.set({'user': user});
-    tpe.goal = user.goal;
-    chrome.storage.local.set({'tpe': tpe});
-  }
-  if (request.msg == `dashboard`) {
-    dashboard = request.data;
-    chrome.storage.local.set({'dashboard': request.data});
-  }
-  if (request.msg == `turkopticon`) {
-    TURKOPTICON_DB(sender.tab.id, request.data);
-  }
-  if (request.msg == `hitexport`) {
-    TODB_hitexport(sender.tab.id, request.data);
-  }
-  if (request.msg == `sync_tpe`) {
-    sync_tpe(sender.tab.id, request.data);
-  }
-  if (request.msg == `send_mtc`) {
-    SEND_MTC(sender.tab.id, request.data);
-  }
-  if (request.msg == `send_th`) {
-    SEND_TH(sender.tab.id, request.data);
-  }
-  if (request.msg == `close_tpe_menu`) {
-    chrome.tabs.sendMessage(sender.tab.id, {msg: `close_tpe_menu`});
+  switch (request.msg) {
+    case `user`: 
+      user = request.data; chrome.storage.local.set({user: user});
+      tpe.goal = user.goal; chrome.storage.local.set({tpe: tpe});
+      break;
+    case `dashboard`:
+      dashboard = request.data; chrome.storage.local.set({dashboard: request.data});
+      break;
+    case `turkopticon`:
+      TURKOPTICON_DB(sender.tab.id, request.data);
+      break;
+    case `hitexport`:
+      TODB_hitexport(sender.tab.id, request.data);
+      break;
+    case `sync_tpe`:
+      sync_tpe(sender.tab.id, request.data);
+      break;
+    case `close_tpe_menu`:
+      chrome.tabs.sendMessage(sender.tab.id, { msg: `close_tpe_menu` });
+      break;
+    case `send_th`:
+      SEND_TH(sender.tab.id, request.data);
+      break;
+    case `send_mtc`:
+      SEND_MTC(sender.tab.id, request.data);
+      break;
+    case `bonus`:
+      GET_BONUS(sender.tab.id);
+      break;
   }
 });
 
@@ -262,21 +271,18 @@ function BBCODE_TO_HTML (BBCODE) {
 }
 
 //******* Experimental *******//
-chrome.webRequest.onCompleted.addListener( 
+chrome.webRequest.onCompleted.addListener(
   function (data) {
-    if (data.statusCode == `200`) {
-      const key = data.url.match(/hitId=(\w+)/)[1];
-      if (hits[key]) {
-        hits[key].status = `Returned`;
-      }
-      else {
-        for (let key in hits) {
-          if (hits[key].assignid === data.url.match(/hitId=(\w+)/)[1]) {
-            hits[key].status = `Returned`;
-          }
-        }
-      }
-    } 
+    if (data.statusCode !== 200) return;
+    
+    const id = data.url.match(/hitId=(\w+)/)[1];
+    
+    if (hits[id]) {
+      hits[id].status = `Returned`;
+    }
+    else {
+      for (let key in hits) if (hits[key].assignid === id) hits[key].status = `Returned`;
+    }
   },
   { urls: [`https://www.mturk.com/mturk/return?*`] }, [`responseHeaders`]
 );
@@ -297,35 +303,37 @@ chrome.storage.local.get(`hits`, function (data) {
         assignid : data.url.indexOf(`assignmentId=`) !== -1  ? data.url.split(`assignmentId=`)[1].split(`&`)[0] : null
       };
     }
+    
+    BONUS_NEW_DAY_CHECK();
   }, { urls: [`https://www.mturk.com/mturk/submit`, `https://www.mturk.com/mturk/externalSubmit*`] }, [`requestBody`]);
   
   chrome.webRequest.onCompleted.addListener( function (data) {
-    if (data.statusCode == `200`) {
-      if (requests[data.requestId].hitid) {
-        const key = requests[data.requestId].hitid;
-        if (hits[key]) {
-          hits[key].status = `Submitted`;
-          hits[key].submitted = new Date().getTime() / 1000;
-        }
-        else {
-          for (let key in hits) {
-            if (hits[key].assignid === requests[data.requestId].hitid) {
-              hits[key].status = `Submitted`;
-              hits[key].submitted = new Date().getTime() / 1000;
-            }
-          }
-        }
+    if (data.statusCode !== 200) return;
+    
+    if (requests[data.requestId].hitid) {
+      const key = requests[data.requestId].hitid;
+      if (hits[key]) {
+        hits[key].status = `Submitted`;
+        hits[key].submitted = new Date().getTime() / 1000;
       }
       else {
         for (let key in hits) {
-          if (hits[key].assignid === requests[data.requestId].assignid) {
+          if (hits[key].assignid === requests[data.requestId].hitid) {
             hits[key].status = `Submitted`;
             hits[key].submitted = new Date().getTime() / 1000;
           }
         }
       }
-      update_tpe();
     }
+    else {
+      for (let key in hits) {
+        if (hits[key].assignid === requests[data.requestId].assignid) {
+          hits[key].status = `Submitted`;
+          hits[key].submitted = new Date().getTime() / 1000;
+        }
+      }
+    }
+      update_tpe();
   }, { urls: [`https://www.mturk.com/mturk/submit`, `https://www.mturk.com/mturk/externalSubmit*`] }, [`responseHeaders`]);
 
   chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
@@ -338,26 +346,14 @@ chrome.storage.local.get(`hits`, function (data) {
 });
 
 function ADD_HIT (data) {
-  if (!hits[data.hitid]) {
-    hits[data.hitid] = {
-      reqname   : data.reqname,
-      reqid     : data.reqid,
-      title     : data.title,
-      reward    : data.reward,
-      autoapp   : data.autoapp,
-      hitid     : data.hitid,
-      assignid  : data.assignid,
-      status    : data.status,
-      source    : data.source,
-      date      : data.date,
-      viewed    : data.viewed,
-      submitted : data.submitted
-    };
-    chrome.storage.local.set({'hits': hits});
-  }
-  else {
+  if (hits[data.hitid]) {
     hits[data.hitid].assignid = data.assignid;
   }
+  else {
+    hits[data.hitid] = data;
+  }
+  
+  chrome.storage.local.set({hits: hits});
 }
 
 function sync_tpe (tab) {
@@ -484,6 +480,8 @@ function dst () {
   return (today >= start && today < end) ? true : false;
 }
 
+
+/********** HIT Finder Database **********/
 const HFDB_request = indexedDB.open(`HFDB`);
 HFDB_request.onsuccess = function (event) {
   const HFDB = event.target.result;
@@ -517,3 +515,43 @@ HFDB_request.onupgradeneeded = function (event) {
     createObjectStore.createIndex(index, index, {unique: false});
   }
 };
+
+/********** Bonus Tracking **********/
+function BONUS_NEW_DAY_CHECK () {
+  if (BONUS.date !== mturk_date(Date.now())) GET_BONUS();
+}
+
+function GET_BONUS (tab) {
+  const date = mturk_date(Date.now());
+  
+  $.get(`https://www.mturk.com/mturk/dashboard`, function (result, status, xhr) {
+    const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
+    
+    const pre = doc.getElementsByClassName(`error_title`);
+    const bonus = doc.querySelector(`#bonus_earnings_amount`);
+    const today = doc.querySelector(`a[href^='/mturk/statusdetail?encodedDate']`);
+    
+    if (pre[0]) return GET_BONUS(); if (!bonus) return;
+    
+    if (BONUS.date !== date || BONUS.starting === null) {
+      BONUS.starting = +bonus.textContent.replace(/[^0-9.]/g, ``);
+    }
+    
+    BONUS.date = mturk_date(Date.now());
+    BONUS.current = +bonus.textContent.replace(/[^0-9.]/g, ``);
+      
+    if (!today.textContent.match(/Today/)) {
+      BONUS.starting = +bonus.textContent.replace(/[^0-9.]/g, ``);
+    }
+    else {
+      const approved = +today.parentElement.parentElement.children[2].textContent;
+      if (approved === 0) {
+        BONUS.starting -= +today.parentElement.parentElement.children[5].textContent.replace(/[^0-9.]/g, ``);
+      }
+    }
+    
+    chrome.storage.local.set({bonus: BONUS});
+    if (tab) chrome.tabs.sendMessage(tab, { msg: `bonus`, data: BONUS });
+    console.log(BONUS);
+  });
+}
