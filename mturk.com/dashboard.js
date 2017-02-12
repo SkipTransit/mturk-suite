@@ -122,7 +122,7 @@ function DASHBOARD () {
       );
     }
       
-    //chrome.runtime.sendMessage({msg: `dashboard`, data: dash});
+    chrome.runtime.sendMessage({msg: `dashboard`, data: dash});
   });
   
   hit_totals[4].children[0].insertAdjacentHTML(`beforeend`,
