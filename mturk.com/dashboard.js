@@ -64,31 +64,31 @@ function DASHBOARD () {
     
     if (dash.today_sub !== loaded_dash.today_sub) {
       hit_status[1].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">+${(dash.today_sub - loaded_dash.today_sub)}</span>`
+        `<span style="float: left; font-size: 80%;">+${(dash.today_sub - loaded_dash.today_sub)}</span>`
       );
     }
 
     if (dash.today_app !== loaded_dash.today_app) {
       hit_status[2].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">+${(dash.today_app - loaded_dash.today_app)}</span>`
+        `<span style="float: left; font-size: 80%;">+${(dash.today_app - loaded_dash.today_app)}</span>`
       );
     }
 
     if (dash.today_rej !== loaded_dash.today_rej) {
       hit_status[3].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">+${(dash.today_rej - loaded_dash.today_rej)}</span>`
+        `<span style="float: left; font-size: 80%;">+${(dash.today_rej - loaded_dash.today_rej)}</span>`
       );
     }
 
     if (dash.today_pen < loaded_dash.today_pen) {
       hit_status[4].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">-${(loaded_dash.today_pen - dash.today_pen)}</span>`
+        `<span style="float: left; font-size: 80%;">-${(loaded_dash.today_pen - dash.today_pen)}</span>`
       );
     }
 
     if (dash.today_pen > loaded_dash.today_pen) {
       hit_status[4].insertAdjacentHTML(`beforeend`,
-        `<span style="float: left;">+${(dash.today_pen - loaded_dash.today_pen)}</span>`
+        `<span style="float: left; font-size: 80%;">+${(dash.today_pen - loaded_dash.today_pen)}</span>`
       );
     }
 
@@ -122,7 +122,7 @@ function DASHBOARD () {
       );
     }
       
-    chrome.runtime.sendMessage({msg: `dashboard`, data: dash});
+    //chrome.runtime.sendMessage({msg: `dashboard`, data: dash});
   });
   
   hit_totals[4].children[0].insertAdjacentHTML(`beforeend`,
@@ -159,6 +159,9 @@ function DASHBOARD () {
   }
   
   for (let i = 1; i < 5; i ++) hit_totals[i].children[1].textContent = (+hit_totals[i].children[1].textContent).toLocaleString();
+  
+  document.getElementById(`lnk_show_earnings_details`).innerHTML = `Show details <img src="/media/more.gif" border="0/">`;
+  document.getElementById(`lnk_hide_earnings_details`).innerHTML = `Hide details <img src="/media/less.gif" border="0/">`;
 }
 
 if (document.getElementById(`total_earnings_amount`)) {
