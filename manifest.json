@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.10.5",
+  "version": "1.11.2",
 
   "icons": {
     "16": "media/icon_16.png",
@@ -49,6 +49,7 @@
         "mturk.com/accept_next.js",
         "mturk.com/hit_capsule.js",
         "mturk.com/hit_export.js",
+        "mturk.com/pre_reloader.js",
         "mturk.com/queue_value.js",
         "mturk.com/send_hit.js",
         "mturk.com/todays_projected_earnings.js",
