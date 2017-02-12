@@ -12,10 +12,10 @@ function CSS_WRITE (data) {
 }
 
 function DARK_THEME () {
-  chrome.storage.local.get(`user`, function (data) {
-    const user = data.user || {dark: false};
+  chrome.storage.local.get(`user`, function (result) {
+    const user = result.user || { dark_theme: false };
   
-    if (user.dark) {
+    if (user.dark_theme) {
       if (document.URL.match(/^https:\/\/www.mturk.com\/mturk\/((?!hit_scraper|finder_).)*$/)) {
         CSS_WRITE(css_all);
       }
