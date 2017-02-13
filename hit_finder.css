@@ -57,8 +57,12 @@
   display: none;
 }
 
-a:link, a:visited {
+a:link {
   color : #224f77;
+}
+
+a:visited {
+  color: #551A8B; 
 }
 
 .vb, .vb_th, .vb_mtc, .rt_block, .rt_include {
