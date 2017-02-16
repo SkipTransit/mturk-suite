@@ -97,7 +97,10 @@
   cursor: pointer;
 }
 
-#overview * {
+#overview table * {
   font-size: 110%;
 }
 
+.text-center u {
+  color: green;
+}

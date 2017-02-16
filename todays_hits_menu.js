@@ -46,7 +46,10 @@ function WRITE () {
     document.getElementById(`ret`).textContent = OVERVIEW.ret;
     document.getElementById(`ret_val`).textContent = `$${OVERVIEW.ret_val.toFixed(2)}`;
     
-    document.getElementById(`bonus`).textContent = OVERVIEW.bonus;    
+    document.getElementById(`bonus`).textContent = OVERVIEW.bonus.toFixed(2);
+    
+    for (let id of [`tpe1`, `tpe2`, `tpe3`]) document.getElementById(id).textContent = `$${OVERVIEW.sub_val.toFixed(2)}`;
+    for (let id of [`tpb1`, `tpb2`, `tpb3`]) document.getElementById(id).innerHTML = OVERVIEW.bonus !== 0 ? `+ Bonuses: <u>$${OVERVIEW.bonus.toFixed(2)}</u> = <u>$${(OVERVIEW.sub_val + OVERVIEW.bonus).toFixed(2)}</u>` : ``;
     
     // Requester Breakdown
     for (let key in hits) {
@@ -192,7 +195,8 @@ function SYNC_PROGRESS (current, total) {
 
 function BONUS (starting, current) {
   OVERVIEW.bonus = BREAKDOWN.bonus.reward = current - starting;
-  if (document.getElementById(`bonus`)) document.getElementById(`bonus`).textContent = `$${OVERVIEW.bonus.toFixed(2)}`;
+  document.getElementById(`bonus`).textContent = `$${OVERVIEW.bonus.toFixed(2)}`;
+  for (let id of [`tpb1`, `tpb2`, `tpb3`]) document.getElementById(id).innerHTML = OVERVIEW.bonus !== 0 ? `+ Bonuses: <u>$${OVERVIEW.bonus.toFixed(2)}</u> = <u>$${(OVERVIEW.sub_val + OVERVIEW.bonus).toFixed(2)}</u>` : ``;
 }
 
 function EXPORT_OVERVIEW () {
