@@ -523,7 +523,7 @@ function BONUS_NEW_DAY_CHECK () {
 }
 
 function GET_BONUS (tab) {
-  const date = mturk_date(Date.now());
+  const date = mturk_date(Date.now()); const b_date = BONUS.date;
   
   $.get(`https://www.mturk.com/mturk/dashboard`, function (result, status, xhr) {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
@@ -544,15 +544,11 @@ function GET_BONUS (tab) {
     if (!today.textContent.match(/Today/)) {
       BONUS.starting = +bonus.textContent.replace(/[^0-9.]/g, ``);
     }
-    else {
-      const approved = +today.parentElement.parentElement.children[2].textContent;
-      if (approved === 0) {
-        BONUS.starting -= +today.parentElement.parentElement.children[5].textContent.replace(/[^0-9.]/g, ``);
-      }
+    else if (+today.parentElement.parentElement.children[2].textContent === 0) {
+      BONUS.starting = +bonus.textContent.replace(/[^0-9.]/g, ``) - +today.parentElement.parentElement.children[5].textContent.replace(/[^0-9.]/g, ``);
     }
     
     chrome.storage.local.set({bonus: BONUS});
     if (tab) chrome.tabs.sendMessage(tab, { msg: `bonus`, data: BONUS });
-    console.log(BONUS);
   });
 }
