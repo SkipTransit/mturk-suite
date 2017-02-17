@@ -136,6 +136,7 @@ $(`html`).on(`click`, `#test_include_list`, function () {
     pushbullet: $(`#save_include_list_pushbullet`).prop(`checked`)
   };
   INCLUDED_ALERTS_TEST(test);
+  console.log(test);
 });
 
 $(`html`).on(`click`, `#test_edit_include_list`, function () {
@@ -148,6 +149,7 @@ $(`html`).on(`click`, `#test_edit_include_list`, function () {
     pushbullet: $(`#edit_include_list_pushbullet`).prop(`checked`)
   };
   INCLUDED_ALERTS_TEST(test);
+  console.log(test);
 });
 
 $(`html`).on(`click`, `.rt_include`, function () {
@@ -833,6 +835,7 @@ function IS_INCLUDED (hit) {
 }
 
 function INCLUDED_ALERTS_TEST (test) {
+  console.log(test);
   if (test.sound) {
     if (test.type === `sound`) {
       INCLUDE_SOUND();
