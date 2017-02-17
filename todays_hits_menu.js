@@ -1,5 +1,5 @@
 const OVERVIEW = { all: 0, all_val: 0, sub: 0, sub_val: 0, app: 0, app_val: 0, ret: 0, ret_val: 0, bonus: 0 };
-const BREAKDOWN = { bonus: { reqname: `Bonuses`, hits: `N/A`, reward: 0 } };
+const BREAKDOWN = {};
 
 function WRITE () {
   chrome.runtime.sendMessage({ msg: `bonus` });
@@ -194,7 +194,7 @@ function SYNC_PROGRESS (current, total) {
 }
 
 function BONUS (starting, current) {
-  OVERVIEW.bonus = BREAKDOWN.bonus.reward = current - starting;
+  OVERVIEW.bonus = current - starting;
   document.getElementById(`bonus`).textContent = `$${OVERVIEW.bonus.toFixed(2)}`;
   for (let id of [`tpb1`, `tpb2`, `tpb3`]) document.getElementById(id).innerHTML = OVERVIEW.bonus !== 0 ? `+ Bonuses: <u>$${OVERVIEW.bonus.toFixed(2)}</u> = <u>$${(OVERVIEW.sub_val + OVERVIEW.bonus).toFixed(2)}</u>` : ``;
 }
@@ -229,17 +229,6 @@ function EXPORT_BREAKDOWN () {
   
   for (let i = sorted.length - 1; i > -1; i --) {
     let hit = BREAKDOWN[sorted[i]];
-    
-    if (hit.reqname === `Bonuses`) {
-      template +=
-        `[tr]` +
-        `[td]${hit.reqname}[/td]` +
-        `[td]${hit.hits}[/td]` +
-        `[td]$${hit.reward.toFixed(2)}[/td]` +
-        `[/tr]\n`
-      ;
-      continue;
-    }
     
     template +=
       `[tr]` +
