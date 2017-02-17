@@ -4,6 +4,17 @@
   "name": "Mturk Suite",
   "short_name": "MTS",
   "version": "1.11.10",
+  
+  "permissions": [
+    "tts",
+    "tabs",
+    "activeTab",
+    "storage",
+    "webRequest",
+    "contextMenus",
+    "clipboardWrite",
+    "<all_urls>"
+  ],
 
   "icons": {
     "16": "media/icon_16.png",
@@ -97,17 +108,7 @@
       "run_at": "document_end"
     }
   ],
-  
-  "permissions": [
-    "tabs",
-    "activeTab",
-    "storage",
-    "webRequest",
-    "contextMenus",
-    "clipboardWrite",
-    "<all_urls>"
-  ],
-  
+
   "web_accessible_resources" : [
     "media/*",
     "todays_hits_menu.html"

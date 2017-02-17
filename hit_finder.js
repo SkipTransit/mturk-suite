@@ -2,7 +2,6 @@ document.addEventListener(`DOMContentLoaded`, function () {
   SET_CONFIG();
   BLOCK_LIST_WRITE();
   INCLUDE_LIST_WRITE();
-  window.speechSynthesis.getVoices();
 });
 
 let timeout;
@@ -1219,10 +1218,12 @@ function VALIDATE_JSON (data) {
 }
 
 function SPEAK (phrase) {
-  const msg = new SpeechSynthesisUtterance();
-  msg.text = phrase;
-  msg.voice = window.speechSynthesis.getVoices()[CONFIG.include_voice];
-  window.speechSynthesis.speak(msg);
+  chrome.tts.speak(
+    phrase, {
+      enqueue: true,
+      voiceName: CONFIG.include_voice === `0` ? `native` : `Google US English`
+    }
+  );
 }
 
 function INCLUDE_SOUND () {
@@ -1309,8 +1310,6 @@ function TURKOPTICON_DB (ids) {
       type: `GET`,
       timeout: 5000
     }).then(to_success, to_error);
-      
-    //$.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`).then(to_success, to_error);
   };
 }
 
