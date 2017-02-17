@@ -3,8 +3,8 @@ function ACCEPT_NEXT () {
     const user = data.user || { accept_next: true };
     
     const element = $(`label:contains(Auto-accept Next Task)`).children()[0];
-    element.checked = user.accept_next ? true : false;
-    element.dispatchEvent(new Event(`change`, {bubbles: true}));
+    const checked = element.checked;
+    
   });
 }
 
