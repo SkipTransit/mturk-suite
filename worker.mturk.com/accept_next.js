@@ -5,6 +5,7 @@ function ACCEPT_NEXT () {
     const element = $(`label:contains(Auto-accept Next Task)`).children()[0];
     const checked = element.checked;
     
+    if (user.accept_next !== checked) element.click();
   });
 }
 
