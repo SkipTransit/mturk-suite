@@ -1,0 +1,52 @@
+.MTS-export {
+  display: inline-block;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  padding: 1px 2px;
+  border-radius: 0.214rem;
+  background-color: #DC8C1B;
+  font-size: 0.70rem;
+  background-image: linear-gradient(to bottom, #f7dfa5 0%, #f0c14b 100%);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFF7DFA5', endColorstr='#FFF0C14B', GradientType=0);
+  border: 1px solid;
+  border-color: #a88734 #9c7e31 #846a29;
+  margin-right: 3px;
+}
+
+.MTS-export:focus {
+  outline: none;
+}
+
+.MTS-dropdown-btn:hover, ..MTS-dropdown-btn:focus {
+  background-color: #3e8e41;
+}
+
+.MTS-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.MTS-dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+
+.MTS-dropdown-content a {
+  color: black;
+  padding: 6px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.MTS-dropdown-content a:hover {
+  cursor: pointer; 
+  background-color: #f1f1f1
+}
