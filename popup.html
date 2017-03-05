@@ -1,5 +1,5 @@
 <!doctype html>
-<html style="width: 500px; overflow-x: hidden;">
+<html style="width: 200px; overflow-x: hidden;">
   <head>
     <meta charset="utf-8">
     <!-- Scripts -->
@@ -10,36 +10,78 @@
     <link href="popup.css" rel="stylesheet">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="bootstrap/toggle/css/bootstrap-toggle.min.css" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
+    <style>body { font-family: 'Open Sans', sans-serif !important; }</style>
   </head>
   <body>
-    <nav class="navbar navbar-fixed-top bg-primary">
+    <nav class="navbar navbar-fixed-top navbar-inverse">
       <div class="container">
         <div class="navbar-header">
           <span class="navbar-brand">Mturk Suite <span id="version"style="font-size: 70%"></span></span>
-          <!--<a class="navbar-brand" href="http://mturksuite.com/" target="_blank">Mturk Suite <span style="font-size: 70%">v0.3.0.9</span></a>-->
+    
+          <a href="/settings.html" target="_blank" style="color: #FFFFFF; margin-top: 1px; margin-right: 5px;" class="pull-right">
+            <span class="glyphicon glyphicon-cog"></span>
+          </a>
         </div>
       </div>
+
     </nav>
-    <div class="row">
-      <div class="col-xs-5">
-        <a href="/hit_finder.html" target="_blank" class="btn btn-primary" style="width: 100%;" role="button">
-          <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
-          HIT Finder
-        </a>
-        
-        <a href="/hit_finder_database.html" target="_blank" class="btn btn-primary" style="width: 100%; margin-top: 5px;" role="button">
-          <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
-          HIT Finder Database
-        </a>
-        <!--
-        <a href="/hit__database.html" target="_blank" class="btn btn-primary" style="width: 100%; margin-top: 5px;" role="button">
-          <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span>
-          HIT Database
-        </a>
-        -->
+
+      <!-- HIT Finder -->
+      <div>
+        <div class="form-group">
+          <input id="hf" name="hf" type="checkbox" autocomplete="off" />
+          <div class="btn-group btn-group-sm">
+            <a href="/hit_finder.html" target="_blank" class="btn btn-primary" role="label">
+              <span class="glyphicon glyphicon-new-window"></span>
+              <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            <a href="/hit_finder.html" target="_blank" class="btn btn-default active"role="label">HIT Finder</a>
+          </div>
+        </div>
       </div>
-      <div id="options" class="col-xs-7"></div>
-    </div>
+        
+      <!-- HIT Finder Database -->
+      <div style="margin-top: 1px;">
+        <div class="form-group">
+          <input id="hfdb" name="hfdb" type="checkbox" autocomplete="off" />
+          <div class="btn-group btn-group-sm">
+            <a href="/hit_finder_database.html" target="_blank" class="btn btn-primary" role="label">
+              <span class="glyphicon glyphicon-new-window"></span>
+              <span class="glyphicon glyphicon-new-window"></span>
+            </a>
+            <a href="/hit_finder_database.html" target="_blank" class="btn btn-default active"role="label">HIT Finder Database</a>
+          </div>
+        </div>
+      </div>
+        
+      <!-- Accept Next -->
+      <div style="margin-top: 1px;">
+        <div class="form-group">
+          <input id="accept_next" name="accept_next" type="checkbox" autocomplete="off" />
+          <div class="btn-group btn-group-sm">
+            <label for="accept_next" class="btn btn-primary">
+              <span class="glyphicon glyphicon-ok"></span>
+              <span class="glyphicon glyphicon-remove"></span>
+            </label>
+            <label for="accept_next" class="btn btn-default active">Accept Next Checked</label>
+          </div>
+        </div>
+      </div>
+        
+      <!-- Theme -->
+      <div style="margin-top: 1px;">
+        <div class="form-group">
+          <input id="theme" name="theme" type="checkbox" autocomplete="off" />
+          <div class="btn-group btn-group-sm">
+            <label for="theme" class="btn btn-primary">
+              <span class="glyphicon glyphicon-ok"></span>
+              <span class="glyphicon glyphicon-remove"></span>
+            </label>
+            <label for="theme" class="btn btn-default active">Theme</label>
+          </div>
+        </div>
+      </div>
+
   </body>
 </html>

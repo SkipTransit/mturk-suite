@@ -1,61 +1,82 @@
-let USER = { goal: 20, dark_theme: false, hit_export: true, accept_next: true, workspace: true, pre_reloader: true };
-
-function POPUP () {
-  chrome.storage.local.get(`user`, function (result) {
-    if (result.user) USER = result.user;
-    
-    document.getElementById(`options`).insertAdjacentHTML(`beforeend`,
-      GOAL_WRITE(USER.goal) +
-      SWITCH_WRITE(`dark_theme`,   USER.dark_theme,   `Dark Theme`) +
-      SWITCH_WRITE(`hit_export`,   USER.hit_export,   `HIT Export`) +
-      SWITCH_WRITE(`accept_next`,  USER.accept_next,  `Accept Next Checked`) +
-      SWITCH_WRITE(`workspace`,    USER.workspace,    `Workspace Expand + Scroll`) +
-      SWITCH_WRITE(`pre_reloader`, USER.pre_reloader, `Page Request Error Auto Reload`)
-    );
-  });
+const SETTINGS = {
+  // Today's Projected Earnings Settings
+  goal: 20.00,
   
-  document.getElementById(`version`).textContent = `v${chrome.runtime.getManifest().version}`;
+  // General Settings
+  accept_next: true,
+  workspace: true,
+  pre_reloader: true,
+  
+  // HIT Export Settings
+  hit_export: { 
+    irc: true,
+    forum: true,
+    forum_th: true,
+    forum_mtc: true
+  },
+  
+  // Theme
+  theme: false
+};
+
+function SAVE_SETTINGS () {
+  // Today's Projected Earnings Settings
+    
+  // General Settings
+  SETTINGS.accept_next = document.getElementById(`accept_next`).checked;
+    
+  // HIT Export Settings
+    
+  // Theme
+  SETTINGS.theme = document.getElementById(`theme`).checked;
+  
+  chrome.storage.local.set({
+    settings: SETTINGS
+  });
 }
 
-function GOAL_WRITE (goal) {
-  const html = 
-    `<div class="form-inline">` +
-      `<div class="input-group">` +
-        `<div class="input-group-addon">Daily Goal</div>` +
-        `<input id="goal" type="number" class="form-control" value="${(+goal).toFixed(2)}">` +
-      `</div>` +
-    `</div>`
-  ;
-  return html;
-}
-
-function SWITCH_WRITE (id, prop, name) {
-  const html =
-    `<div class="checkbox" style="padding: 2px; margin: 1px;">` +
-      `<label>` +
-        `<input id="${id}" type="checkbox" data-toggle="toggle" data-size="mini" data-onstyle="success" ${(prop ? `checked` : ``)}>` +
-        `${name}` +
-      `</label>` +
-    `</div>`
-  ;
-  return html;
+function LOAD_SETTINGS (settings) {    
+  if (settings) {
+    // Today's Projected Earnings Settings
+    if (settings.hasOwnProperty(`goal`)) SETTINGS.goal = settings.goal;
+      
+    // General Settings
+    if (settings.hasOwnProperty(`workspace`)) SETTINGS.workspace = settings.workspace;
+    if (settings.hasOwnProperty(`pre_reloader`)) SETTINGS.pre_reloader = settings.pre_reloader;
+    if (settings.hasOwnProperty(`accept_next`)) SETTINGS.accept_next = settings.accept_next;
+      
+    // HIT Export Settings
+    if (settings.hasOwnProperty(`hit_export`)) {
+      if (settings.hit_export.hasOwnProperty(`irc`)) SETTINGS.hit_export.irc = settings.hit_export.irc;
+      if (settings.hit_export.hasOwnProperty(`forum`)) SETTINGS.hit_export.forum = settings.hit_export.forum;
+      if (settings.hit_export.hasOwnProperty(`forum_th`)) SETTINGS.hit_export.forum_th = settings.hit_export.forum_th;
+      if (settings.hit_export.hasOwnProperty(`forum_mtc`)) SETTINGS.hit_export.forum_mtc = settings.hit_export.forum_mtc;
+    }  
+      
+    // Theme
+    if (settings.hasOwnProperty(`theme`)) SETTINGS.theme = settings.theme;
+  }
+  
+  // Today's Projected Earnings Settings
+    
+  // General Settings
+  document.getElementById(`accept_next`).checked = SETTINGS.accept_next;
+      
+  // HIT Export Settings
+      
+  // Theme
+  document.getElementById(`theme`).checked = SETTINGS.theme;
 }
 
 document.addEventListener(`DOMContentLoaded`, function () {
-  $(`html`).on(`click`, `.checkbox, label`, function (event) {
-    if (event.target !== this) return;
-    $(this).find(`input[type="checkbox"]`).bootstrapToggle(`toggle`);
+  chrome.storage.onChanged.addListener( function (changes) {
+    if (changes.settings) LOAD_SETTINGS(changes.settings.newValue);
   });
   
-  $(`html`).on(`change`, `input`, function () {
-    USER.goal         = document.getElementById(`goal`).value;
-    USER.dark_theme   = document.getElementById(`dark_theme`).checked;
-    USER.hit_export   = document.getElementById(`hit_export`).checked;
-    USER.accept_next  = document.getElementById(`accept_next`).checked;
-    USER.workspace    = document.getElementById(`workspace`).checked;
-    USER.pre_reloader = document.getElementById(`pre_reloader`).checked;
-    chrome.runtime.sendMessage({msg: `user`, data: USER});
+  chrome.storage.local.get(`settings`, function (result) {
+    LOAD_SETTINGS(result.settings ? result.settings : null);
   });
-
-  POPUP();
+  
+  $(`input`).on(`change`, SAVE_SETTINGS);
+  document.getElementById(`version`).textContent = `v${chrome.runtime.getManifest().version}`;
 });
