@@ -205,7 +205,7 @@ function EXPORT_OVERVIEW () {
     `[spoiler=Today's Projected Earnings - Overview]\n` +
     `[table]\n` +
     `[tr][th][b]&#8291;[/b][/th][th][b]HITs[/b][/th][th][b]Value[/b][/th][/tr]\n` +
-    `[tr][td]All HITs[/td][td]${OVERVIEW.all}[/td][td]$${OVERVIEW.all_val.toFixed(2)}[/td][/tr]\n` +
+    `[tr][td]Viewed[/td][td]${OVERVIEW.all}[/td][td]$${OVERVIEW.all_val.toFixed(2)}[/td][/tr]\n` +
     `[tr][td]Submitted[/td][td]${OVERVIEW.sub}[/td][td]$${OVERVIEW.sub_val.toFixed(2)}[/td][/tr]\n` +
     `[tr][td]Approved[/td][td]${OVERVIEW.app}[/td][td]$${OVERVIEW.app_val.toFixed(2)}[/td][/tr]\n` +
     `[tr][td]Returned[/td][td]${OVERVIEW.ret}[/td][td]$${OVERVIEW.ret_val.toFixed(2)}[/td][/tr]\n` +
