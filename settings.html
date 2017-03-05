@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>MTS - Settings</title>
+    <!-- Scripts -->
+    <script src="jquery-3.1.1.min.js"></script>
+    <script src="settings.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <!-- Cascading Style Sheets -->
+    <link href="settings.css" rel="stylesheet" media="screen">
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
+    <style>body { font-family: 'Open Sans', sans-serif !important; }</style>
+  </head>
+  <body>
+
+    <div class="container">
+      
+      <!-- Header -->
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Mturk Suite Settings</a>
+          </div>
+        </div>
+      </nav>
+      
+      <!-- Today's Projected Earnings Settings -->
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          Today's Projected Earnings Settings
+          <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-html="true" data-container="body" data-placement="right"
+                title="
+                       <div style='text-align: left;'>
+                       <b><u>Goal:</u></b> Set you daily projected earnings goal.
+                       </div>
+                       "></span>
+        </div>
+
+        <div class="panel-body row">
+    
+          <!-- Goal -->
+          <div class="col-xs-6">
+            <div class="input-group input-group-sm form-group">
+              <div class="input-group-addon">Goal</div>
+              <input id="goal" type="number" class="form-control" step="1" min="1" value="20.00">
+            </div>
+          </div>
+        </div>
+        
+    </div>       
+      
+      <!-- General Settings -->
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          General Settings
+          <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-html="true" data-container="body" data-placement="right"
+                title="
+                       <div style='text-align: left;'>
+                       <b><u>Workspace Expand & Scroll:</u></b> Expands the HIT to fill the browser viewport and scrolls it into focus for accepted HITs.<br><br>
+                       <b><u>PRE Auto Reloader:</u></b> Automatically reloads a page request error page after 1 second.
+                       </div>
+                       "></span>
+        </div>
+
+        <div class="panel-body row">
+    
+          <!-- Workspace Expand & Scroll -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="workspace" name="workspace" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="workspace" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="workspace" class="btn btn-default active">Enable Workspace Expand & Scroll</label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- PRE Auto Reloader -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="pre_reloader" name="pre_reloader" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="pre_reloader" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="pre_reloader" class="btn btn-default active">Enable PRE Auto Reloader</label>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+    </div>      
+
+      <!-- HIT Export Settings -->
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          HIT Export Settings
+          <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-html="true" data-container="body" data-placement="right"
+                title="
+                       <div style='text-align: left;'>
+                       <b><u>IRC Export:</u></b> Copies to clipboard. Formatted for single line use. URLs shortened.<br><br>
+                       <b><u>Forum Export:</u></b> Copies to clipboard. Formatted for a forum.<br><br>
+                       <b><u>TH Direct Export:</u></b> Directly exports to TurkerHub.com if logged in.<br><br>
+                       
+                       <b><u>MTC Direct Export:</u></b> Directly exports to MTurkCrowd.com if logged in.
+                       </div>
+                       "></span>
+        </div>
+      
+        <div class="panel-body row">
+          
+          <!-- IRC Export -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="irc" name="irc" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="irc" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="irc" class="btn btn-default active">Enable IRC Export</label>
+              </div>
+            </div>
+          </div>
+    
+          <!-- Forum Export -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="forum" name="forum" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="forum" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="forum" class="btn btn-default active">Enable Forum Export</label>
+              </div>
+            </div>
+          </div>
+          
+  
+          <!-- TH Direct Export -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="forum_th" name="forum_th" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="forum_th" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="forum_th" class="btn btn-default active">Enable TH Direct Export</label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- MTC Forum Export -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="forum_mtc" name="forum_mtc" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="forum_mtc" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="forum_mtc" class="btn btn-default active">Enable MTC Direct Export</label>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+    </div>
+      
+    </div>
+  </body>
+</html>
+

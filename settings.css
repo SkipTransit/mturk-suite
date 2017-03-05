@@ -1,0 +1,75 @@
+/********** Bootstrap Primary Change **********/
+.bg-primary {
+  background-color: #222222 !important;
+}
+
+.btn-primary {
+  color: #FFFFFF !important;
+  border-color: #222222 !important;
+  background-color: #222222 !important;
+}
+
+.btn-primary:hover {
+  color: #FFFFFF !important;
+  border-color: #444444 !important;
+  background-color: #444444 !important;
+}
+
+.panel-primary {
+  border-color: #222222 !important;
+}
+
+.panel-primary > .panel-heading {
+  color: #FFFFFF !important;
+  border-color: #222222 !important;
+  background-color: #222222 !important;
+}
+/**********************************************/
+
+body {
+  padding-top: 70px;
+}
+
+.navbar-brand {
+  color: #FFFFFF !important;
+  cursor: default;
+}
+
+.form-group input[type="checkbox"] {
+  display: none;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span {
+  width: 20px;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span:first-child {
+  display: none;
+}
+.form-group input[type="checkbox"] + .btn-group > label span:last-child {
+  display: inline-block;   
+}
+
+.form-group input[type="checkbox"]:checked + .btn-group > label span:first-child {
+  display: inline-block;
+}
+.form-group input[type="checkbox"]:checked + .btn-group > label span:last-child {
+  display: none;   
+}
+
+.btn-group.btn-group-sm {
+  width: 100%;
+}
+
+.btn.btn-default.active {
+  overflow: hidden;
+  width: calc(100% - 42px)
+}
+
+.tooltip.in {
+  opacity: 1 !important;
+}
+
+.tooltip-inner {
+  max-width: 350px !important;
+}
