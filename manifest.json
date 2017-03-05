@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.11.11",
+  "version": "1.2.8",
   
   "permissions": [
     "tts",
@@ -38,41 +38,6 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.mturk.com/*"
-      ],
-      "css": [
-        "mturk.com/hit_export.css",
-        "mturk.com/todays_projected_earnings.css",
-        "mturk.com/turkopticon.css"
-      ],
-      "js": [
-        "mturk.com/dark_theme.js"
-      ],
-      "run_at": "document_start"
-    },
-    
-    {
-      "matches": [
-        "https://www.mturk.com/*"
-      ],
-      "js": [
-        "mturk.com/accept_links.js",
-        "mturk.com/accept_next.js",
-        "mturk.com/hit_capsule.js",
-        "mturk.com/hit_export.js",
-        "mturk.com/pre_reloader.js",
-        "mturk.com/queue_value.js",
-        "mturk.com/send_hit.js",
-        "mturk.com/todays_projected_earnings.js",
-        "mturk.com/turkopticon.js",
-        "mturk.com/unqualled_contact.js",
-        "mturk.com/workspace.js"
-      ],
-      "run_at": "document_end"
-    },
-    
-    {
-      "matches": [
         "https://worker.mturk.com/*"
       ],
       "css": [
@@ -100,10 +65,45 @@
     
     {
       "matches": [
+        "https://www.mturk.com/*"
+      ],
+      "css": [
+        "www.mturk.com/hit_export.css",
+        "www.mturk.com/todays_projected_earnings.css",
+        "www.mturk.com/turkopticon.css"
+      ],
+      "js": [
+        "www.mturk.com/dark_theme.js"
+      ],
+      "run_at": "document_start"
+    },
+    
+    {
+      "matches": [
+        "https://www.mturk.com/*"
+      ],
+      "js": [
+        "www.mturk.com/accept_links.js",
+        "www.mturk.com/accept_next.js",
+        "www.mturk.com/hit_capsule.js",
+        "www.mturk.com/hit_export.js",
+        "www.mturk.com/pre_reloader.js",
+        "www.mturk.com/queue_value.js",
+        "www.mturk.com/send_hit.js",
+        "www.mturk.com/todays_projected_earnings.js",
+        "www.mturk.com/turkopticon.js",
+        "www.mturk.com/unqualled_contact.js",
+        "www.mturk.com/workspace.js"
+      ],
+      "run_at": "document_end"
+    },
+    
+    {
+      "matches": [
         "https://www.mturk.com/mturk/dashboard"
       ],
       "js": [
-        "mturk.com/dashboard.js"
+        "www.mturk.com/dashboard.js"
       ],
       "run_at": "document_end"
     }
