@@ -41,178 +41,13 @@ const CONFIG = {
   site_to_scan     : LOADED_CONFIG.site_to_scan     || `mturk`,
   new_hit_sound    : LOADED_CONFIG.new_hit_sound    || `1`,
   include_voice    : LOADED_CONFIG.include_voice    || `0`,
-  include_sound    : LOADED_CONFIG.include_sound    || `1`
+  include_sound    : LOADED_CONFIG.include_sound    || `1`, 
   
+  irc : LOADED_CONFIG.hasOwnProperty(`irc`) ? LOADED_CONFIG.irc : true,
+  forum : LOADED_CONFIG.hasOwnProperty(`forum`) ? LOADED_CONFIG.forum : true,
+  forum_th : LOADED_CONFIG.hasOwnProperty(`forum_th`) ? LOADED_CONFIG.forum_th : true,
+  forum_mtc : LOADED_CONFIG.hasOwnProperty(`forum_mtc`) ? LOADED_CONFIG.forum_mtc : true
 };
-
-$(`html`).on(`click`, `#scan`, function () {
-  clearTimeout(timeout);
-  $(this).toggleClass(`btn-success btn-danger`);
- 
-  switch ($(this).text()) {
-    case `Stop`: $(this).text(`Start`); break;
-    case `Start`: $(this).text(`Stop`); FIND(); break;
-  }
-});
-
-// Block List Stuff
-$(`html`).on(`click`, `#block_list`, function () {
-  SHOW_BLOCK_LIST();
-});
-
-$(`html`).on(`click`, `#add_block_list`, function () {
-  ADD_BLOCK_LIST();
-});
-
-$(`html`).on(`click`, `#save_block_list`, function () {
-  SAVE_BLOCK_LIST();
-});
-
-$(`html`).on(`click`, `.bl_item`, function () {
-  EDIT_BLOCK_LIST($(this).data(`key`));
-});
-
-$(`html`).on(`click`, `#save_edit_block_list`, function () {
-  SAVE_EDIT_BLOCK_LIST();
-});
-
-$(`html`).on(`click`, `#delete_edit_block_list`, function () {
-  DELETE_EDIT_BLOCK_LIST();
-});
-
-$(`html`).on(`click`, `#import_block_list`, function () {
-  IMPORT_BLOCK_LIST();
-});
-
-$(`html`).on(`click`, `#export_block_list`, function () {
-  EXPORT_BLOCK_LIST();
-});
-
-$(`html`).on(`click`, `.rt_block`, function () {
-  RT_ADD_BLOCK_LIST($(this).data(`term`), $(this).data(`name`));
-});
-
-// Include List Stuff
-$(`html`).on(`click`, `#include_list`, function () {
-  SHOW_INCLUDE_LIST();
-});
-
-$(`html`).on(`click`, `#add_include_list`, function () {
-  ADD_INCLUDE_LIST();
-});
-
-$(`html`).on(`click`, `#save_include_list`, function () {
-  SAVE_INCLUDE_LIST();
-});
-
-$(`html`).on(`click`, `.il_item`, function () {
-  EDIT_INCLUDE_LIST($(this).data(`key`));
-});
-
-$(`html`).on(`click`, `#save_edit_include_list`, function () {
-  SAVE_EDIT_INCLUDE_LIST();
-});
-
-$(`html`).on(`click`, `#delete_edit_include_list`, function () {
-  DELETE_EDIT_INCLUDE_LIST();
-});
-
-$(`html`).on(`click`, `#import_include_list`, function () {
-  IMPORT_INCLUDE_LIST();
-});
-
-$(`html`).on(`click`, `#export_include_list`, function () {
-  EXPORT_INCLUDE_LIST();
-});
-
-$(`html`).on(`click`, `#test_include_list`, function () {
-  const test = {
-    term: $(`#save_include_list_term`).val(),
-    name: $(`#save_include_list_name`).val() === `` ? $(`#save_include_list_term`).val() : $(`#save_include_list_name`).val(),
-    type: $(`#save_include_list_type`).val(),
-    sound: $(`#save_include_list_sound`).prop(`checked`),
-    notification: $(`#save_include_list_notification`).prop(`checked`),
-    pushbullet: $(`#save_include_list_pushbullet`).prop(`checked`)
-  };
-  INCLUDED_ALERTS_TEST(test);
-});
-
-$(`html`).on(`click`, `#test_edit_include_list`, function () {
-  const test = {
-    term: $(`#edit_include_list_term`).val(),
-    name: $(`#edit_include_list_name`).val() === `` ? $(`#edit_include_list_term`).val() : $(`#edit_include_list_name`).val(),
-    type: $(`#edit_include_list_type`).val(),
-    sound: $(`#edit_include_list_sound`).prop(`checked`),
-    notification: $(`#edit_include_list_notification`).prop(`checked`),
-    pushbullet: $(`#edit_include_list_pushbullet`).prop(`checked`)
-  };
-  INCLUDED_ALERTS_TEST(test);
-});
-
-$(`html`).on(`click`, `.rt_include`, function () {
-  RT_ADD_INCLUDE_LIST($(this).data(`term`), $(this).data(`name`));
-});
-
-// Setting Stuff
-$(`html`).on(`change`, `#sort_by, #qualified, #enable_to, #hide_nl, #hide_bl, #hide_m, #new_hit, #pushbullet, #site_to_scan, #new_hit_sound, #include_voice, #include_sound`, function () {
-  SAVE_CONFIG();
-});
-
-$(`html`).on(`input`, `#scan_delay, #min_reward, #min_avail, #min_to, #size, #pushbullet_token`, function () {
-  SAVE_CONFIG();
-});
-
-$(`html`).on(`click`, `#advanced_settings`, function () {
-  SHOW_ADVANCED_SETTINGS();
-});
-
-$(`html`).on(`change`, `#include_voice`, function () {
-  SPEAK(`This is my voice.`);
-});
-
-$(`html`).on(`change`, `#include_sound`, function () {
-  INCLUDE_SOUND();
-});
-
-$(`html`).on(`change`, `#new_hit_sound`, function () {
-  NEW_HIT_SOUND();
-});
-
-// Export Stuff
-$(`html`).on(`click`, `.vb`, function () {
-  const key = $(this).data(`key`);
-  EXPORT.key = key;
-  EXPORT.type = `vb`;
-  TODB_HIT_EXPORT(HITS[key].reqid);
-});
-
-$(`html`).on(`click`, `.vb_th`, function () {
-  const key = $(this).data(`key`);
-  EXPORT.key = key;
-  EXPORT.type = `vb_th`;
-  TODB_HIT_EXPORT(HITS[key].reqid);
-});
-
-$(`html`).on(`click`, `.vb_mtc`, function () {
-  const key = $(this).data(`key`);
-  EXPORT.key = key;
-  EXPORT.type = `vb_mtc`;
-  TODB_HIT_EXPORT(HITS[key].reqid);
-});
-
-// Modal Stuff
-$(document).on(`show.bs.modal`, `.modal`, function (event) {
-  const zindex = 1040 + (10 * $(`.modal:visible`).length);
-  $(this).css(`z-index`, zindex);
-  setTimeout( function () { $(`.modal-backdrop`).not(`.modal-stack`).css(`z-index`, zindex - 1).addClass(`modal-stack`); }, 0);
-});
-
-//
-$(`html`).on(`click`, `.panel-heading.toggle`, function () {
-  $(this).children(`.glyphicon`).toggleClass(`glyphicon-resize-small glyphicon-resize-full`);
-  $(this).next().toggle();
-});
-
 
 // Find HITs Stuff
 function FIND () {
@@ -513,16 +348,7 @@ function HITS_WRITE_LOGGED_IN (to) {
         `  </td>` +
         // Project
         `  <td>` +
-        `    <div class="btn-group btn-group-xxs">` +
-        `      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
-        `        Export <span class="caret"></span>` +
-        `      </button>` +
-        `      <ul class="dropdown-menu">` +
-        `        <li><a class="vb" data-key="${hit.groupid}">Forum</a></li>` +
-        `        <li><a class="vb_th" data-key="${hit.groupid}">TH Direct</a></li>` +
-        `        <li><a class="vb_mtc" data-key="${hit.groupid}">MTC Direct</a></li>` +
-        `      </ul>` +
-        `    </div>` +
+        `    ${EXPORT_WRITE(hit.groupid)}` +
         `    <a href="${hit.prevlink}" target="_blank" data-toggle="tooltip" data-placement="top" data-html="true" title="${hit.quals.replace(/; /g, `;<br>`)}">${hit.title}</a>` +
         `  </td>` +
         // Tasks
@@ -685,6 +511,45 @@ function TO_COLOR (rating) {
   if (rating > 1.99) return `toAverage`;
   if (rating > 0.01) return `toLow`;
   return `toNone`;
+}
+
+function EXPORT_WRITE (key) {
+  let enabled = 0;
+  if (CONFIG.irc) enabled ++;
+  if (CONFIG.forum) enabled ++;
+  if (CONFIG.forum_th) enabled ++;
+  if (CONFIG.forum_mtc) enabled ++;
+  
+  let html = ``;
+      
+  if (enabled === 1) {
+    html = 
+      `<button type="button" class="btn btn-primary btn-xxs export_hit" ` +
+      (CONFIG.irc ? `data-type="irc"` : ``) +
+      (CONFIG.forum ? `data-type="forum"` : ``) +
+      (CONFIG.forum_th ? `data-type="forum_th"` : ``) +
+      (CONFIG.forum_mtc ? `data-type="forum_mtc"` : ``) +
+      `data-key="${key}">Export</button>`
+    ;
+  }
+      
+  if (enabled > 1) {
+    html =
+      `<div class="btn-group btn-group-xxs">` +
+      `<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">` +
+      `Export <span class="caret"></span>` +
+      `</button>` +
+      `<ul class="dropdown-menu">` +
+      (CONFIG.irc ? `<li><a class="export_hit" data-type="irc" data-key="${key}">IRC</a></li>` : ``) +
+      (CONFIG.forum ? `<li><a class="export_hit" data-type="forum" data-key="${key}">Forum</a></li>` : ``) +
+      (CONFIG.forum_th ? `<li><a class="export_hit" data-type="forum_th" data-key="${key}">TH Direct</a></li>` : ``) +
+      (CONFIG.forum_mtc ? `<li><a class="export_hit" data-type="forum_mtc" data-key="${key}">MTC Direct</a></li>` : ``) +
+      `</ul>` +
+      `</div>`
+    ;
+  }
+  
+  return html;
 }
 
 function SECONDS_TO_STRING (s) {
@@ -1082,6 +947,11 @@ function SET_CONFIG () {
   document.getElementById(`new_hit_sound`).value    = CONFIG.new_hit_sound;
   document.getElementById(`include_voice`).value    = CONFIG.include_voice;
   document.getElementById(`include_sound`).value    = CONFIG.include_sound;
+  
+  document.getElementById(`irc`).checked = CONFIG.irc;
+  document.getElementById(`forum`).checked = CONFIG.forum;
+  document.getElementById(`forum_th`).checked = CONFIG.forum_th;
+  document.getElementById(`forum_mtc`).checked = CONFIG.forum_mtc;
 }
 
 function SAVE_CONFIG () {
@@ -1106,6 +976,11 @@ function SAVE_CONFIG () {
   CONFIG.include_voice    = document.getElementById(`include_voice`).value;
   CONFIG.include_sound    = document.getElementById(`include_sound`).value;
   
+  CONFIG.irc = document.getElementById(`irc`).checked;
+  CONFIG.forum = document.getElementById(`forum`).checked;
+  CONFIG.forum_th = document.getElementById(`forum_th`).checked;
+  CONFIG.forum_mtc = document.getElementById(`forum_mtc`).checked;
+  
   localStorage.setItem(`CONFIG`, JSON.stringify(CONFIG));
 
   $(CONFIG.hide_nl ? `.nl` : `.nl_hidden`).toggleClass(`nl nl_hidden`);
@@ -1118,26 +993,27 @@ function SHOW_ADVANCED_SETTINGS () {
 }
 
 // HIT Export
-function EXPORT_HIT (to) {
+function FORUM_HIT_EXPORT (data) {
   const hit = HITS[EXPORT.key];
-  
-  function attr (type, rating) {
+
+  function to (type, rating) {
     if (rating > 3.99) return `[b][${type}: [color=#00cc00]${rating}[/color]][/b]`;
     if (rating > 2.99) return `[b][${type}: [color=#cccc00]${rating}[/color]][/b]`;
     if (rating > 1.99) return `[b][${type}: [color=#cc6600]${rating}[/color]][/b]`;
     if (rating > 0.01) return `[b][${type}: [color=#cc0000]${rating}[/color]][/b]`;
     return `[b][${type}: [color=grey]N/A[/color]][/b]`;
   }
-  
-  const template =
-    `[table][tr][td][b]Title:[/b] [url=${hit.prevlink}]${hit.title}[/url] | [url=${hit.pandlink}]PANDA[/url]\n` +
+
+  const forum_template =
+    `[table][tr][td][b]Title:[/b] [url=https://www.mturk.com/mturk/preview?groupId=${hit.groupid}]${hit.title}[/url] | [url=https://www.mturk.com/mturk/previewandaccept?groupId=${hit.groupid}]PANDA[/url]\n` +
+    `[b]Worker:[/b] [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/]Preview[/url] | [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/accept_random]Accept[/url] | [url=https://worker.mturk.com/requesters/${hit.reqid}/projects]Requester[/url]\n` +
     `[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])\n` +
     `[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/url]:[/b] ` +
-    `${attr(`Pay`, to.attrs.pay)} ${attr(`Fair`, to.attrs.fair)} ` +
-    `${attr(`Comm`, to.attrs.comm)} ${attr(`Fast`, to.attrs.fast)} ` +
-    `[b][Reviews: ${to.reviews}][/b] ` +
-    `[b][ToS: ${to.tos_flags === 0 ? `[color=green]${to.tos_flags}` : `[color=red]${to.tos_flags}`}[/color]][/b]\n` +
-    `[b]Description:[/b] ${hit.desc}\n` +
+    `${to(`Pay`, data.attrs.pay)} ${to(`Fair`, data.attrs.fair)} ` +
+    `${to(`Comm`, data.attrs.comm)} ${to(`Fast`, data.attrs.fast)} ` +
+    `[b][Reviews: ${data.reviews}][/b] ` +
+    `[b][ToS: [color=${data.tos_flags === 0 ? `green` : `red`}]${data.tos_flags}[/color]][/b]\n` +
+    `[b]${hit.desc ? `Description:[/b] ${hit.desc}` : `Auto Approval:[/b] ${hit.aa}`}\n` +
     `[b]Time:[/b] ${hit.time}\n` +
     `[b]HITs Available:[/b] ${hit.avail}\n` +
     `[b]Reward:[/b] [color=green][b] ${hit.reward}[/b][/color]\n` +
@@ -1146,26 +1022,44 @@ function EXPORT_HIT (to) {
   ;
   
   const direct_template =
-    `<p>[table][tr][td][b]Title:[/b] [url=${hit.prevlink}]${hit.title}[/url] | [url=${hit.pandlink}]PANDA[/url]</p>` +
+    `<p>[table][tr][td][b]Title:[/b] [url=https://www.mturk.com/mturk/preview?groupId=${hit.groupid}]${hit.title}[/url] | [url=https://www.mturk.com/mturk/previewandaccept?groupId=${hit.groupid}]PANDA[/url]</p>` +
+    `<p>[b]Worker:[/b] [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/]Preview[/url] | [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/accept_random]Accept[/url] | [url=https://worker.mturk.com/requesters/${hit.reqid}/projects]Requester[/url]</p>` +
     `<p>[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])</p>` +
     `<p>[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO[/url]:[/b] ` +
-    `${attr(`Pay`, to.attrs.pay)} ${attr(`Fair`, to.attrs.fair)} ` +
-    `${attr(`Comm`, to.attrs.comm)} ${attr(`Fast`, to.attrs.fast)} ` +
-    `[b][Reviews: ${to.reviews}][/b] ` +
-    `[b][ToS: ${to.tos_flags === 0 ? `[color=green]${to.tos_flags}` : `[color=red]${to.tos_flags}`}[/color]][/b]\n</p>` +
-    `<p>[b]Description:[/b] ${hit.desc}</p>` +
+    `${to(`Pay`, data.attrs.pay)} ${to(`Fair`, data.attrs.fair)} ` +
+    `${to(`Comm`, data.attrs.comm)} ${to(`Fast`, data.attrs.fast)} ` +
+    `[b][Reviews: ${data.reviews}][/b] ` +
+    `[b][ToS: [color=${data.tos_flags === 0 ? `green` : `red`}]${data.tos_flags}[/color]][/b]</p>` +
+    `<p>[b]${hit.desc ? `Description:[/b] ${hit.desc}` : `Auto Approval:[/b] ${hit.aa}`}</p>` +
     `<p>[b]Time:[/b] ${hit.time}</p>` +
     `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
     `<p>[b]Reward:[/b] [color=green][b] ${hit.reward}[/b][/color]</p>` +
     `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
-    `<p>[tr][td][center][size=2]HIT posted from [url=http://mturksuite.com/]Mturk Suite[/url] v${chrome.runtime.getManifest().version}[/size][/center][/td][/tr][/table]</p>`
+    `<p>[tr][td][center][size=2]HIT exported from [url=http://mturksuite.com/]Mturk Suite[/url] v${chrome.runtime.getManifest().version}[/size][/center][/td][/tr][/table]</p>`
   ;
 
   switch (EXPORT.type) {
-    case `vb`: EXPORT_TO_CLIP(template); break;
-    case `vb_th`: EXPORT_TO_TH(direct_template); break;
-    case `vb_mtc`: EXPORT_TO_MTC(direct_template); break;
+    case `forum`: EXPORT_TO_CLIP(forum_template); break;
+    case `forum_th`: EXPORT_TO_TH(direct_template); break;
+    case `forum_mtc`: EXPORT_TO_MTC(direct_template); break;
   }
+}
+
+function IRC_HIT_EXPORT (info) {
+  const hit = HITS[EXPORT.key];
+  
+  const template = 
+    `${hit.quals.match(/Masters has been granted|Masters Exists/) ? `MASTERS • ` : ``}` +
+    `Req: ${hit.reqname} ${info.links.req} • ` +
+    `Title: ${hit.title} ${info.links.preview} • ` +
+    `Time: ${hit.time} • ` +
+    `Avail: ${hit.avail} • ` +
+    `Reward: ${hit.reward} • ` +
+    `TO: Pay=${info.to.attrs.pay} Fair=${info.to.attrs.fair} Comm=${info.to.attrs.comm} Fast=${info.to.attrs.fast} Reviews=${info.to.reviews} TOS=${info.to.tos_flags} ${info.links.to} • ` +
+    `PANDA: ${info.links.panda}`
+  ;
+  
+  EXPORT_TO_CLIP(template);
 }
 
 function EXPORT_TO_CLIP (template) {
@@ -1209,8 +1103,7 @@ function COPY_TO_CLIP (string, message) {
 
 function VALIDATE_JSON (data) {
   try {
-    const json = JSON.parse(data);
-    return json;
+    return JSON.parse(data);
   }
   catch (e) {
     return false;
@@ -1218,12 +1111,7 @@ function VALIDATE_JSON (data) {
 }
 
 function SPEAK (phrase) {
-  chrome.tts.speak(
-    phrase, {
-      enqueue: true,
-      voiceName: CONFIG.include_voice === `0` ? `native` : `Google US English`
-    }
-  );
+  chrome.tts.speak(phrase, { enqueue: true, voiceName: CONFIG.include_voice === `0` ? `native` : `Google US English` });
 }
 
 function INCLUDE_SOUND () {
@@ -1244,7 +1132,7 @@ function TIME () {
   hours = hours % 12;
   hours = hours ? hours : 12;
   minutes = minutes < 10 ? `0` + minutes : minutes;
-  return `${hours}:${minutes}${ampm}`;
+  return `${ hours }:${ minutes }${ ampm }`;
 }
 
 // Turkopticon IndexedDB
@@ -1313,17 +1201,61 @@ function TURKOPTICON_DB (ids) {
   };
 }
 
-function TODB_HIT_EXPORT (id) {
-  const transaction = TODB.transaction([`requester`]);
-  const objectStore = transaction.objectStore(`requester`);
-  const request = objectStore.get(id);
+function INIT_IRC_HIT_EXPORT (info) {
+  const obj = { 
+    to: {
+      attrs: {
+        pay: 0.00,
+        fair: 0.00,
+        comm: 0.00,
+        fast: 0.00
+      },
+      reviews: 0,
+      tos_flags: 0
+    },
+    links: {
+      req: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${info.reqid}`,
+      preview: `https://www.mturk.com/mturk/preview?groupId=${info.groupid}`,
+      panda: `https://www.mturk.com/mturk/previewandaccept?groupId=${info.groupid}`,
+      to: `https://turkopticon.ucsd.edu/${info.reqid}`
+    }
+  };
+  
+  function success_ns4t (result, status, xhr) {
+    const urls = result.split(`;`);
+    obj.links.req = urls[0];
+    obj.links.preview = urls[1];
+    obj.links.panda = urls[2];
+    obj.links.to = urls[3];
+    
+    get_to();
+  }
+  
+  function error_ns4t (result, status, xhr) {
+    get_to();
+  }
+  
+  function get_to () {
+    const request = TODB.transaction([`requester`]).objectStore(`requester`).get(info.reqid);
+
+    request.onsuccess = function (event) {
+      if (request.result) obj.to = request.result;
+      IRC_HIT_EXPORT(obj);
+    };
+  }
+
+  $.get(`https://ns4t.net/yourls-api.php?action=bulkshortener&title=MTurk&signature=39f6cf4959&urls[]=${encodeURIComponent(obj.links.req)}&urls[]=${encodeURIComponent(obj.links.preview)}&urls[]=${encodeURIComponent(obj.links.panda)}&urls[]=${encodeURIComponent(obj.links.to)}`).then(success_ns4t, error_ns4t);
+}
+
+function INIT_FORUM_HIT_EXPORT (info) {
+  const request = TODB.transaction([`requester`]).objectStore(`requester`).get(info.reqid);
 
   request.onsuccess = function (event) {
     if (request.result) {
-      EXPORT_HIT(request.result);
+      FORUM_HIT_EXPORT(request.result);
     }
     else {
-      EXPORT_HIT({attrs: {comm: 0.00, fair: 0.00, fast: 0.00, pay: 0.00}, reviews: 0, tos_flags: 0});
+      FORUM_HIT_EXPORT({ attrs: { comm: 0.00, fair: 0.00, fast: 0.00, pay: 0.00 }, reviews: 0, tos_flags: 0 })
     }
   };
 }
@@ -1337,9 +1269,9 @@ HFDB_request.onsuccess = function (event) {
 HFDB_request.onupgradeneeded = function (event) {
   const HFDB = event.target.result;
   
-  const createObjectStore = HFDB.createObjectStore(`hit`, {keyPath: `groupid`});
+  const createObjectStore = HFDB.createObjectStore(`hit`, { keyPath: `groupid` });
   for (let index of [`reqid`, `reqname`, `title`, `reward`, `date`]) {
-    createObjectStore.createIndex(index, index, {unique: false});
+    createObjectStore.createIndex(index, index, { unique: false });
   }
 };
 
@@ -1350,16 +1282,167 @@ function HIT_FINDER_DB (keys) {
   for (let i = 0; i < keys.length; i ++) {
     const hit = HITS[keys[i]];
     objectStore.put({
-      reqid: hit.reqid,
-      reqname: hit.reqname,
-      title: hit.title,
-      desc: hit.desc,
-      time: hit.time,
-      reward: hit.reward,
-      groupid: hit.groupid,
-      quals: hit.quals,
-      masters: hit.masters,
-      seen: hit.seen
+      reqid   : hit.reqid,
+      reqname : hit.reqname,
+      title   : hit.title,
+      desc    : hit.desc,
+      time    : hit.time,
+      reward  : hit.reward,
+      groupid : hit.groupid,
+      quals   : hit.quals,
+      masters : hit.masters,
+      seen    : hit.seen
     });
   }
 }
+
+$(`html`).on(`click`, `#scan`, function () {
+  clearTimeout(timeout);
+  $(this).toggleClass(`btn-success btn-danger`);
+ 
+  switch ($(this).text()) {
+    case `Stop`: $(this).text(`Start`); break;
+    case `Start`: $(this).text(`Stop`); FIND(); break;
+  }
+});
+
+// Block List Stuff
+$(`html`).on(`click`, `#block_list`, function () {
+  SHOW_BLOCK_LIST();
+});
+
+$(`html`).on(`click`, `#add_block_list`, function () {
+  ADD_BLOCK_LIST();
+});
+
+$(`html`).on(`click`, `#save_block_list`, function () {
+  SAVE_BLOCK_LIST();
+});
+
+$(`html`).on(`click`, `.bl_item`, function () {
+  EDIT_BLOCK_LIST($(this).data(`key`));
+});
+
+$(`html`).on(`click`, `#save_edit_block_list`, function () {
+  SAVE_EDIT_BLOCK_LIST();
+});
+
+$(`html`).on(`click`, `#delete_edit_block_list`, function () {
+  DELETE_EDIT_BLOCK_LIST();
+});
+
+$(`html`).on(`click`, `#import_block_list`, function () {
+  IMPORT_BLOCK_LIST();
+});
+
+$(`html`).on(`click`, `#export_block_list`, function () {
+  EXPORT_BLOCK_LIST();
+});
+
+$(`html`).on(`click`, `.rt_block`, function () {
+  RT_ADD_BLOCK_LIST($(this).data(`term`), $(this).data(`name`));
+});
+
+// Include List Stuff
+$(`html`).on(`click`, `#include_list`, function () {
+  SHOW_INCLUDE_LIST();
+});
+
+$(`html`).on(`click`, `#add_include_list`, function () {
+  ADD_INCLUDE_LIST();
+});
+
+$(`html`).on(`click`, `#save_include_list`, function () {
+  SAVE_INCLUDE_LIST();
+});
+
+$(`html`).on(`click`, `.il_item`, function () {
+  EDIT_INCLUDE_LIST($(this).data(`key`));
+});
+
+$(`html`).on(`click`, `#save_edit_include_list`, function () {
+  SAVE_EDIT_INCLUDE_LIST();
+});
+
+$(`html`).on(`click`, `#delete_edit_include_list`, function () {
+  DELETE_EDIT_INCLUDE_LIST();
+});
+
+$(`html`).on(`click`, `#import_include_list`, function () {
+  IMPORT_INCLUDE_LIST();
+});
+
+$(`html`).on(`click`, `#export_include_list`, function () {
+  EXPORT_INCLUDE_LIST();
+});
+
+$(`html`).on(`click`, `#test_include_list`, function () {
+  const test = {
+    term: $(`#save_include_list_term`).val(),
+    name: $(`#save_include_list_name`).val() === `` ? $(`#save_include_list_term`).val() : $(`#save_include_list_name`).val(),
+    type: $(`#save_include_list_type`).val(),
+    sound: $(`#save_include_list_sound`).prop(`checked`),
+    notification: $(`#save_include_list_notification`).prop(`checked`),
+    pushbullet: $(`#save_include_list_pushbullet`).prop(`checked`)
+  };
+  INCLUDED_ALERTS_TEST(test);
+});
+
+$(`html`).on(`click`, `#test_edit_include_list`, function () {
+  const test = {
+    term: $(`#edit_include_list_term`).val(),
+    name: $(`#edit_include_list_name`).val() === `` ? $(`#edit_include_list_term`).val() : $(`#edit_include_list_name`).val(),
+    type: $(`#edit_include_list_type`).val(),
+    sound: $(`#edit_include_list_sound`).prop(`checked`),
+    notification: $(`#edit_include_list_notification`).prop(`checked`),
+    pushbullet: $(`#edit_include_list_pushbullet`).prop(`checked`)
+  };
+  INCLUDED_ALERTS_TEST(test);
+});
+
+$(`html`).on(`click`, `.rt_include`, function () {
+  RT_ADD_INCLUDE_LIST($(this).data(`term`), $(this).data(`name`));
+});
+
+// Setting Stuff
+$(`html`).on(`change`, `input, select`, function () {
+  SAVE_CONFIG();
+});
+
+$(`html`).on(`click`, `#advanced_settings`, function () {
+  SHOW_ADVANCED_SETTINGS();
+});
+
+$(`html`).on(`change`, `#include_voice`, function () {
+  SPEAK(`This is my voice.`);
+});
+
+$(`html`).on(`change`, `#include_sound`, function () {
+  INCLUDE_SOUND();
+});
+
+$(`html`).on(`change`, `#new_hit_sound`, function () {
+  NEW_HIT_SOUND();
+});
+
+// Export Stuff
+$(`html`).on(`click`, `.export_hit`, function () {
+  EXPORT.key = $(this).data(`key`);
+  EXPORT.type = $(this).data(`type`);
+    
+  if (EXPORT.type.match(/irc/)) INIT_IRC_HIT_EXPORT(HITS[EXPORT.key]);
+  if (EXPORT.type.match(/forum/)) INIT_FORUM_HIT_EXPORT(HITS[EXPORT.key]);
+});
+
+// Modal Stuff
+$(document).on(`show.bs.modal`, `.modal`, function (event) {
+  const zindex = 1040 + (10 * $(`.modal:visible`).length);
+  $(this).css(`z-index`, zindex);
+  setTimeout( function () { $(`.modal-backdrop`).not(`.modal-stack`).css(`z-index`, zindex - 1).addClass(`modal-stack`); }, 0);
+});
+
+//
+$(`html`).on(`click`, `.panel-heading.toggle`, function () {
+  $(this).children(`.glyphicon`).toggleClass(`glyphicon-resize-small glyphicon-resize-full`);
+  $(this).next().toggle();
+});
