@@ -1,16 +1,39 @@
-let dashboard = {}, tpe = {}, hits  = {}, requests = {};
+let tpe = {}, hits  = {}, requests = {};
 let syncing_tpe = { tab: null, running: false };
 
-let USER = { goal: 20, dark_theme: false, hit_export: true, accept_next: true, workspace: true, pre_reloader: true };
-let BONUS = { date: null, starting: null, current: null };
+const USER = {
+  worker_id: `Visit Dashboard`
+};
 
-chrome.storage.local.get(`user`, function (result) {
-  if (result.user) USER = result.user;
-  tpe.goal = USER.goal;
+let BONUS = { 
+  date     : null, 
+  starting : null, 
+  current  : null
+};
+
+function PARSE_SETTINGS (settings) {
+  if (settings.hasOwnProperty(`goal`)) tpe.goal = settings.goal;
+  
+  chrome.storage.local.set({
+    tpe: tpe
+  });
+}
+
+function PARSE_DASHBOARD (dashboard) {
+  if (dashboard.hasOwnProperty(`worker_id`)) USER.worker_id = dashboard.worker_id;
+}
+
+chrome.storage.onChanged.addListener( function (changes) {
+  if (changes.settings) PARSE_SETTINGS(changes.settings.newValue);
+  if (changes.dashboard) PARSE_DASHBOARD(changes.dashboard.newValue);
 });
 
-chrome.storage.local.get(`dashboard`, function (data) {
-  dashboard = data.dashboard || {id: `Visit Dashboard!`, date: null, earn_hits: 0, earn_bonus: 0, earn_total: 0, earn_trans: 0, total_sub: 0, total_app: 0, total_rej: 0, total_pen: 0, today_sub: 0, today_app: 0, today_rej: 0, today_pen: 0};
+chrome.storage.local.get(`settings`, function (result) {
+  PARSE_SETTINGS(result.settings);
+});
+
+chrome.storage.local.get(`dashboard`, function (result) {
+  PARSE_DASHBOARD(result.dashboard);
 });
 
 chrome.storage.local.get(`bonus`, function (result) {
@@ -20,18 +43,14 @@ chrome.storage.local.get(`bonus`, function (result) {
 
 chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
   switch (request.msg) {
-    case `user`: 
-      USER = request.data; chrome.storage.local.set({user: USER});
-      tpe.goal = USER.goal; chrome.storage.local.set({tpe: tpe});
-      break;
-    case `dashboard`:
-      dashboard = request.data; chrome.storage.local.set({dashboard: request.data});
-      break;
     case `turkopticon`:
       TURKOPTICON_DB(sender.tab.id, request.data);
       break;
-    case `hitexport`:
-      TODB_hitexport(sender.tab.id, request.data);
+    case `irc_hit_export`:
+      IRC_HIT_EXPORT(sender.tab.id, request.data);
+      break;
+    case `forum_hit_export`:
+      FORUM_HIT_EXPORT(sender.tab.id, request.data);
       break;
     case `sync_tpe`:
       sync_tpe(sender.tab.id, request.data);
@@ -53,26 +72,28 @@ chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
 
 // Adds context menu to paste worker id in input fields
 chrome.contextMenus.create({
-  title: "Paste Mturk Worker ID",
-  contexts: ["editable"],
-  onclick: function (info, tab) {
-    chrome.tabs.executeScript(tab.id, {
+  title    : "Paste Mturk Worker ID",
+  contexts : ["editable"],
+  onclick  : function (info, tab) {
+    chrome.tabs.executeScript(
+      tab.id, {
         frameId: info.frameId,
-        code: 
-      `element = document.activeElement;` +
-      `element.value += '${dashboard.id}';` +
-      `element.dispatchEvent(new Event('change', {'bubbles': true}));`
-    });
+        code:
+          `element = document.activeElement;` +
+          `element.value += '${USER.worker_id}';` +
+          `element.dispatchEvent(new Event('change', {bubbles: true}));`
+      }
+    );
   }
 });
 
 // Adds context menu to search mturk for highlighted text
 chrome.contextMenus.create({
-  title: "Search Mturk",
-  "type" : "normal",
-  contexts: ["selection"],
-  onclick: function (info, tab) {
-    chrome.tabs.create({url: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${info.selectionText}`});
+  title    : "Search Mturk",
+  type     : "normal",
+  contexts : ["selection"],
+  onclick  : function (info, tab) {
+    chrome.tabs.create({ url: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${info.selectionText}` });
   }
 });
 
@@ -84,7 +105,7 @@ TODB_request.onsuccess = function (event) {
 };
 TODB_request.onupgradeneeded = function (event) {
   const TODB = event.target.result;
-  TODB.createObjectStore(`requester`, {keyPath: `id`});
+  TODB.createObjectStore(`requester`, { keyPath: `id` });
 };
 
 function TURKOPTICON_DB (tab, ids) {
@@ -134,38 +155,63 @@ function TURKOPTICON_DB (tab, ids) {
   };
 }
 
-function TODB_hitexport (tab, id) {
-  const transaction = TODB.transaction([`requester`]);
-  const objectStore = transaction.objectStore(`requester`);
-  const request = objectStore.get(id);
+function IRC_HIT_EXPORT (tab, info) {
+  const obj = { 
+    to: {
+      attrs: {
+        pay: 0.00,
+        fair: 0.00,
+        comm: 0.00,
+        fast: 0.00
+      },
+      reviews: 0,
+      tos_flags: 0
+    },
+    links: {
+      req: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${info.reqid}`,
+      preview: `https://www.mturk.com/mturk/preview?groupId=${info.groupid}`,
+      panda: `https://www.mturk.com/mturk/previewandaccept?groupId=${info.groupid}`,
+      to: `https://turkopticon.ucsd.edu/${info.reqid}`
+    }
+  };
+  
+  function success_ns4t (result, status, xhr) {
+    const urls = result.split(`;`);
+    obj.links.req = urls[0];
+    obj.links.preview = urls[1];
+    obj.links.panda = urls[2];
+    obj.links.to = urls[3];
+    
+    get_to();
+  }
+  
+  function error_ns4t (result, status, xhr) {
+    get_to();
+  }
+  
+  function get_to () {
+    const request = TODB.transaction([`requester`]).objectStore(`requester`).get(info.reqid);
+
+    request.onsuccess = function (event) {
+      if (request.result) obj.to = request.result;
+      chrome.tabs.sendMessage(tab, { msg : `irc_hit_export`, data : obj });
+    };
+  }
+
+  $.get(`https://ns4t.net/yourls-api.php?action=bulkshortener&title=MTurk&signature=39f6cf4959&urls[]=${encodeURIComponent(obj.links.req)}&urls[]=${encodeURIComponent(obj.links.preview)}&urls[]=${encodeURIComponent(obj.links.panda)}&urls[]=${encodeURIComponent(obj.links.to)}`).then(success_ns4t, error_ns4t);
+}
+
+function FORUM_HIT_EXPORT (tab, id) {
+  const request = TODB.transaction([`requester`]).objectStore(`requester`).get(id);
 
   request.onsuccess = function (event) {
     if (request.result) {
-      chrome.tabs.sendMessage(tab, {msg: `hitexport.js`, data: request.result});
+      chrome.tabs.sendMessage(tab, { msg: `forum_hit_export`, data: request.result });
     }
     else {
-      chrome.tabs.sendMessage(tab, {msg: `hitexport.js`, data: {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0}});
+      chrome.tabs.sendMessage(tab, { msg: `forum_hit_export`, data: { attrs: { comm: 0.00, fair: 0.00, fast: 0.00, pay: 0.00 }, reviews: 0, tos_flags: 0 } });
     }
   };
-}
-
-function SEND_MTC (tab, message) {
-  $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, function (data) {
-    const $data = $(data);
-    const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
-    const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
-
-    $.get(`http://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
-      const group_id = message.match(/groupId=(\w+)/)[1];
-      
-      for (let i = 0; i < data.posts.length; i ++) if (data.posts[i].message.indexOf(group_id) !== -1) return;
-           
-      $.post(`http://www.mturkcrowd.com/threads/${thread}/add-reply`, {
-        message_html: message,
-        _xfToken: xfToken
-      });
-    });
-  });
 }
 
 function SEND_TH (tab, message) {
@@ -180,18 +226,40 @@ function SEND_TH (tab, message) {
       for (let i = 0; i < data.posts.length; i ++) if (data.posts[i].message.indexOf(group_id) !== -1) return;
            
       $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
-        message_html: message,
-        _xfToken: xfToken
+        _xfToken: xfToken,
+        message_html: message
       });
     });
   });
 }
 
-chrome.webRequest.onBeforeRequest.addListener( function (data) {
-  if (data.tabId === -1) {
-    MAKE_HIT(data);
-  }
-}, { urls: [`http://www.mturkcrowd.com/threads/*/add-reply`, `https://turkerhub.com/threads/*/add-reply`] }, [`requestBody`]);
+function SEND_MTC (tab, message) {
+  $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, function (data) {
+    const $data = $(data);
+    const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
+    const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
+
+    $.get(`http://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
+      const group_id = message.match(/groupId=(\w+)/)[1];
+      
+      for (let i = 0; i < data.posts.length; i ++) if (data.posts[i].message.indexOf(group_id) !== -1) return;
+           
+      $.post(`http://www.mturkcrowd.com/threads/${thread}/add-reply`, {
+        _xfToken: xfToken,
+        message_html: message
+      });
+    });
+  });
+}
+
+chrome.webRequest.onBeforeRequest.addListener(
+  function (data) {
+    if (data.tabId === -1) {
+      MAKE_HIT(data);
+    }
+  },
+  { urls: [`http://www.mturkcrowd.com/threads/*/add-reply`, `https://turkerhub.com/threads/*/add-reply`] }, [`requestBody`]
+);
 
 function MAKE_HIT (data) {
   const forum = data.url.match(/mturkcrowd|turkerhub/);
@@ -511,7 +579,7 @@ HFDB_request.onsuccess = function (event) {
 HFDB_request.onupgradeneeded = function (event) {
   const HFDB = event.target.result;
   
-  const createObjectStore = HFDB.createObjectStore(`hit`, {keyPath: `groupid`});
+  const createObjectStore = HFDB.createObjectStore(`hit`, { keyPath: `groupid` });
   for (let index of [`reqid`, `reqname`, `title`, `reward`, `seen`]) {
     createObjectStore.createIndex(index, index, {unique: false});
   }
