@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>HIT Finder</title>
+    <title>MTS - HIT Finder</title>
     <!-- Scripts -->
     <script src="jquery-3.1.1.min.js"></script>
     <script src="hit_finder.js"></script>
@@ -12,6 +12,7 @@
     <link href="hit_finder.css" rel="stylesheet" media="screen">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link href="bootstrap/toggle/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
   </head>
   <body style="padding: 3px;">
     <!-- Buttons -->
@@ -505,6 +506,63 @@
                 </select>
               </div>
             </div>
+            
+            <!-- IRC Export -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="irc" name="irc" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="irc" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="irc" class="btn btn-default active">Enable IRC Export</label>
+              </div>
+            </div>
+          </div>
+    
+          <!-- Forum Export -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="forum" name="forum" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="forum" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="forum" class="btn btn-default active">Enable Forum Export</label>
+              </div>
+            </div>
+          </div>
+          
+  
+          <!-- TH Direct Export -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="forum_th" name="forum_th" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="forum_th" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="forum_th" class="btn btn-default active">Enable TH Direct Export</label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Forum Export -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="forum_mtc" name="forum_mtc" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="forum_mtc" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="forum_mtc" class="btn btn-default active">Enable MTC Direct Export</label>
+              </div>
+            </div>
+          </div>
            
           </div>
         </div>
