@@ -1,13 +1,9 @@
 function ACCEPT_NEXT (settings) {
   if (!settings) settings = { accept_next: true };
-    
-  const element = $(`label:contains(Auto-accept Next Task)`).children()[0];
-  const checked = element.checked;
-    
-  if (settings.accept_next !== checked) element.click();
+  document.getElementsByName(`autoAcceptEnabled`)[0].checked = settings.accept_next ? true : false;
 }
 
-if ($(`label:contains(Auto-accept Next Task)`)[0]) {
+if (document.getElementsByName(`autoAcceptEnabled`)[0]) {
   chrome.storage.onChanged.addListener( function (changes) {
     if (changes.settings) ACCEPT_NEXT(changes.settings.newValue);
   });
