@@ -1,4 +1,18 @@
-let tpe = {}, hits  = {}, requests = {};
+// New Version
+chrome.storage.local.get(`version`, function (result) {
+  const version = chrome.runtime.getManifest().version;
+  
+  if (result.version !== version) {
+    chrome.tabs.create({ url: chrome.extension.getURL(`settings.html`) });
+  }
+  
+  chrome.storage.local.set({
+    version: version
+  });
+});
+
+
+let tpe = { goal: 20.00 }, hits  = {}, requests = {};
 let syncing_tpe = { tab: null, running: false };
 
 const USER = {
