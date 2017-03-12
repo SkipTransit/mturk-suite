@@ -111,8 +111,8 @@ const catcher = {
       return;
     }
     
-    catcher.id = catcher.ids[catcher.index ++ % catcher.ids.length];
-    console.log(`https://www.mturk.com/mturk/previewandaccept?groupId=${catcher.id}`);
+    catcher.id = catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
+    console.log(catcher.index, catcher.ids.length, catcher.id); 
     
     $.ajax({
       url:
@@ -122,12 +122,13 @@ const catcher = {
       timeout:
       5000
     }).then(catcher.wwwParse, catcher.wwwError);
+    
   },
   wwwParse: function (result, status, xhr) {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
     const obj = watchers[catcher.id];
     
-    // Page request error
+    // Page request error encountered
     if (doc.getElementsByClassName(`error_title`)[0]) {
       console.log(`pre`);
     }
