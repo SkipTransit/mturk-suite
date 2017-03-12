@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.14.9",
+  "version": "1.16.2",
   
   "permissions": [
     "tts",
@@ -87,6 +87,7 @@
         "www.mturk.com/accept_next.js",
         "www.mturk.com/hit_capsule.js",
         "www.mturk.com/hit_export.js",
+        "www.mturk.com/hitCatcherButtons.js",
         "www.mturk.com/pre_reloader.js",
         "www.mturk.com/queue_value.js",
         "www.mturk.com/send_hit.js",

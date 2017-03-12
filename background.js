@@ -534,8 +534,8 @@ function update_tpe () {
     }
   }
 
-  chrome.storage.local.set({'tpe': tpe});
-  chrome.storage.local.set({'hits': hits});
+  chrome.storage.local.set({ tpe: tpe });
+  chrome.storage.local.set({ hits: hits });
 }
 
 // Get the date for mturk
