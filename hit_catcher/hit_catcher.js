@@ -88,8 +88,8 @@ const watcher = {
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-success`, `btn-default`);
   },
-  alert: function (obj) {
-    
+  found: function (obj) {
+    speak(`HIT Caught: ${obj.nickName}, $0.05, $1.00.`);
   }
 };
 
@@ -103,7 +103,7 @@ const hitCatcher = {
 }
 
 const catcher = {
-  id: null, ids: [], index: 0, timeout: null,
+  id: null, ids: [], index: 0, timeout: null, pause: false;
   catch: function () {
     clearTimeout(catcher.timeout);
     
@@ -162,6 +162,8 @@ const catcher = {
         data: hit
       });
       
+      watcher.found(obj);
+      
       if (obj) {
         obj.caught = obj.caught > 0 ? obj.caught + 1 : 1;
       } 
@@ -191,7 +193,18 @@ const alerts = {
 
 document.addEventListener(`click`, function (event) {
   const element = event.target;
-    
+  
+  /*
+  if (element.matches(`.catch`)) {
+    if (element.className.match(`btn-default`)) {
+      watcher.catchOn(watchers[element.dataset.id]);
+    }
+    else if (element.className.match(`btn-success`)) {
+      watcher.catchOff(watchers[element.dataset.id]);
+    }
+  }
+  */
+  
   // If the watcher's catch button is clicked
   if (element.matches(`.catch`)) {
     if (element.className.match(`btn-default`)) {
@@ -228,6 +241,10 @@ document.addEventListener(`DOMContentLoaded`, function () {
   watcher.add(structure);
   watcher.draw(structure);
 });
+
+function speak (phrase) {
+  chrome.tts.speak(phrase, { enqueue: true, voiceName: `Google US English` });
+}
 
 function whenAccepted (time) {
   const split = time.split(/:| /);
