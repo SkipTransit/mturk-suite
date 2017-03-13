@@ -6,6 +6,15 @@ chrome.storage.onChanged.addListener( function (changes) {
   } 
 });
 
+const hitCatcher = {
+  load: function () {
+    
+  },
+  save: function () {
+    
+  }
+}
+
 const watchers = {};
 
 const watcher = {
@@ -125,15 +134,6 @@ const watcher = {
   }
 };
 
-const hitCatcher = {
-  load: function () {
-    
-  },
-  save: function () {
-    
-  }
-}
-
 const catcher = {
   id: null, ids: [], index: 0, timeout: null, paused: false,
   catch: function () {
@@ -155,6 +155,17 @@ const catcher = {
       5000
     }).then(catcher.wwwParse, catcher.wwwError);
     
+  },
+  pauseOn: function () {
+    const element = document.getElementById(`pause`);
+    element.className = element.className.replace(`btn-default`, `btn-danger`);
+    catcher.paused = true;
+  },
+  pauseOff: function () {
+    const element = document.getElementById(`pause`);
+    element.className = element.className.replace(`btn-danger`, `btn-default`);
+    catcher.paused = false;
+    catcher.catch();
   },
   wwwParse: function (result, status, xhr) {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
@@ -228,7 +239,7 @@ const catcher = {
     catcher.timeout = setTimeout(catcher.catch, 1000);
   },
   captchaFound: function () {
-    catcher.paused = true;
+    catcher.pauseOn();
     
     speak(`Captcha found. HIT Catcher paused.`);
     
@@ -236,16 +247,15 @@ const catcher = {
       message: `Captcha found. Do you want to resume HIT Catcher?`,
       buttons: {
         confirm: {
-          className: 'btn-sm btn-success'
+          className: `btn-sm btn-success`
         },
         cancel: {
-          className: 'btn-sm btn-danger'
+          className: `btn-sm btn-danger`
         }
       },
       callback: function (result) {
         if (result) {
-          catcher.paused = false;
-          catcher.catch();
+          catcher.pauseOff();
         }
       }
     });
@@ -256,7 +266,17 @@ const catcher = {
 document.addEventListener(`click`, function (event) {
   const element = event.target;
   
-  /*
+  // Catcher pause button is clicked
+  if (element.matches(`#pause`)) {
+    if (element.className.match(`btn-default`)) {
+      catcher.pauseOn();
+    }
+    else if (element.className.match(`btn-danger`)) {
+      catcher.pauseOff();
+    }
+  }
+  
+  // Watcher catch button is clicked
   if (element.matches(`.catch`)) {
     if (element.className.match(`btn-default`)) {
       watcher.catchOn(watchers[element.dataset.id]);
@@ -265,19 +285,8 @@ document.addEventListener(`click`, function (event) {
       watcher.catchOff(watchers[element.dataset.id]);
     }
   }
-  */
   
-  // If the watcher's catch button is clicked
-  if (element.matches(`.catch`)) {
-    if (element.className.match(`btn-default`)) {
-      watcher.catchOn(watchers[element.dataset.id]);
-    }
-    else if (element.className.match(`btn-success`)) {
-      watcher.catchOff(watchers[element.dataset.id]);
-    }
-  }
-  
-  // IF the watcher's sound button is clicked
+  // Watcher sound button is clicked
   if (element.matches(`.sound`)) {
     if (element.className.match(`btn-default`)) {
       watcher.soundOn(watchers[element.dataset.id]);
@@ -287,12 +296,12 @@ document.addEventListener(`click`, function (event) {
     }
   }
   
-  // If the watcher's settings button is clicked
+  // Watcher settings button is clicked
   if (element.matches(`.glyphicon-cog`)) {
     watcher.settingsShow(watchers[element.dataset.id]);
   }
   
-  // If the watcher's remove button is clicked
+  // Watcher remove button is clicked
   if (element.matches(`.glyphicon-remove`)) {
     watcher.remove(watchers[element.dataset.id]);
   }
