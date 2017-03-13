@@ -2,7 +2,7 @@ chrome.storage.onChanged.addListener( function (changes) {
   if (changes.addWatcher) {
     watcher.add(changes.addWatcher.newValue);
     watcher.draw(changes.addWatcher.newValue);
-    watcher.catch(changes.addWatcher.newValue);
+    watcher.catchOn(changes.addWatcher.newValue);
   } 
 });
 
@@ -13,6 +13,9 @@ const watcher = {
     if (!watchers[obj.hitSetId]) {
       watchers[obj.hitSetId] = obj
     }
+  },
+  update: function (obj) {
+    document.getElementById(obj.hitSetId).getElementsByClassName(`name`)[0].textContent = obj.nickname ? obj.nickname : obj.requesterName ? obj.requesterName : obj.hitSetId;
   },
   remove: function (obj) {
     bootbox.confirm({
@@ -25,7 +28,6 @@ const watcher = {
           className: 'btn-sm btn-danger'
         }
       },
-      backdrop: true,
       callback: function (result) {
         if (result) {
           delete watchers[obj.hitSetId];
@@ -42,21 +44,21 @@ const watcher = {
       `beforeend`,
       `<div id="${obj.hitSetId}" class="col-sm-3">
         <div class="card card-inverse card-hit">
-          <div class="card-header">
-            <div class="float-right" style="background-color: #444; border-left: 1px solid #FFFFFF;"> > </div>
+          <div class="card-header" style="word-wrap: break-word;">
+            <!-- <div class="float-right" style="background-color: #444; border-left: 1px solid #FFFFFF;"> > </div> -->
             <div class="float-right">
-              <span class="glyphicon glyphicon-cog align-top" data-id="${obj.hitSetId}"></span>
-              <span class="glyphicon glyphicon-remove align-top" data-id="${obj.hitSetId}"></span>
+              <span data-id="${obj.hitSetId}" class="glyphicon glyphicon-cog text-muted align-top"></span>
+              <span data-id="${obj.hitSetId}" class="glyphicon glyphicon-remove text-danger align-top"></span>
             </div>
-            <div class="float-left" style="background-color: #444; border-right: 1px solid #FFFFFF;"> < </div>
-            <b>${obj.nickName}</b>
+            <!-- <div class="float-left" style="background-color: #444; border-right: 1px solid #FFFFFF;"> < </div> -->
+            <b class="name">${obj.nickname ? obj.nickname : obj.requesterName ? obj.requesterName : obj.hitSetId}</b>
           </div>
           <div class="card-block">
             <div class="card-text">
               <div>
                 <div class="stats" style="font-size: 10px;">Caught: 0; Searched: 0;</div>
-                <button class="catch btn btn-xxs btn-default" data-id="${obj.hitSetId}">Catch</button>
-                <button class="sound btn btn-xxs btn-success" data-id="${obj.hitSetId}">Sound</button>
+                <button data-id="${obj.hitSetId}" class="catch btn btn-xxs btn-default">Catch</button>
+                <button data-id="${obj.hitSetId}" class="sound btn btn-xxs ${obj.sound ? `btn-success` : `btn-default`}">Sound</button>
               </div>
             </div>
           </div>
@@ -68,7 +70,7 @@ const watcher = {
     document.getElementById(obj.hitSetId).getElementsByClassName(`stats`)[0].textContent =
       `Caught: ${obj.caught ? obj.caught : 0}; Searched: ${obj.searched ? obj.searched : 0};`
     ;
-  }, 
+  },
   catchOn: function (obj) {
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
     element.className = element.className.replace(`btn-default`, `btn-success`);
@@ -83,13 +85,43 @@ const watcher = {
   soundOn: function (obj) {
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-default`, `btn-success`);
+    obj.sound = true;
   }, 
   soundOff: function (obj) {
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-success`, `btn-default`);
+    obj.sound = false;
+  },
+  settingsShow: function (obj) {
+    document.getElementById(`watcher-settings-nickname`).value = obj.nickname;
+    document.getElementById(`watcher-settings-once`).checked   = obj.once;
+    
+    document.getElementById(`watcher-settings-requester-name`).textContent = obj.requesterName;
+    document.getElementById(`watcher-settings-requester-id`).textContent = obj.requesterId;
+    document.getElementById(`watcher-settings-title`).textContent = obj.title;
+    document.getElementById(`watcher-settings-hit-set-id`).textContent = obj.hitSetId;
+    document.getElementById(`watcher-settings-reward`).textContent = obj.reward;
+    document.getElementById(`watcher-settings-duration`).textContent = obj.assignmentDuration;
+    document.getElementById(`watcher-settings-requirements`).textContent = obj.hitRequirements;
+    document.getElementById(`watcher-settings-auto-app-delay`).textContent = obj.hitAutoAppDelay;
+    
+    $(document.getElementById(`watcher-settings-modal`)).modal(`show`);
+    
+    $(document.getElementById(`watcher-settings-modal`)).on('hidden.bs.modal', function (e) {
+      $(document.getElementById(`watcher-settings-modal`)).off('hidden.bs.modal');
+      
+      obj.nickname = document.getElementById(`watcher-settings-nickname`).value;
+      obj.once = document.getElementById(`watcher-settings-once`).checked;
+      watcher.update(obj);
+    });
   },
   found: function (obj) {
-    speak(`HIT Caught: ${obj.nickName}, $0.05, $1.00.`);
+    if (obj.once) {
+      watcher.catchOff(obj);
+    }
+    if (obj.sound) {
+      speak(`HIT Caught: ${obj.nickname ? obj.nickname : obj.requesterName}, ${obj.reward}, ${obj.once ? obj.assignmentDuration : ``}`);
+    }
   }
 };
 
@@ -103,11 +135,11 @@ const hitCatcher = {
 }
 
 const catcher = {
-  id: null, ids: [], index: 0, timeout: null, pause: false,
+  id: null, ids: [], index: 0, timeout: null, paused: false,
   catch: function () {
     clearTimeout(catcher.timeout);
     
-    if (!catcher.ids[0]) {
+    if (!catcher.ids[0] || catcher.paused) {
       return;
     }
     
@@ -136,6 +168,8 @@ const catcher = {
     // Captcha encountered
     else if (doc.querySelector(`[name="userCaptchaResponse"]`)) {
       console.log(`captcha`);
+      
+      catcher.captchaFound();
     }
     
     // HIT accepted
@@ -143,8 +177,8 @@ const catcher = {
       console.log(`accepted`);
       
       const hit = {
-        reqname : doc.querySelector(`[name="prevRequester"]`).value,
-        reqid   : doc.querySelector(`[name="prevRequester"]`).value,
+        reqname: doc.querySelector(`[name="prevRequester"]`).value,
+        reqid: doc.querySelector(`[name="prevRequester"]`).value,
         title: doc.querySelector('.capsulelink_bold').textContent.trim(),
         reward: doc.querySelector(`[name="prevReward"]`).value.replace(`USD`, `$`),
         autoapp: doc.querySelector(`[name="hitAutoAppDelayInSeconds"]`).value,
@@ -162,10 +196,18 @@ const catcher = {
         data: hit
       });
       
-      watcher.found(obj);
-      
       if (obj) {
+        obj.title = hit.title;
+        obj.reward = hit.reward;
+        obj.requesterName = hit.reqname;
+        obj.hitRequirements = doc.querySelectorAll(`.capsule_field_text`)[4].textContent.trim();
+        obj.hitAutoAppDelay = secondsToString(hit.autoapp);
+        obj.assignmentDuration = doc.querySelectorAll(`.capsule_field_text`)[3].textContent.trim();
+        
         obj.caught = obj.caught > 0 ? obj.caught + 1 : 1;
+        
+        watcher.found(obj);
+        watcher.update(obj);
       } 
     }
   
@@ -185,11 +227,31 @@ const catcher = {
   workerError: function (result, status, xhr) {
     catcher.timeout = setTimeout(catcher.catch, 1000);
   },
+  captchaFound: function () {
+    catcher.paused = true;
+    
+    speak(`Captcha found. HIT Catcher paused.`);
+    
+    bootbox.confirm({
+      message: `Captcha found. Do you want to resume HIT Catcher?`,
+      buttons: {
+        confirm: {
+          className: 'btn-sm btn-success'
+        },
+        cancel: {
+          className: 'btn-sm btn-danger'
+        }
+      },
+      callback: function (result) {
+        if (result) {
+          catcher.paused = false;
+          catcher.catch();
+        }
+      }
+    });
+  },
 }
 
-const alerts = {
-  
-};
 
 document.addEventListener(`click`, function (event) {
   const element = event.target;
@@ -225,16 +287,29 @@ document.addEventListener(`click`, function (event) {
     }
   }
   
-  // IF the watcher's remove button is clicked
+  // If the watcher's settings button is clicked
+  if (element.matches(`.glyphicon-cog`)) {
+    watcher.settingsShow(watchers[element.dataset.id]);
+  }
+  
+  // If the watcher's remove button is clicked
   if (element.matches(`.glyphicon-remove`)) {
     watcher.remove(watchers[element.dataset.id]);
   }
 });
 
 const structure = {
-  nickName: `Test HIT 1`,
+  nickname: ``,
+  once: false,
+  sound: true,
+  requesterName: null,
+  requesterId: null,
+  title: null,
   hitSetId: `3YVLYSYEBF5EJAO35WSGKPFABSF0QM`,
-  panda: true
+  reward: null,
+  assignmentDuration: null,
+  hitRequirements: null,
+  hitAutoAppDelay: null
 };
 
 document.addEventListener(`DOMContentLoaded`, function () {
@@ -244,6 +319,10 @@ document.addEventListener(`DOMContentLoaded`, function () {
 
 function speak (phrase) {
   chrome.tts.speak(phrase, { enqueue: true, voiceName: `Google US English` });
+}
+
+function notification () {
+  
 }
 
 function whenAccepted (time) {
@@ -277,4 +356,18 @@ function dst () {
   day = end.getDay();
   end.setDate(7 - day);
   return (today >= start && today < end) ? true : false;
+}
+
+function secondsToString (seconds) {
+  const dd = Math.floor(seconds / 86400);
+  const hh = Math.floor(seconds / 3600 % 24);
+  const mm = Math.floor(seconds / 60 % 60);
+
+  const string =   
+    (dd > 0 ? `${dd} day${dd > 1 ? `s` : ``} ` : ``) +
+    (hh > 0 ? `${hh} hour${hh > 1 ? `s` : ``} ` : ``) +
+    (mm > 0 ? `${mm} minute${mm > 1 ? `s` : ``} ` : ``)
+  ;
+  
+  return seconds > 0 ? string : `0 seconds`
 }

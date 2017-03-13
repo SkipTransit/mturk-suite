@@ -37,6 +37,36 @@
 }
 /**********************************************/
 
+/********** Checkbox Styling **********/
+.form-group {
+  margin-bottom: 0px !important;
+}
+
+.form-group input[type="checkbox"] {
+  display: none;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span {
+  width: 20px;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span:first-child {
+  display: none;
+}
+
+.form-group input[type="checkbox"] + .btn-group > label span:last-child {
+  display: inline-block;
+}
+
+.form-group input[type="checkbox"]:checked + .btn-group > label span:first-child {
+  display: inline-block;
+}
+
+.form-group input[type="checkbox"]:checked + .btn-group > label span:last-child {
+  display: none;   
+}
+/**************************************/
+
 .panel, .panel-top {
   margin-bottom: 5px !important;
 }
@@ -46,7 +76,11 @@
 }
 
 .card-header {
-  padding: 0rem
+  padding: 0px 3px;
+}
+
+#hits .card-header {
+  line-height: 1.1;
 }
 
 .card-block {
@@ -80,7 +114,7 @@
   cursor: pointer;
   font-size: 10px;
   padding-top: 2px;
-  padding-right: 2px;
+ /* padding-right: 2px;*/
 }
 
 .modal-content {
@@ -88,6 +122,30 @@
   background-color: #222222;
 }
 
-.modal-footer {
+.modal-header, .modal-footer {
   border-color: rgba(255,255,255,.2);;
+}
+
+.input-group-sm {
+  width: 100%;
+  margin: 3px;
+}
+
+
+.btn-default:hover {
+    color: #333;
+    background-color: #d4d4d4;
+    border-color: #8c8c8c;
+}
+
+.btn-default {
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.btn-default.active, .btn-default:active, .open>.dropdown-toggle.btn-default {
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
 }
