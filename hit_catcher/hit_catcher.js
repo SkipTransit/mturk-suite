@@ -171,19 +171,26 @@ const catcher = {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
     const obj = watchers[catcher.id];
     
-    // Page request error encountered
+    // Logged out
+    if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {
+      console.log(`logged out`);
+      
+      catcher.loggedOut();
+    }
+    
+    // Page request error
     if (doc.getElementsByClassName(`error_title`)[0]) {
       console.log(`pre`);
     }
     
-    // Captcha encountered
+    // Captcha
     else if (doc.querySelector(`[name="userCaptchaResponse"]`)) {
       console.log(`captcha`);
       
       catcher.captchaFound();
     }
     
-    // HIT accepted
+    // Accepted
     else if (doc.querySelector(`[name="isAccepted"]`)) {
       console.log(`accepted`);
       
@@ -237,6 +244,28 @@ const catcher = {
   },
   workerError: function (result, status, xhr) {
     catcher.timeout = setTimeout(catcher.catch, 1000);
+  },
+  loggedOut: function () {
+    catcher.pauseOn();
+    
+    speak(`You are logged out. HIT Catcher paused.`);
+    
+    bootbox.confirm({
+      message: `You are logged out. Do you want to resume HIT Catcher?`,
+      buttons: {
+        confirm: {
+          className: `btn-sm btn-success`
+        },
+        cancel: {
+          className: `btn-sm btn-danger`
+        }
+      },
+      callback: function (result) {
+        if (result) {
+          catcher.pauseOff();
+        }
+      }
+    });
   },
   captchaFound: function () {
     catcher.pauseOn();
