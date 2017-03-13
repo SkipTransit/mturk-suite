@@ -103,7 +103,7 @@ const hitCatcher = {
 }
 
 const catcher = {
-  id: null, ids: [], index: 0, timeout: null, pause: false;
+  id: null, ids: [], index: 0, timeout: null, pause: false,
   catch: function () {
     clearTimeout(catcher.timeout);
     
