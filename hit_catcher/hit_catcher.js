@@ -135,7 +135,7 @@ const watcher = {
 };
 
 const catcher = {
-  id: null, ids: [], index: 0, timeout: null, paused: false,
+  id: null, ids: [], index: 0, pre: 0, timeout: null, paused: false,
   catch: function () {
     clearTimeout(catcher.timeout);
     
@@ -172,28 +172,22 @@ const catcher = {
     const obj = watchers[catcher.id];
     
     // Logged out
-    if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {
-      console.log(`logged out`);
-      
+    if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {      
       catcher.loggedOut();
     }
     
     // Page request error
     if (doc.getElementsByClassName(`error_title`)[0]) {
-      console.log(`pre`);
+      catcher.pageRequestError();
     }
     
     // Captcha
-    else if (doc.querySelector(`[name="userCaptchaResponse"]`)) {
-      console.log(`captcha`);
-      
+    else if (doc.querySelector(`[name="userCaptchaResponse"]`)) {      
       catcher.captchaFound();
     }
     
     // Accepted
-    else if (doc.querySelector(`[name="isAccepted"]`)) {
-      console.log(`accepted`);
-      
+    else if (doc.querySelector(`[name="isAccepted"]`)) {      
       const hit = {
         reqname: doc.querySelector(`[name="prevRequester"]`).value,
         reqid: doc.querySelector(`[name="prevRequester"]`).value,

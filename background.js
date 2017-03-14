@@ -11,7 +11,6 @@ chrome.storage.local.get(`version`, function (result) {
   });
 });
 
-
 let tpe = { goal: 20.00 }, hits  = {}, requests = {};
 let syncing_tpe = { tab: null, running: false };
 
@@ -82,7 +81,28 @@ chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
       GET_BONUS(sender.tab.id);
       break;
   }
+  
+  if (onMessageParser[request.msg]) {
+    onMessageParser[request.msg](sender.tab.id);
+  }
 });
+
+const onMessageParser = {
+  isHitCatcherAlive: function (tabId, requestObj) {
+    const tabs = chrome.extension.getViews({
+      type: `tab`
+    });
+    for (let i = 0; i < tabs.length; i ++) {
+      if (tabs[i].location.href.match(`hit_catcher.html`)) {
+        chrome.tabs.sendMessage(tabId, {
+          message: `isHitCatcherAlive`,
+          response: true
+        });
+        break;
+      }
+    }
+  }
+};
 
 // Adds context menu to paste worker id in input fields
 chrome.contextMenus.create({
