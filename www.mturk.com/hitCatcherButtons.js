@@ -84,7 +84,7 @@ const hitCatcherButtons = {
 
 if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
   chrome.runtime.onMessage.addListener( function (request) {
-    if (request.message === `isHitCatcherAlive` && request.response === true) {
+    if (request.type === `hitCatcherPing` && request.message === true) {
       if (document.querySelector(`a[href^="/mturk/preview?groupId="]`)) {
         hitCatcherButtons.drawAll();
       }
@@ -95,7 +95,7 @@ if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
   });
   
   chrome.runtime.sendMessage({ 
-    msg: `isHitCatcherAlive`
+    type: `hitCatcherPing`
   });
   
   document.addEventListener(`click`, function (event) {
@@ -104,8 +104,9 @@ if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
     if (element.matches(`.hitCatcherButtonPanda`)) {
       const obj = hitCatcherExporter[element.dataset.key];
       
-      chrome.storage.local.set({
-        addWatcher: obj
+      chrome.runtime.sendMessage({ 
+        type: `hitCatcherAddWatcher`,
+        message: obj
       });
     }
     
@@ -113,11 +114,10 @@ if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
       const obj = hitCatcherExporter[element.dataset.key];
       obj.once = true;
       
-      chrome.storage.local.set({
-        addWatcher: obj
+      chrome.runtime.sendMessage({ 
+        type: `hitCatcherAddWatcher`,
+        message: obj
       });
     }
   });
 }
-
-console.log(doc);

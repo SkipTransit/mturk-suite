@@ -1,10 +1,30 @@
-chrome.storage.onChanged.addListener( function (changes) {
-  if (changes.addWatcher) {
-    watcher.add(changes.addWatcher.newValue);
-    watcher.draw(changes.addWatcher.newValue);
-    watcher.catchOn(changes.addWatcher.newValue);
-  } 
+// Listens from messages from MTS sources
+chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
+  if (onMessageParser[request.type]) {
+    onMessageParser[request.type](sender.tab.id, request.message);
+  }
 });
+
+// Listens for messages from Non-MTS sources
+chrome.runtime.onMessageExternal.addListener( function (request, sender, sendResponse) {
+  if (onMessageParser[request.type]) {
+    onMessageParser[request.type](sender.tab.id, request.message);
+  }
+});
+
+const onMessageParser = {
+  hitCatcherPing: function (tabId, requestObj) {
+    chrome.tabs.sendMessage(tabId, {
+      type: `hitCatcherPing`,
+      message: true
+    });
+  },
+  hitCatcherAddWatcher: function (tabId, message) {
+    watcher.add(message);
+    watcher.draw(message);
+    watcher.catchOn(message);
+  }
+};
 
 const hitCatcher = {
   load: function () {
@@ -13,14 +33,14 @@ const hitCatcher = {
   save: function () {
     
   }
-}
+};
 
 const watchers = {};
 
 const watcher = {
   add: function (obj) {
     if (!watchers[obj.hitSetId]) {
-      watchers[obj.hitSetId] = obj
+      watchers[obj.hitSetId] = obj;
     }
   },
   update: function (obj) {
@@ -83,8 +103,11 @@ const watcher = {
   catchOn: function (obj) {
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
     element.className = element.className.replace(`btn-default`, `btn-success`);
-    catcher.ids.push(obj.hitSetId);
-    catcher.catch();
+    
+    if (catcher.ids.includes(obj.hitSetId) === false) {
+      catcher.ids.push(obj.hitSetId);
+      catcher.catch();
+    }
   },
   catchOff: function (obj) {
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
@@ -283,7 +306,7 @@ const catcher = {
       }
     });
   },
-}
+};
 
 
 document.addEventListener(`click`, function (event) {
@@ -401,5 +424,5 @@ function secondsToString (seconds) {
     (mm > 0 ? `${mm} minute${mm > 1 ? `s` : ``} ` : ``)
   ;
   
-  return seconds > 0 ? string : `0 seconds`
+  return seconds > 0 ? string : `0 seconds`;
 }

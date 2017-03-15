@@ -81,27 +81,24 @@ chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
       GET_BONUS(sender.tab.id);
       break;
   }
-  
-  if (onMessageParser[request.msg]) {
-    onMessageParser[request.msg](sender.tab.id);
+});
+
+// Listens from messages from MTS sources
+chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
+  if (onMessageParser[request.type]) {
+    onMessageParser[request.type](sender.tab.id, request.message);
+  }
+});
+
+// Listens for messages from Non-MTS sources
+chrome.runtime.onMessageExternal.addListener( function (request, sender, sendResponse) {
+  if (onMessageParser[request.type]) {
+    onMessageParser[request.type](sender.tab.id, request.message);
   }
 });
 
 const onMessageParser = {
-  isHitCatcherAlive: function (tabId, requestObj) {
-    const tabs = chrome.extension.getViews({
-      type: `tab`
-    });
-    for (let i = 0; i < tabs.length; i ++) {
-      if (tabs[i].location.href.match(`hit_catcher.html`)) {
-        chrome.tabs.sendMessage(tabId, {
-          message: `isHitCatcherAlive`,
-          response: true
-        });
-        break;
-      }
-    }
-  }
+  
 };
 
 // Adds context menu to paste worker id in input fields
