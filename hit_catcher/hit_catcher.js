@@ -1,18 +1,19 @@
 // Listens from messages from MTS sources
 chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
-  if (onMessageParser[request.type]) {
-    onMessageParser[request.type](sender.tab.id, request.message);
+  if (onMessageHandler[request.type]) {
+    onMessageHandler[request.type](sender.tab.id, request.message);
   }
 });
 
 // Listens for messages from Non-MTS sources
 chrome.runtime.onMessageExternal.addListener( function (request, sender, sendResponse) {
-  if (onMessageParser[request.type]) {
-    onMessageParser[request.type](sender.tab.id, request.message);
+  if (onMessageHandler[request.type]) {
+    onMessageHandler[request.type](sender.tab.id, request.message);
   }
 });
 
-const onMessageParser = {
+// Deals with onMessage stuff
+const onMessageHandler = {
   hitCatcherPing: function (tabId, requestObj) {
     chrome.tabs.sendMessage(tabId, {
       type: `hitCatcherPing`,
@@ -26,21 +27,80 @@ const onMessageParser = {
   }
 };
 
-const hitCatcher = {
-  load: function () {
-    
+// Deals with storage stuff
+const storageHandler = {
+  loadHitCatcherWatchers: function () {
+    console.log(`storageHandler.loadHitCatcherWatchers()`);
+    chrome.storage.local.get(`hitCatcherWatchers`, function (result) {
+      if (result.hitCatcherWatchers) {
+        watcher.watchers = result.hitCatcherWatchers.watchers;
+      }
+      
+      for (let key of result.hitCatcherWatchers.position) {
+        watcher.draw(watcher.watchers[key]);
+      }
+      
+      
+      for (let key in watcher.watchers) {
+        watcher.draw(watcher.watchers[key]);
+      }
+      
+      
+      console.log(result.hitCatcherWatchers);
+    });
   },
-  save: function () {
+  saveHitCatcherWatchers: function () {
+    console.log(`storageHandler.saveHitCatcherWatchers()`);
+    const obj = {}; const pos = [];
     
+    for (let key in watcher.watchers) {
+      obj[key] = {
+        nickname: watcher.watchers[key].nickname,
+        once: watcher.watchers[key].once,
+        sound: watcher.watchers[key].sound,
+        requesterName: watcher.watchers[key].requesterName,
+        requesterId: watcher.watchers[key].requesterId,
+        title: watcher.watchers[key].title,
+        hitSetId: watcher.watchers[key].hitSetId,
+        reward: watcher.watchers[key].reward,
+        assignmentDuration: watcher.watchers[key].assignmentDuration,
+        hitRequirements: watcher.watchers[key].hitRequirements,
+        hitAutoAppDelay: watcher.watchers[key].hitAutoAppDelay
+      };
+    }
+    
+    for (let element of document.getElementById(`hits`).children) {
+      pos.push(element.id);
+    }
+    
+    chrome.storage.local.set({
+      hitCatcherWatchers: {
+        watchers: obj,
+        position: pos
+      }
+    });
+  },
+  loadHitCatcherSettings: function () {
+    console.log(`storageHandler.loadHitCatcherSettings()`);
+    chrome.storage.local.get(`hitCatcherSettings`, function (result) {
+    });
+  },
+  saveHitCatcherSettings: function () {
+    console.log(`storageHandler.saveHitCatcherSettings()`);
+    const obj = {};
+    
+    chrome.storage.local.set({
+      hitCatcherSettings: catcher.obj
+    });
   }
 };
 
-const watchers = {};
-
 const watcher = {
+  watchers: {},
   add: function (obj) {
-    if (!watchers[obj.hitSetId]) {
-      watchers[obj.hitSetId] = obj;
+    if (!watcher.watchers[obj.hitSetId]) {
+      watcher.watchers[obj.hitSetId] = obj;
+      storageHandler.saveHitCatcherWatchers();
     }
   },
   update: function (obj) {
@@ -59,9 +119,10 @@ const watcher = {
       },
       callback: function (result) {
         if (result) {
-          delete watchers[obj.hitSetId];
+          delete watcher.watchers[obj.hitSetId];
           catcher.ids.splice(catcher.ids.indexOf(obj.hitSetId), 1);
           document.getElementById(obj.hitSetId).parentNode.removeChild(document.getElementById(obj.hitSetId));
+          storageHandler.saveHitCatcherWatchers();
         }
       }
     });
@@ -95,6 +156,15 @@ const watcher = {
       </div>`
     );
   },
+  redraw: function (obj) {
+    
+  },
+  moveUp: function (obj) {
+    
+  },
+  moveDown: function (obj) {
+    
+  },
   stats: function (obj) {
     document.getElementById(obj.hitSetId).getElementsByClassName(`stats`)[0].textContent =
       `Caught: ${obj.caught ? obj.caught : 0}; Searched: ${obj.searched ? obj.searched : 0};`
@@ -118,11 +188,13 @@ const watcher = {
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-default`, `btn-success`);
     obj.sound = true;
+    storageHandler.saveHitCatcherWatchers();
   }, 
   soundOff: function (obj) {
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-success`, `btn-default`);
     obj.sound = false;
+    storageHandler.saveHitCatcherWatchers();
   },
   settingsShow: function (obj) {
     document.getElementById(`watcher-settings-nickname`).value = obj.nickname;
@@ -139,12 +211,13 @@ const watcher = {
     
     $(document.getElementById(`watcher-settings-modal`)).modal(`show`);
     
-    $(document.getElementById(`watcher-settings-modal`)).on('hidden.bs.modal', function (e) {
-      $(document.getElementById(`watcher-settings-modal`)).off('hidden.bs.modal');
+    $(document.getElementById(`watcher-settings-modal`)).on(`hidden.bs.modal`, function (event) {
+      $(document.getElementById(`watcher-settings-modal`)).off(`hidden.bs.modal`);
       
       obj.nickname = document.getElementById(`watcher-settings-nickname`).value;
       obj.once = document.getElementById(`watcher-settings-once`).checked;
       watcher.update(obj);
+      storageHandler.saveHitCatcherWatchers();
     });
   },
   found: function (obj) {
@@ -158,6 +231,7 @@ const watcher = {
 };
 
 const catcher = {
+  settings: {},
   id: null, ids: [], index: 0, pre: 0, timeout: null, paused: false,
   catch: function () {
     clearTimeout(catcher.timeout);
@@ -167,7 +241,6 @@ const catcher = {
     }
     
     catcher.id = catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
-    console.log(catcher.index, catcher.ids.length, catcher.id); 
     
     $.ajax({
       url:
@@ -192,7 +265,7 @@ const catcher = {
   },
   wwwParse: function (result, status, xhr) {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
-    const obj = watchers[catcher.id];
+    const obj = watcher.watchers[catcher.id];
     
     // Logged out
     if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {      
@@ -201,7 +274,7 @@ const catcher = {
     
     // Page request error
     if (doc.getElementsByClassName(`error_title`)[0]) {
-      catcher.pageRequestError();
+      //catcher.pageRequestError();
     }
     
     // Captcha
@@ -308,7 +381,6 @@ const catcher = {
   },
 };
 
-
 document.addEventListener(`click`, function (event) {
   const element = event.target;
   
@@ -325,52 +397,42 @@ document.addEventListener(`click`, function (event) {
   // Watcher catch button is clicked
   if (element.matches(`.catch`)) {
     if (element.className.match(`btn-default`)) {
-      watcher.catchOn(watchers[element.dataset.id]);
+      watcher.catchOn(watcher.watchers[element.dataset.id]);
     }
     else if (element.className.match(`btn-success`)) {
-      watcher.catchOff(watchers[element.dataset.id]);
+      watcher.catchOff(watcher.watchers[element.dataset.id]);
     }
   }
   
   // Watcher sound button is clicked
   if (element.matches(`.sound`)) {
     if (element.className.match(`btn-default`)) {
-      watcher.soundOn(watchers[element.dataset.id]);
+      watcher.soundOn(watcher.watchers[element.dataset.id]);
     }
     else if (element.className.match(`btn-success`)) {
-      watcher.soundOff(watchers[element.dataset.id]);
+      watcher.soundOff(watcher.watchers[element.dataset.id]);
     }
   }
   
   // Watcher settings button is clicked
   if (element.matches(`.glyphicon-cog`)) {
-    watcher.settingsShow(watchers[element.dataset.id]);
+    watcher.settingsShow(watcher.watchers[element.dataset.id]);
   }
   
   // Watcher remove button is clicked
   if (element.matches(`.glyphicon-remove`)) {
-    watcher.remove(watchers[element.dataset.id]);
+    watcher.remove(watcher.watchers[element.dataset.id]);
   }
 });
 
-const structure = {
-  nickname: ``,
-  once: false,
-  sound: true,
-  requesterName: null,
-  requesterId: null,
-  title: null,
-  hitSetId: `3YVLYSYEBF5EJAO35WSGKPFABSF0QM`,
-  reward: null,
-  assignmentDuration: null,
-  hitRequirements: null,
-  hitAutoAppDelay: null
-};
-
 document.addEventListener(`DOMContentLoaded`, function () {
-  watcher.add(structure);
-  watcher.draw(structure);
+  storageHandler.loadHitCatcherWatchers();
 });
+
+window.addEventListener(`beforeunload`, function (event) {
+  storageHandler.saveHitCatcherWatchers();
+});
+
 
 function speak (phrase) {
   chrome.tts.speak(phrase, { enqueue: true, voiceName: `Google US English` });
