@@ -132,15 +132,15 @@ const watcher = {
     
     document.getElementById(`hits`).insertAdjacentHTML(
       `beforeend`,
-      `<div id="${obj.hitSetId}" class="col-sm-3">
+      `<div id="${obj.hitSetId}" class="col-sm-3" draggable="true">
         <div class="card card-inverse card-hit">
           <div class="card-header" style="word-wrap: break-word;">
-            <!-- <div class="float-right" style="background-color: #444; border-left: 1px solid #FFFFFF;"> > </div> -->
+            <div data-id="${obj.hitSetId}" class="move-right float-right" style="background-color: #444; border-left: 1px solid #FFFFFF;"> > </div>
             <div class="float-right">
               <span data-id="${obj.hitSetId}" class="glyphicon glyphicon-cog text-muted align-top"></span>
               <span data-id="${obj.hitSetId}" class="glyphicon glyphicon-remove text-danger align-top"></span>
             </div>
-            <!-- <div class="float-left" style="background-color: #444; border-right: 1px solid #FFFFFF;"> < </div> -->
+            <div data-id="${obj.hitSetId}" class="move-left float-left" style="background-color: #444; border-right: 1px solid #FFFFFF;"> < </div>
             <b class="name">${obj.nickname ? obj.nickname : obj.requesterName ? obj.requesterName : obj.hitSetId}</b>
           </div>
           <div class="card-block">
@@ -159,11 +159,19 @@ const watcher = {
   redraw: function (obj) {
     
   },
-  moveUp: function (obj) {
-    
+  moveLeft: function (obj) {
+    console.log(`watcher.moveLeft()`, obj);
+    const element = document.getElementById(obj.hitSetId);
+    if (element.previousElementSibling) {
+      element.parentNode.insertBefore(element, element.previousElementSibling);
+    }
   },
-  moveDown: function (obj) {
-    
+  moveRight: function (obj) {
+    console.log(`watcher.moveRight()`, obj);
+    const element = document.getElementById(obj.hitSetId);
+    if (element.nextElementSibling) {
+      element.parentNode.insertBefore(element.nextElementSibling, element);
+    }
   },
   stats: function (obj) {
     document.getElementById(obj.hitSetId).getElementsByClassName(`stats`)[0].textContent =
@@ -381,8 +389,22 @@ const catcher = {
   },
 };
 
+const onDragHandler = {
+  
+};
+
 document.addEventListener(`click`, function (event) {
   const element = event.target;
+  
+  // If move left is clicked
+  if (element.matches(`.move-left`)) {
+    watcher.moveLeft(watcher.watchers[element.dataset.id]);
+  }
+  
+  // If move right is clicked
+  if (element.matches(`.move-right`)) {
+    watcher.moveRight(watcher.watchers[element.dataset.id]);
+  }
   
   // Catcher pause button is clicked
   if (element.matches(`#pause`)) {
