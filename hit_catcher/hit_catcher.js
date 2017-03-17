@@ -32,21 +32,18 @@ const storageHandler = {
   loadHitCatcherWatchers: function () {
     console.log(`storageHandler.loadHitCatcherWatchers()`);
     chrome.storage.local.get(`hitCatcherWatchers`, function (result) {
+      // Set watchers
       if (result.hitCatcherWatchers) {
         watcher.watchers = result.hitCatcherWatchers.watchers;
       }
-      
+      // Draw watchers in order
       for (let key of result.hitCatcherWatchers.position) {
         watcher.draw(watcher.watchers[key]);
       }
-      
-      
+      // Fallback incase any watchers weren't drawn
       for (let key in watcher.watchers) {
         watcher.draw(watcher.watchers[key]);
       }
-      
-      
-      console.log(result.hitCatcherWatchers);
     });
   },
   saveHitCatcherWatchers: function () {
@@ -135,12 +132,16 @@ const watcher = {
       `<div id="${obj.hitSetId}" class="col-sm-3" draggable="true">
         <div class="card card-inverse card-hit">
           <div class="card-header" style="word-wrap: break-word;">
-            <div data-id="${obj.hitSetId}" class="move-right float-right" style="background-color: #444; border-left: 1px solid #FFFFFF;"> > </div>
+            <div data-id="${obj.hitSetId}" class="move-right float-right" style="position: relative; left: 3px; background-color: #444; height: 100%;">
+              <span class="glyphicon glyphicon-menu-right small" style="font-size: ;"></span>
+            </div>
             <div class="float-right">
               <span data-id="${obj.hitSetId}" class="glyphicon glyphicon-cog text-muted align-top"></span>
               <span data-id="${obj.hitSetId}" class="glyphicon glyphicon-remove text-danger align-top"></span>
             </div>
-            <div data-id="${obj.hitSetId}" class="move-left float-left" style="background-color: #444; border-right: 1px solid #FFFFFF;"> < </div>
+            <div data-id="${obj.hitSetId}" class="move-left float-left" style="position: relative; left: -3px; background-color: #444;">
+              <span class="glyphicon glyphicon-menu-left small" style="font-size: ;"></span>
+           </div>
             <b class="name">${obj.nickname ? obj.nickname : obj.requesterName ? obj.requesterName : obj.hitSetId}</b>
           </div>
           <div class="card-block">
@@ -275,14 +276,14 @@ const catcher = {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
     const obj = watcher.watchers[catcher.id];
     
-    // Logged out
-    if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {      
-      catcher.loggedOut();
-    }
-    
     // Page request error
     if (doc.getElementsByClassName(`error_title`)[0]) {
       //catcher.pageRequestError();
+    }
+    
+    // Logged out
+    else if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {      
+      catcher.loggedOut();
     }
     
     // Captcha
@@ -389,22 +390,8 @@ const catcher = {
   },
 };
 
-const onDragHandler = {
-  
-};
-
 document.addEventListener(`click`, function (event) {
   const element = event.target;
-  
-  // If move left is clicked
-  if (element.matches(`.move-left`)) {
-    watcher.moveLeft(watcher.watchers[element.dataset.id]);
-  }
-  
-  // If move right is clicked
-  if (element.matches(`.move-right`)) {
-    watcher.moveRight(watcher.watchers[element.dataset.id]);
-  }
   
   // Catcher pause button is clicked
   if (element.matches(`#pause`)) {
@@ -414,6 +401,16 @@ document.addEventListener(`click`, function (event) {
     else if (element.className.match(`btn-danger`)) {
       catcher.pauseOff();
     }
+  }
+  
+  // Watcher left button is clicked
+  if (element.matches(`.move-left`)) {
+    watcher.moveLeft(watcher.watchers[element.dataset.id]);
+  }
+  
+  // Watcher right button is clicked
+  if (element.matches(`.move-right`)) {
+    watcher.moveRight(watcher.watchers[element.dataset.id]);
   }
   
   // Watcher catch button is clicked
@@ -444,6 +441,10 @@ document.addEventListener(`click`, function (event) {
   // Watcher remove button is clicked
   if (element.matches(`.glyphicon-remove`)) {
     watcher.remove(watcher.watchers[element.dataset.id]);
+  }
+  
+  if (element.matches(`#advanced_settings`)) {
+    $(document.getElementById(`advanced_settings_modal`)).modal(`show`);
   }
 });
 

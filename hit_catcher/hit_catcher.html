@@ -115,129 +115,47 @@
     </div>
     
     <!-- Advanced Settings -->
-    <div class="modal fade" id="advanced_settings_modal">
+    <div  id="advanced_settings_modal" class="modal fade">
+      
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header bg-primary">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h4 class="modal-title">Advanced Settings</h4>
+            Advanced Settings
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
           </div>
           <div class="modal-body row">
-            
-            <!-- Pushbullet Token -->
-            <div class="col-xs-12">
-              <div class="input-group input-group-sm form-group">
-                <div class="input-group-addon">Pushbullet Token</div>
-                <input id="pushbullet_token" type="text" class="form-control">
-              </div>
-            </div>
-             
-            <!-- Site To Scan -->
-            <div class="col-xs-6">
-              <div class="input-group input-group-sm form-group">
-                <div class="input-group-addon">Site To Scan</div>
-                <select id="site_to_scan">
-                  <option value="mturk">mturk.com</option>
-                  <option value="worker">worker.mturk.com</option>
-                </select>
-              </div>
-            </div>
-            
-            <!-- New HIT Sound -->
-            <div class="col-xs-6">
-              <div class="input-group input-group-sm form-group">
-                <div class="input-group-addon">New HIT Sound</div>
-                <select id="new_hit_sound">
-                  <option value="1">Sound 1</option>
-                  <option value="2">Sound 2</option>
-                </select>
-              </div>
-            </div>
-            
-            <!-- Include Match Voice -->
-            <div class="col-xs-6">
-              <div class="input-group input-group-sm form-group">
-                <div class="input-group-addon">Include Match Voice</div>
-                <select id="include_voice">
-                  <option value="0">Male</option>
-                  <option value="2">Female</option>
-                </select>
-              </div>
-            </div>
-            
-            <!-- Include Match Sound -->
-            <div class="col-xs-6">
-              <div class="input-group input-group-sm form-group">
-                <div class="input-group-addon">Include Match Sound</div>
-                <select id="include_sound">
-                  <option value="1">Sound 1</option>
-                  <option value="2">Sound 2</option>
-                  <option value="3">Sound 3</option>
-                  <option value="4">Sound 4</option>
-                </select>
-              </div>
-            </div>
-            
-            <!-- IRC Export -->
-          <div class="col-xs-6">
-            <div class="form-group">
-              <input id="irc" name="irc" type="checkbox" autocomplete="off" />
-              <div class="btn-group btn-group-sm">
-                <label for="irc" class="btn btn-default">
-                  <span class="glyphicon glyphicon-ok"></span>
-                  <span> </span>
-                </label>
-                <label for="irc" class="btn btn-default active">Enable IRC Export</label>
-              </div>
-            </div>
-          </div>
-    
-          <!-- Forum Export -->
-          <div class="col-xs-6">
-            <div class="form-group">
-              <input id="forum" name="forum" type="checkbox" autocomplete="off" />
-              <div class="btn-group btn-group-sm">
-                <label for="forum" class="btn btn-default">
-                  <span class="glyphicon glyphicon-ok"></span>
-                  <span> </span>
-                </label>
-                <label for="forum" class="btn btn-default active">Enable Forum Export</label>
-              </div>
-            </div>
-          </div>
-          
-  
-          <!-- TH Direct Export -->
-          <div class="col-xs-6">
-            <div class="form-group">
-              <input id="forum_th" name="forum_th" type="checkbox" autocomplete="off" />
-              <div class="btn-group btn-group-sm">
-                <label for="forum_th" class="btn btn-default">
-                  <span class="glyphicon glyphicon-ok"></span>
-                  <span> </span>
-                </label>
-                <label for="forum_th" class="btn btn-default active">Enable TH Direct Export</label>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Forum Export -->
-          <div class="col-xs-6">
-            <div class="form-group">
-              <input id="forum_mtc" name="forum_mtc" type="checkbox" autocomplete="off" />
-              <div class="btn-group btn-group-sm">
-                <label for="forum_mtc" class="btn btn-default">
-                  <span class="glyphicon glyphicon-ok"></span>
-                  <span> </span>
-                </label>
-                <label for="forum_mtc" class="btn btn-default active">Enable MTC Direct Export</label>
-              </div>
-            </div>
-          </div>
            
+            <!-- Panda -->
+            <h6 style="width: 100%; border-bottom: 1px solid #FFFFFF; margin: 2px;">Panda</h6>
+            
+            <!-- Panda Sound -->
+            <div class="col-sm-6">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">Sound</div>
+                <select id="panda-sound" value="voice">
+                  <option value="voice">Voice</option>
+                  <option value="noise">Noise</option>
+                </select>
+              </div>
+            </div>
+            
+            <h6 style="width: 100%; border-bottom: 1px solid #FFFFFF; margin: 2px;">Once</h6>
+            <!-- Once -->
+            <div class="col-sm-6">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">Sound</div>
+                <select id="once-sound" value="voice">
+                  <option value="voice">Voice</option>
+                  <option value="noise">Noise</option>
+                </select>
+              </div>
+            </div>
+            
+            
           </div>
         </div>
       </div>
+      
     </div>
     
   </body>
