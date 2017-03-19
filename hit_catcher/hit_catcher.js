@@ -534,6 +534,7 @@ document.addEventListener(`keydown`, function (event) {
   if (key === `Enter`) {
     if (document.getElementsByClassName(`bootbox`)[0]) {
       document.getElementsByClassName(`bootbox`)[0].querySelector(`[data-bb-handler="confirm"]`).click();
+      bootbox.hideAll();
     }
   }
 });
