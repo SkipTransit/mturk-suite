@@ -166,9 +166,7 @@ const watcher = {
         if (result) {
           delete watcher.watchers[obj.hitSetId];
           catcher.ids.splice(catcher.ids.indexOf(obj.hitSetId), 1);
-          if (document.getElementById(obj.hitSetId)) {
-            document.getElementById(obj.hitSetId).parentNode.removeChild(document.getElementById(obj.hitSetId));
-          }
+          document.getElementById(obj.hitSetId).parentNode.removeChild(document.getElementById(obj.hitSetId));
           storageHandler.saveHitCatcherWatchers();
         }
       }
