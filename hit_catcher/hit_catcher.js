@@ -48,13 +48,15 @@ const storageHandler = {
       if (result.hitCatcherWatchers) {
         watcher.watchers = result.hitCatcherWatchers.watchers;
       }
-      // Draw watchers in order
+      // Draw watchers in order from order array
       for (let key of result.hitCatcherWatchers.position) {
         watcher.draw(watcher.watchers[key]);
       }
-      // Fallback incase any watchers weren't drawn
+      // Fallback for any watchers not in order array
       for (let key in watcher.watchers) {
-        watcher.draw(watcher.watchers[key]);
+        if (!document.getElementById(key)) {
+          watcher.draw(watcher.watchers[key]);
+        }
       }
     });
   },
@@ -92,30 +94,63 @@ const storageHandler = {
   loadHitCatcherSettings: function () {
     console.log(`storageHandler.loadHitCatcherSettings()`);
     chrome.storage.local.get(`hitCatcherSettings`, function (result) {
+      console.log(result);
+      const hitCatcherSettings = result.hitCatcherSettings || {};
+      
+      catcher.settings = {
+        speed:
+          hitCatcherSettings.hasOwnProperty(`speed`) ?
+          hitCatcherSettings.speed :
+          1000,
+        captchaPopup:
+          hitCatcherSettings.hasOwnProperty(`captchaPopup`) ?
+          hitCatcherSettings.captchaPopup :
+          false,
+        captchaOverride:
+          hitCatcherSettings.hasOwnProperty(`captchaOverride`) ?
+          hitCatcherSettings.captchaOverride :
+          null,
+      };
+      
+      document.getElementById(`speed`).value = catcher.settings.speed;
+      document.getElementById(`captcha-popup`).checked = catcher.settings.captchaPopup;
+      document.getElementById(`captcha-override`).value = catcher.settings.captchaOverride;
     });
   },
   saveHitCatcherSettings: function () {
     console.log(`storageHandler.saveHitCatcherSettings()`);
-    const obj = {};
+    const settings = {
+      speed: +document.getElementById(`speed`).value,
+      captchaPopup: document.getElementById(`captcha-popup`).checked,
+      captchaOverride: document.getElementById(`captcha-override`).value
+    };
     
     chrome.storage.local.set({
-      hitCatcherSettings: catcher.settings
+      hitCatcherSettings: settings
     });
+  },
+  updateHitCatcherSettings: function () {
+    catcher.settings.speed = +document.getElementById(`speed`).value;
+    catcher.settings.captchaPopup = document.getElementById(`captcha-popup`).checked;
+    catcher.settings.captchaOverride = document.getElementById(`captcha-override`).value;
   }
 };
 
 const watcher = {
   watchers: {},
   add: function (obj) {
+    console.log(`watcher.add()`, obj);
     if (!watcher.watchers[obj.hitSetId]) {
       watcher.watchers[obj.hitSetId] = obj;
       storageHandler.saveHitCatcherWatchers();
     }
   },
   update: function (obj) {
+    console.log(`watcher.update()`, obj);
     document.getElementById(obj.hitSetId).getElementsByClassName(`name`)[0].textContent = obj.nickname ? obj.nickname : obj.requesterName ? obj.requesterName : obj.hitSetId;
   },
   remove: function (obj) {
+    console.log(`watcher.remove()`, obj);
     bootbox.confirm({
       message: `Are you sure you want to delete this watcher?`,
       buttons: {
@@ -137,6 +172,7 @@ const watcher = {
     });
   },
   draw: function (obj) {
+    console.log(`watcher.draw()`, obj);
     if (document.getElementById(obj.hitSetId)) return;
     
     document.getElementById(`hits`).insertAdjacentHTML(
@@ -159,7 +195,7 @@ const watcher = {
           <div class="card-block">
             <div class="card-text">
               <div>
-                <div class="stats" style="font-size: 10px;">Caught: 0; Searched: 0;</div>
+                <div class="stats" style="font-size: 10px;">Caught: 0; Searched: 0; PRE: 0;</div>
                 <button data-id="${obj.hitSetId}" class="catch btn btn-xxs btn-default">Catch</button>
                 <button data-id="${obj.hitSetId}" class="sound btn btn-xxs ${obj.sound ? `btn-success` : `btn-default`}">Sound</button>
               </div>
@@ -170,14 +206,14 @@ const watcher = {
     );
   },
   moveLeft: function (obj) {
-    console.log(`watcher.moveLeft()`);
+    console.log(`watcher.moveLeft()`, obj);
     const element = document.getElementById(obj.hitSetId);
     if (element.previousElementSibling) {
       element.parentNode.insertBefore(element, element.previousElementSibling);
     }
   },
   moveRight: function (obj) {
-    console.log(`watcher.moveRight()`);
+    console.log(`watcher.moveRight()`, obj);
     const element = document.getElementById(obj.hitSetId);
     if (element.nextElementSibling) {
       element.parentNode.insertBefore(element.nextElementSibling, element);
@@ -185,11 +221,11 @@ const watcher = {
   },
   stats: function (obj) {
     document.getElementById(obj.hitSetId).getElementsByClassName(`stats`)[0].textContent =
-      `Caught: ${obj.caught ? obj.caught : 0}; Searched: ${obj.searched ? obj.searched : 0};`
+      `Caught: ${obj.caught ? obj.caught : 0}; Searched: ${obj.searched ? obj.searched : 0}; PRE: ${obj.pre ? obj.pre : 0};`
     ;
   },
   catchOn: function (obj) {
-    console.log(`watcher.catchOn()`);
+    console.log(`watcher.catchOn()`, obj);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
     element.className = element.className.replace(`btn-default`, `btn-success`);
     if (catcher.ids.includes(obj.hitSetId) === false) {
@@ -198,27 +234,27 @@ const watcher = {
     }
   },
   catchOff: function (obj) {
-    console.log(`watcher.catchOff()`);
+    console.log(`watcher.catchOff()`, obj);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
     element.className = element.className.replace(`btn-success`, `btn-default`);
     catcher.ids.splice(catcher.ids.indexOf(obj.hitSetId), 1);
   },
   soundOn: function (obj) {
-    console.log(`watcher.soundOn()`);
+    console.log(`watcher.soundOn()`, obj);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-default`, `btn-success`);
     obj.sound = true;
     storageHandler.saveHitCatcherWatchers();
   }, 
   soundOff: function (obj) {
-    console.log(`watcher.soundOff()`);
+    console.log(`watcher.soundOff()`, obj);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-success`, `btn-default`);
     obj.sound = false;
     storageHandler.saveHitCatcherWatchers();
   },
   settingsShow: function (obj) {
-    console.log(`watcher.settingsShow()`);
+    console.log(`watcher.settingsShow()`, obj);
     document.getElementById(`watcher-settings-nickname`).value = obj.nickname;
     document.getElementById(`watcher-settings-once`).checked = obj.once;
     
@@ -243,22 +279,27 @@ const watcher = {
     });
   },
   found: function (obj) {
-    console.log(`watcher.found()`);
+    console.log(`watcher.found()`, obj);
     if (obj.once) {
       watcher.catchOff(obj);
     }
     if (obj.sound) {
-      speak(`HIT Caught: ${obj.nickname ? obj.nickname : obj.requesterName}, ${obj.reward}, ${obj.once ? obj.assignmentDuration : ``}`);
+      notifications.speak(`HIT Caught: ${obj.nickname ? obj.nickname : obj.requesterName}, ${obj.reward}, ${obj.once ? obj.assignmentDuration : ``}`);
     }
   }
 };
 
 const catcher = {
   settings: {},
-  id: null, ids: [], index: 0, pre: 0, timeout: null,
+  id: null, ids: [], index: 0, timeout: null,
   paused: {
     status: false,
     reason: null
+  },
+  delay: function () {
+    const nextCatch = catcher.time + catcher.settings.speed;
+    const adjustedDelay = nextCatch - new Date().getTime();
+    return adjustedDelay > 0 ? adjustedDelay : 1;
   },
   catch: function () {
     clearTimeout(catcher.timeout);
@@ -268,6 +309,7 @@ const catcher = {
     }
     
     catcher.id = catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
+    catcher.time = new Date().getTime();
     
     $.ajax({
       url:
@@ -277,7 +319,6 @@ const catcher = {
       timeout:
       5000
     }).then(catcher.wwwParse, catcher.wwwError);
-    
   },
   pauseOn: function (reason) {
     const element = document.getElementById(`pause`);
@@ -298,7 +339,7 @@ const catcher = {
     
     // Page request error
     if (doc.getElementsByClassName(`error_title`)[0]) {
-      //catcher.pageRequestError();
+      obj.pre = obj.pre > 0 ? obj.pre + 1 : 1;
     }
     
     // Logged out
@@ -353,21 +394,21 @@ const catcher = {
     } 
       
     watcher.stats(obj);
-    catcher.timeout = setTimeout(catcher.catch, 1000);
+    catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
   wwwError: function (result, status, xhr) {
-    catcher.timeout = setTimeout(catcher.catch, 1000);
+    catcher.timeout = setTimeout(catcher.catch, catcher.settings.speed);
   },
   workerParse: function (result, status, xhr) {
-    catcher.timeout = setTimeout(catcher.catch, 1000);
+    catcher.timeout = setTimeout(catcher.catch, catcher.settings.speed);
   },
   workerError: function (result, status, xhr) {
-    catcher.timeout = setTimeout(catcher.catch, 1000);
+    catcher.timeout = setTimeout(catcher.catch, catcher.settings.speed);
   },
   loggedOut: function () {
     catcher.pauseOn(`loggedOut`);
     
-    speak(`You are logged out. HIT Catcher paused.`);
+    notifications.speak(`You are logged out. HIT Catcher paused.`);
     
     bootbox.confirm({
       message: `You are logged out. Do you want to resume HIT Catcher?`,
@@ -389,7 +430,7 @@ const catcher = {
   captchaFound: function () {
     catcher.pauseOn(`captchaFound`);
     
-    speak(`Captcha found. HIT Catcher paused.`);
+    notifications.speak(`Captcha found. HIT Catcher paused.`);
     
     bootbox.confirm({
       message: `Captcha found. Do you want to resume HIT Catcher?`,
@@ -407,7 +448,20 @@ const catcher = {
         }
       }
     });
+    
+    if (catcher.settings.captchaPopup) {
+      window.open(`https://www.mturk.com/mturk/preview?groupId=${catcher.settings.captchaOverride ? catcher.settings.captchaOverride : catcher.id}`, `hcPopup`, `width=800, height=600`);
+    }
   },
+};
+
+const notifications = {
+  speak: function (phrase) {
+    chrome.tts.speak(phrase, {
+      enqueue: true,
+      voiceName: `Google US English`
+    });
+  }
 };
 
 document.addEventListener(`click`, function (event) {
@@ -468,30 +522,30 @@ document.addEventListener(`click`, function (event) {
   }
 });
 
+document.addEventListener(`change`, function (event) {
+  storageHandler.saveHitCatcherSettings();
+  storageHandler.updateHitCatcherSettings();
+});
+
+
 document.addEventListener(`keydown`, function (event) {
   const key = event.key;
   
   if (key === `Enter`) {
-    document.getElementsByClassName(`bootbox`)[0].querySelector(`[data-bb-handler="confirm"]`).click();
+    if (document.getElementsByClassName(`bootbox`)[0]) {
+      document.getElementsByClassName(`bootbox`)[0].querySelector(`[data-bb-handler="confirm"]`).click();
+    }
   }
 });
 
 document.addEventListener(`DOMContentLoaded`, function () {
   storageHandler.loadHitCatcherWatchers();
+  storageHandler.loadHitCatcherSettings();
 });
 
 window.addEventListener(`beforeunload`, function (event) {
   storageHandler.saveHitCatcherWatchers();
 });
-
-
-function speak (phrase) {
-  chrome.tts.speak(phrase, { enqueue: true, voiceName: `Google US English` });
-}
-
-function notification () {
-  
-}
 
 function whenAccepted (time) {
   const split = time.split(/:| /);

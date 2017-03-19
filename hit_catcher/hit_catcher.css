@@ -145,9 +145,9 @@
 }
 
 .btn-default.active, .btn-default:active, .open>.dropdown-toggle.btn-default {
-    color: #333;
-    background-color: #e6e6e6;
-    border-color: #adadad;
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #adadad;
 }
 
 body {
@@ -156,4 +156,23 @@ body {
 
 select {
   width: 100%;
+}
+
+
+.input-group-xs {
+  width: 120px;
+}
+
+
+.input-group-xs .input-group-addon {
+  padding: 1px 2px !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  border-radius: 3px !important;
+  height: 20px;
+}
+
+.input-group-xs .form-control {
+  height: 20px;
+  padding: 0;
 }

@@ -19,8 +19,18 @@
   <body style="padding: 3px;">
     <!-- Buttons -->
     <div class="panel-top">
+      
+      <div class="float-left" style="padding: 4px;">
+        <div class="input-group input-group-xs form-group">
+          <div class="input-group-addon">Speed</div>
+          <input id="speed" type="number" class="form-control" step="100" min="500" value="1000">
+          <div class="input-group-addon">ms</div>
+        </div>
+      </div>
+      
       <button id="pause" type="button" class="btn btn-xxs btn-default">Pause</button>
       <button id="advanced_settings" class="btn btn-xxs btn-primary">Advanced Settings</button>
+      
     </div>
         
     <!-- HITS -->
@@ -105,7 +115,7 @@
     </div>
     
     <!-- Advanced Settings -->
-    <div  id="advanced_settings_modal" class="modal fade">
+    <div id="advanced_settings_modal" class="modal fade">
       
       <div class="modal-dialog">
         <div class="modal-content">
@@ -114,11 +124,49 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: -10px;">×</button>
           </div>
           <div class="modal-body row">
+            
+            <!-- Site to Use -->
+            <div class="col-sm-6">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">Site To Use</div>
+                <select id="site-to-use" value="www">
+                  <option value="www">www.mturk.com</option>
+                  <!-- <option value="worker">worker.mturk.com</option> -->
+                </select>
+              </div>
+            </div>
            
+            <!-- Site to Use -->
+            <div class="col-sm-6"></div>
+            
+            <!-- Captcha Popup -->
+            <div class="col-sm-6">
+              <div class="input-group input-group-sm form-group">
+                <input id="captcha-popup" name="captcha-popup" type="checkbox" autocomplete="off" />
+                <div class="btn-group btn-group-sm">
+                  <label for="captcha-popup" class="btn btn-default">
+                    <span class="glyphicon glyphicon-ok"></span>
+                    <span> </span>
+                  </label>
+                  <label for="captcha-popup" class="btn btn-default active">Popup HIT On Captcha</label>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Captcha Override -->
+            <div class="col-sm-6">
+              <div class="input-group input-group-sm form-group">
+                <div class="input-group-addon">GroupId</div>
+                <input id="captcha-override" type="text" class="form-control" placeholder="Group id for popup">
+              </div>
+            </div>
             <!-- Panda -->
+            <!--
             <h6 style="width: 100%; border-bottom: 1px solid #FFFFFF; margin: 2px;">Panda</h6>
+            -->
             
             <!-- Panda Sound -->
+            <!--
             <div class="col-sm-6">
               <div class="input-group input-group-sm form-group">
                 <div class="input-group-addon">Sound</div>
@@ -128,9 +176,14 @@
                 </select>
               </div>
             </div>
+            -->
             
+            <!--
             <h6 style="width: 100%; border-bottom: 1px solid #FFFFFF; margin: 2px;">Once</h6>
+            -->
+            
             <!-- Once -->
+            <!--
             <div class="col-sm-6">
               <div class="input-group input-group-sm form-group">
                 <div class="input-group-addon">Sound</div>
@@ -140,6 +193,7 @@
                 </select>
               </div>
             </div>
+            -->
             
             
           </div>
