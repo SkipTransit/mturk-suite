@@ -161,11 +161,14 @@ const watcher = {
           className: 'btn-sm btn-danger'
         }
       },
+      animate: false,
       callback: function (result) {
         if (result) {
           delete watcher.watchers[obj.hitSetId];
           catcher.ids.splice(catcher.ids.indexOf(obj.hitSetId), 1);
-          document.getElementById(obj.hitSetId).parentNode.removeChild(document.getElementById(obj.hitSetId));
+          if (document.getElementById(obj.hitSetId)) {
+            document.getElementById(obj.hitSetId).parentNode.removeChild(document.getElementById(obj.hitSetId));
+          }
           storageHandler.saveHitCatcherWatchers();
         }
       }
