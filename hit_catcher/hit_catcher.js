@@ -101,7 +101,7 @@ const storageHandler = {
         speed:
           hitCatcherSettings.hasOwnProperty(`speed`) ?
           hitCatcherSettings.speed :
-          1000,
+          1500,
         captchaPopup:
           hitCatcherSettings.hasOwnProperty(`captchaPopup`) ?
           hitCatcherSettings.captchaPopup :
@@ -181,15 +181,15 @@ const watcher = {
       `<div id="${obj.hitSetId}" class="col-sm-3">
         <div class="card card-inverse card-hit">
           <div class="card-header" style="word-wrap: break-word;">
-            <div data-id="${obj.hitSetId}" class="move-right float-right" style="position: relative; left: 3px; background-color: #444; height: 100%;">
-              <span class="glyphicon glyphicon-menu-right small" style="font-size: ;"></span>
+            <div class="float-right" style="position: relative; left: 3px; background-color: #444; height: 100%;">
+              <span data-id="${obj.hitSetId}" class="move-right glyphicon glyphicon-menu-right small" style="font-size: ;"></span>
             </div>
             <div class="float-right">
               <span data-id="${obj.hitSetId}" class="glyphicon glyphicon-cog text-muted align-top"></span>
               <span data-id="${obj.hitSetId}" class="glyphicon glyphicon-remove text-danger align-top"></span>
             </div>
-            <div data-id="${obj.hitSetId}" class="move-left float-left" style="position: relative; left: -3px; background-color: #444;">
-              <span class="glyphicon glyphicon-menu-left small" style="font-size: ;"></span>
+            <div class="float-left" style="position: relative; left: -3px; background-color: #444;">
+              <span data-id="${obj.hitSetId}"  class="move-left glyphicon glyphicon-menu-left small" style="font-size: ;"></span>
            </div>
             <b class="name">${obj.nickname ? obj.nickname : obj.requesterName ? obj.requesterName : obj.hitSetId}</b>
           </div>
