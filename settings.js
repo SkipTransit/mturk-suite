@@ -26,6 +26,7 @@ function SAVE_SETTINGS () {
   // General Settings
   SETTINGS.workspace = document.getElementById(`workspace`).checked;
   SETTINGS.pre_reloader = document.getElementById(`pre_reloader`).checked;
+  SETTINGS.hc_beta = document.getElementById(`hc_beta`).checked;
     
   // HIT Export Settings
   SETTINGS.hit_export.irc = document.getElementById(`irc`).checked;
@@ -49,6 +50,7 @@ function LOAD_SETTINGS (settings) {
     if (settings.hasOwnProperty(`workspace`)) SETTINGS.workspace = settings.workspace;
     if (settings.hasOwnProperty(`pre_reloader`)) SETTINGS.pre_reloader = settings.pre_reloader;
     if (settings.hasOwnProperty(`accept_next`)) SETTINGS.accept_next = settings.accept_next;
+    if (settings.hasOwnProperty(`hc_beta`)) SETTINGS.hc_beta = settings.hc_beta;
       
     // HIT Export Settings
     if (settings.hasOwnProperty(`hit_export`)) {
@@ -68,6 +70,7 @@ function LOAD_SETTINGS (settings) {
   // General Settings
   document.getElementById(`workspace`).checked = SETTINGS.workspace;
   document.getElementById(`pre_reloader`).checked = SETTINGS.pre_reloader;
+  document.getElementById(`hc_beta`).checked = SETTINGS.hc_beta;
       
   // HIT Export Settings
   document.getElementById(`irc`).checked = SETTINGS.hit_export.irc;

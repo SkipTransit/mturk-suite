@@ -14,7 +14,7 @@ chrome.runtime.onMessageExternal.addListener( function (request, sender, sendRes
 
 // Deals with onMessage stuff
 const onMessageHandler = {
-  hitCatcherPing: function (tabId, requestObj) {
+  hitCatcherPing: function (tabId, message) {
     chrome.tabs.sendMessage(tabId, {
       type: `hitCatcherPing`,
       message: true
@@ -24,6 +24,18 @@ const onMessageHandler = {
     watcher.add(message);
     watcher.draw(message);
     watcher.catchOn(message);
+  },
+  loggedIn: function (tabId, message) {
+    if (catcher.paused.reason === `loggedOut`) {
+      bootbox.hideAll();
+      catcher.pauseOff();
+    }
+  },
+  captchaCleared: function (tabId, message) {
+    if (catcher.paused.reason === `captchaFound`) {
+      bootbox.hideAll();
+      catcher.pauseOff();
+    }
   }
 };
 
@@ -87,7 +99,7 @@ const storageHandler = {
     const obj = {};
     
     chrome.storage.local.set({
-      hitCatcherSettings: catcher.obj
+      hitCatcherSettings: catcher.settings
     });
   }
 };
@@ -129,7 +141,7 @@ const watcher = {
     
     document.getElementById(`hits`).insertAdjacentHTML(
       `beforeend`,
-      `<div id="${obj.hitSetId}" class="col-sm-3" draggable="true">
+      `<div id="${obj.hitSetId}" class="col-sm-3">
         <div class="card card-inverse card-hit">
           <div class="card-header" style="word-wrap: break-word;">
             <div data-id="${obj.hitSetId}" class="move-right float-right" style="position: relative; left: 3px; background-color: #444; height: 100%;">
@@ -157,18 +169,15 @@ const watcher = {
       </div>`
     );
   },
-  redraw: function (obj) {
-    
-  },
   moveLeft: function (obj) {
-    console.log(`watcher.moveLeft()`, obj);
+    console.log(`watcher.moveLeft()`);
     const element = document.getElementById(obj.hitSetId);
     if (element.previousElementSibling) {
       element.parentNode.insertBefore(element, element.previousElementSibling);
     }
   },
   moveRight: function (obj) {
-    console.log(`watcher.moveRight()`, obj);
+    console.log(`watcher.moveRight()`);
     const element = document.getElementById(obj.hitSetId);
     if (element.nextElementSibling) {
       element.parentNode.insertBefore(element.nextElementSibling, element);
@@ -180,34 +189,38 @@ const watcher = {
     ;
   },
   catchOn: function (obj) {
+    console.log(`watcher.catchOn()`);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
     element.className = element.className.replace(`btn-default`, `btn-success`);
-    
     if (catcher.ids.includes(obj.hitSetId) === false) {
       catcher.ids.push(obj.hitSetId);
       catcher.catch();
     }
   },
   catchOff: function (obj) {
+    console.log(`watcher.catchOff()`);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
     element.className = element.className.replace(`btn-success`, `btn-default`);
     catcher.ids.splice(catcher.ids.indexOf(obj.hitSetId), 1);
   },
   soundOn: function (obj) {
+    console.log(`watcher.soundOn()`);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-default`, `btn-success`);
     obj.sound = true;
     storageHandler.saveHitCatcherWatchers();
   }, 
   soundOff: function (obj) {
+    console.log(`watcher.soundOff()`);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
     element.className = element.className.replace(`btn-success`, `btn-default`);
     obj.sound = false;
     storageHandler.saveHitCatcherWatchers();
   },
   settingsShow: function (obj) {
+    console.log(`watcher.settingsShow()`);
     document.getElementById(`watcher-settings-nickname`).value = obj.nickname;
-    document.getElementById(`watcher-settings-once`).checked   = obj.once;
+    document.getElementById(`watcher-settings-once`).checked = obj.once;
     
     document.getElementById(`watcher-settings-requester-name`).textContent = obj.requesterName;
     document.getElementById(`watcher-settings-requester-id`).textContent = obj.requesterId;
@@ -230,6 +243,7 @@ const watcher = {
     });
   },
   found: function (obj) {
+    console.log(`watcher.found()`);
     if (obj.once) {
       watcher.catchOff(obj);
     }
@@ -241,11 +255,15 @@ const watcher = {
 
 const catcher = {
   settings: {},
-  id: null, ids: [], index: 0, pre: 0, timeout: null, paused: false,
+  id: null, ids: [], index: 0, pre: 0, timeout: null,
+  paused: {
+    status: false,
+    reason: null
+  },
   catch: function () {
     clearTimeout(catcher.timeout);
     
-    if (!catcher.ids[0] || catcher.paused) {
+    if (!catcher.ids[0] || catcher.paused.status) {
       return;
     }
     
@@ -261,15 +279,17 @@ const catcher = {
     }).then(catcher.wwwParse, catcher.wwwError);
     
   },
-  pauseOn: function () {
+  pauseOn: function (reason) {
     const element = document.getElementById(`pause`);
     element.className = element.className.replace(`btn-default`, `btn-danger`);
-    catcher.paused = true;
+    catcher.paused.status = true;
+    catcher.paused.reason = reason;
   },
   pauseOff: function () {
     const element = document.getElementById(`pause`);
     element.className = element.className.replace(`btn-danger`, `btn-default`);
-    catcher.paused = false;
+    catcher.paused.status = false;
+    catcher.paused.reason = null;
     catcher.catch();
   },
   wwwParse: function (result, status, xhr) {
@@ -345,7 +365,7 @@ const catcher = {
     catcher.timeout = setTimeout(catcher.catch, 1000);
   },
   loggedOut: function () {
-    catcher.pauseOn();
+    catcher.pauseOn(`loggedOut`);
     
     speak(`You are logged out. HIT Catcher paused.`);
     
@@ -367,7 +387,7 @@ const catcher = {
     });
   },
   captchaFound: function () {
-    catcher.pauseOn();
+    catcher.pauseOn(`captchaFound`);
     
     speak(`Captcha found. HIT Catcher paused.`);
     
@@ -445,6 +465,14 @@ document.addEventListener(`click`, function (event) {
   
   if (element.matches(`#advanced_settings`)) {
     $(document.getElementById(`advanced_settings_modal`)).modal(`show`);
+  }
+});
+
+document.addEventListener(`keydown`, function (event) {
+  const key = event.key;
+  
+  if (key === `Enter`) {
+    document.getElementsByClassName(`bootbox`)[0].querySelector(`[data-bb-handler="confirm"]`).click();
   }
 });
 

@@ -44,6 +44,7 @@ function LOAD_SETTINGS (settings) {
     if (settings.hasOwnProperty(`workspace`)) SETTINGS.workspace = settings.workspace;
     if (settings.hasOwnProperty(`pre_reloader`)) SETTINGS.pre_reloader = settings.pre_reloader;
     if (settings.hasOwnProperty(`accept_next`)) SETTINGS.accept_next = settings.accept_next;
+    if (settings.hasOwnProperty(`hc_beta`)) SETTINGS.hc_beta = settings.hc_beta;
       
     // HIT Export Settings
     if (settings.hasOwnProperty(`hit_export`)) {
@@ -61,6 +62,8 @@ function LOAD_SETTINGS (settings) {
     
   // General Settings
   document.getElementById(`accept_next`).checked = SETTINGS.accept_next;
+  document.getElementById(`hc`).parentElement.parentElement.style.display = SETTINGS.hc_beta ? `` : `none`;
+
       
   // HIT Export Settings
       

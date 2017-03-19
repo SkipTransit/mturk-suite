@@ -97,7 +97,7 @@ chrome.runtime.onMessageExternal.addListener( function (request, sender, sendRes
   }
 });
 
-const onMessageParser = {
+const onMessageHandler = {
   
 };
 
