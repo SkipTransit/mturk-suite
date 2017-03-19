@@ -421,6 +421,7 @@ const catcher = {
           className: `btn-sm btn-danger`
         }
       },
+      animate: false,
       callback: function (result) {
         if (result) {
           catcher.pauseOff();
@@ -443,6 +444,7 @@ const catcher = {
           className: `btn-sm btn-danger`
         }
       },
+      animate: false,
       callback: function (result) {
         if (result) {
           catcher.pauseOff();
