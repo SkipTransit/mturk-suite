@@ -1,4 +1,5 @@
 const turkopticon = {
+  mts: {},
   grabIds: function () {
     const ids = [];
     
@@ -45,9 +46,33 @@ const turkopticon = {
   },
   circle: function (id) {
     const to = turkopticon.ratings[id];
+    const mts = turkopticon.mts;
+    
+    let color = `mts-toNone`;
+    if (mts.to) {
+      if (mts.to.to1 && to.to1) {
+        if (mts.to.to1.use) {
+          const pay = to.to1.attrs.pay;
+          if (pay >= mts.to.to1.high) color = `mts-toHigh`;
+          else if (pay >= mts.to.to1.good) color = `mts-toGood`;
+          else if (pay >= mts.to.to1.average) color = `mts-toAverage`;
+          else if (pay >= mts.to.to1.low) color = `mts-toLow`;
+        }
+      }
+      if (mts.to.to2 && to.to2) {
+        if (mts.to.to2.use) {
+          const pay = to.to2.recent.reward[1] > 0 ? (to.to2.recent.reward[0] / to.to2.recent.reward[1]) * 60 ** 2 : 0;
+          if (pay >= mts.to.to2.high) color = `mts-toHigh`;
+          else if (pay >= mts.to.to2.good) color = `mts-toGood`;
+          else if (pay >= mts.to.to2.average) color = `mts-toAverage`;
+          else if (pay >= mts.to.to2.low) color = `mts-toLow`;
+        }
+      }
+    }
+    
     const html = 
       `<mts-to>
-        <mts-to-circle class="mts-toNone">TO</mts-to-circle>
+        <mts-to-circle class="${color}">TO</mts-to-circle>
         <mts-to-reviews>
           ${turkopticon.attrTable(to)}
           ${turkopticon.linkTable(id)}
@@ -70,8 +95,8 @@ const turkopticon = {
           <mts-td>${to1 ? `${to1.attrs.pay} / 5` : `null`}</mts-td>
 
           <mts-td>Pay Rate:</mts-td>
-          <mts-td>${to2 ? to2.recent.reward[1] > 0 ? `$${((to2.recent.reward[0]/to2.recent.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr` : `null`}</mts-td>
-          <mts-td>${to2 ? to2.all.reward[1] > 0 ? `$${((to2.all.reward[0]/to2.all.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.recent.reward[1] > 0 ? `$${((to2.recent.reward[0] / to2.recent.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.reward[1] > 0 ? `$${((to2.all.reward[0] / to2.all.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr` : `null`}</mts-td>
         </mts-tr>
         <mts-tr>
           <mts-td>Fast:</mts-td>
@@ -152,5 +177,8 @@ if (document.querySelector(`a[href*="requesterId="]`)) {
     }
   });
   
-  turkopticon.grabIds();
+  chrome.storage.local.get(`settings`, function (result) {
+    turkopticon.mts = result.settings ? result.settings : {};
+    turkopticon.grabIds();
+  });
 }
