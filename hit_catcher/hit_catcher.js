@@ -179,7 +179,7 @@ const watcher = {
     document.getElementById(`hits`).insertAdjacentHTML(
       `beforeend`,
       `<div id="${obj.hitSetId}" class="col-sm-3">
-        <div class="card card-inverse card-hit">
+        <div class="watcher card card-inverse card-hit">
           <div class="card-header" style="word-wrap: break-word;">
             <div class="float-right" style="position: relative; left: 3px; background-color: #444; height: 100%;">
               <span data-id="${obj.hitSetId}" class="move-right glyphicon glyphicon-menu-right small" style="font-size: ;"></span>
@@ -292,7 +292,7 @@ const watcher = {
 
 const catcher = {
   settings: {},
-  id: null, ids: [], index: 0, timeout: null,
+  id: null, ids: [], index: 0, timeout: null, repeat: false,
   paused: {
     status: false,
     reason: null
@@ -308,9 +308,10 @@ const catcher = {
     if (!catcher.ids[0] || catcher.paused.status) {
       return;
     }
-    
-    catcher.id = catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
+      
+    catcher.id = catcher.repeat ? catcher.id : catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
     catcher.time = new Date().getTime();
+    catcher.repeat = false;
     
     $.ajax({
       url:
@@ -339,8 +340,9 @@ const catcher = {
     const obj = watcher.watchers[catcher.id];
     
     // Page request error
-    if (doc.getElementsByClassName(`error_title`)[0]) {
+    if (doc.querySelector(`[class="error_title"]`)) {
       obj.pre = obj.pre > 0 ? obj.pre + 1 : 1;
+      catcher.repeat = true;
     }
     
     // Logged out
@@ -387,6 +389,7 @@ const catcher = {
         
         watcher.found(obj);
         watcher.update(obj);
+        catcher.repeat = obj.once ? false : true;
       } 
     }
   
@@ -398,13 +401,13 @@ const catcher = {
     catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
   wwwError: function (result, status, xhr) {
-    catcher.timeout = setTimeout(catcher.catch, catcher.settings.speed);
+    catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
   workerParse: function (result, status, xhr) {
-    catcher.timeout = setTimeout(catcher.catch, catcher.settings.speed);
+    catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
   workerError: function (result, status, xhr) {
-    catcher.timeout = setTimeout(catcher.catch, catcher.settings.speed);
+    catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
   loggedOut: function () {
     catcher.pauseOn(`loggedOut`);
@@ -525,6 +528,19 @@ document.addEventListener(`click`, function (event) {
   }
 });
 
+document.addEventListener(`dblclick`, function () {
+  const element = event.target;
+  
+  const watcher = $(element).parents(`.watcher`)[0];
+  
+  if (watcher && watcher.matches(`.selected`)) {
+    watcher.classList.remove(`selected`);
+  }
+  else if (watcher) {
+    watcher.classList.add(`selected`);
+  }
+}); 
+
 document.addEventListener(`change`, function (event) {
   storageHandler.saveHitCatcherSettings();
   storageHandler.updateHitCatcherSettings();
@@ -538,6 +554,39 @@ document.addEventListener(`keydown`, function (event) {
     if (document.getElementsByClassName(`bootbox`)[0]) {
       document.getElementsByClassName(`bootbox`)[0].querySelector(`[data-bb-handler="confirm"]`).click();
       bootbox.hideAll();
+    }
+  }
+  
+  if (key === `Delete`) {
+    const ids = [];
+    
+    for (let element of document.getElementsByClassName(`selected`)) {
+      ids.push(element.parentNode.id);
+    }
+    
+    if (ids[0]) {
+      bootbox.confirm({
+        message: `Are you sure you want to delete all selected watchers?`,
+        buttons: {
+          confirm: {
+            className: 'btn-sm btn-success'
+          },
+          cancel: {
+            className: 'btn-sm btn-danger'
+          }
+        },
+        animate: false,
+        callback: function (result) {
+          if (result) {
+            for (let i = 0; i < ids.length; i ++) { 
+              delete watcher.watchers[ids[i]];
+              catcher.ids.splice(catcher.ids.indexOf(ids[i]), 1);
+              document.getElementById(ids[i]).parentNode.removeChild(document.getElementById(ids[i]));
+            }
+            storageHandler.saveHitCatcherWatchers();
+          }
+        }
+      });  
     }
   }
 });
