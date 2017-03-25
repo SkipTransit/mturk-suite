@@ -85,21 +85,289 @@ chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
 
 // Listens from messages from MTS sources
 chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
-  if (onMessageParser[request.type]) {
-    onMessageParser[request.type](sender.tab.id, request.message);
+  if (onMessageHandler[request.type]) {
+    onMessageHandler[request.type](sender.tab.id, request.message);
   }
 });
 
 // Listens for messages from Non-MTS sources
 chrome.runtime.onMessageExternal.addListener( function (request, sender, sendResponse) {
-  if (onMessageParser[request.type]) {
-    onMessageParser[request.type](sender.tab.id, request.message);
+  if (onMessageHandler[request.type]) {
+    onMessageHandler[request.type](sender.tab.id, request.message);
   }
 });
 
 const onMessageHandler = {
-  
+  turkopticon: function (tabId, message) {
+    turkopticon.get(tabId, message);
+  },
+  ircHitExport: function (tabId, message) {
+    hitExport.irc(tabId, message);
+  },
+  forumHitExport: function (tabId, message) {
+    hitExport.forum(tabId, message);
+  },
+  hitExportThDirect: function (tabId, message) {
+    hitExport.thDirect(tabId, message);
+  },
+  hitExportMtcDirect: function (tabId, message) {
+    hitExport.mtcDirect(tabId, message);
+  }
 };
+
+const turkopticon = {
+  db: null,
+  initialize : function () {
+    const dbRequest = window.indexedDB.open(`TODB`, 1);
+    
+    dbRequest.onsuccess = function (event) {
+      turkopticon.db = event.target.result;
+    };
+    dbRequest.onupgradeneeded = function (event) {
+      turkopticon.db = event.target.result;
+      turkopticon.db.createObjectStore(`requester`, {keyPath: `id`});
+    }
+  },
+  get: function (tab, ids) {
+    let temp = {};
+    
+    $.when(
+      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`),
+      $.get(`https://api.turkopticon.info/requesters?rids=${ids}&fields[requesters]=rid,aggregates`)
+    ).done(function (to1, to2) {
+      temp = turkopticon.to1Parse(to1, ids, temp);
+      temp = turkopticon.to2Parse(to2, ids, temp);
+      turkopticon.getDone(tab, ids, temp);
+    });
+  },
+  to1Parse: function (result, ids, temp) {
+    const json = JSON.parse(result[0]);
+    
+    for (let i = 0; i < ids.length; i ++) {
+      const id = ids[i];
+      
+      if (!temp[id]) {
+        temp[id] = {};
+      }
+      
+      if (json[id]) {
+        temp[id].id = id;
+        temp[id].to1 = json[id];
+      }
+    }
+    return temp;
+  },
+  to2Parse: function (result, ids, temp) {
+    const array = result[0].data;
+    
+    for (let i = 0; i < array.length; i ++) {
+      const id = array[i].id;
+      
+      if (!temp[id]) {
+        temp[id] = {};
+      }
+      
+      temp[id].id = id;
+      temp[id].to2 = array[i].attributes.aggregates;
+    }
+    return temp;
+  },
+  getDone: function (tab, ids, temp) {
+    const transaction = turkopticon.db.transaction([`requester`], `readwrite`);
+    const objectStore = transaction.objectStore(`requester`);
+    
+    for (let i = 0; i < ids.length; i ++) {
+      const id = ids[i];
+      if (temp[id] && temp[id].id) {
+        objectStore.put(temp[id]);
+      }
+    }
+    
+    chrome.tabs.sendMessage(tab, {
+      type: `turkopticon`,
+      message: temp
+    });
+  }
+};
+
+const hitExport = {
+  irc: function (tab, msg) {
+    const obj = { 
+      links: {
+        req: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${msg.reqid}`,
+        preview: `https://www.mturk.com/mturk/preview?groupId=${msg.groupid}`,
+        panda: `https://www.mturk.com/mturk/previewandaccept?groupId=${msg.groupid}`,
+        to1: `https://turkopticon.ucsd.edu/${msg.reqid}`,
+        to2: `https://turkopticon.info/requesters/${msg.reqid}`
+      }
+    };
+  
+    function ns4tSuccess (result, status, xhr) {
+      console.log(`ns4tSuccess`);
+      const urls = result.split(`;`);
+      obj.links.req = urls[0];
+      obj.links.preview = urls[1];
+      obj.links.panda = urls[2];
+      obj.links.to1 = urls[3];
+      obj.links.to2 = urls[4];
+    
+      getTo();
+    }
+  
+    function ns4tError (result, status, xhr) {
+      console.log(`ns4tError`);
+      getTo();
+    }
+  
+    function getTo () {
+      const request = turkopticon.db.transaction([`requester`]).objectStore(`requester`).get(msg.reqid);
+      request.onsuccess = function (event) {
+        
+        obj.to = request.result ? request.result : {};
+        console.log(obj);
+        chrome.tabs.sendMessage(tab, {
+          type : `ircHitExport`,
+          message : obj
+        });
+      };
+    }
+
+    $.get(`https://ns4t.net/yourls-api.php?action=bulkshortener&title=MTurk&signature=39f6cf4959&urls[]=${encodeURIComponent(obj.links.req)}&urls[]=${encodeURIComponent(obj.links.preview)}&urls[]=${encodeURIComponent(obj.links.panda)}&urls[]=${encodeURIComponent(obj.links.to1)}&urls[]=${encodeURIComponent(obj.links.to2)}`).then(ns4tSuccess, ns4tError);
+  },
+  forum: function (tab, id) {
+    const request = turkopticon.db.transaction([`requester`]).objectStore(`requester`).get(id);
+    request.onsuccess = function (event) {
+      chrome.tabs.sendMessage(tab, {
+        type: `forumHitExport`,
+        message: request.result ? request.result : {}
+      });
+    };
+  },
+  thDirect: function (tab, msg) {
+    $.get(`https://turkerhub.com/forums/2/?order=post_date&direction=desc`, function (data) {
+      const $data = $(data);
+      const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
+      const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
+
+      $.get(`https://turkerhub.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
+        const groupId = msg.match(/groupId=(\w+)/)[1];
+      
+        for (let i = 0; i < data.posts.length; i ++) {
+          if (data.posts[i].message.indexOf(groupId) !== -1) {
+            return;
+          }
+        } 
+           
+        $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
+          _xfToken: xfToken,
+          message_html: msg
+        });
+      });
+    });
+  },
+  mtcDirect: function (tab, msg) {
+    $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, function (data) {
+      const $data = $(data);
+      const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
+      const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
+
+      $.get(`http://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
+        const groupId = msg.match(/groupId=(\w+)/)[1];
+      
+        for (let i = 0; i < data.posts.length; i ++) {
+          if (data.posts[i].message.indexOf(groupId) !== -1) {
+            return;
+          }
+        }
+          
+        $.post(`http://www.mturkcrowd.com/threads/${thread}/add-reply`, {
+          _xfToken: xfToken,
+          message_html: msg
+        });
+      });
+    });
+  },
+  drawOnForum: function (data) {
+    const forum = data.url.match(/mturkcrowd|turkerhub/);
+    const thread = data.url.split(`threads/`)[1].split(`/`)[0];
+    const regex = new RegExp(`.+${forum}\.com\/threads\/.+\.${thread}`);
+    
+    function bbcodeToHtml (bbcode) {
+      bbcode = bbcode.replace(/(?:\r\n|\r|\n)/g, ``);
+      bbcode = bbcode.replace(/<p>/gi, ``).replace(/<\/p>/gi, `<br>`);
+      bbcode = bbcode.replace(/\[table\]/gi, `<table class="ctaBbcodeTable">`).replace(/\[\/table\]/gi, `</table>`);
+      bbcode = bbcode.replace(/\[tr\]/gi, `<tr class="ctaBbcodeTableRowTransparent">`).replace(/\[\/tr\]/gi, `</tr>`);
+      bbcode = bbcode.replace(/\[td\]/gi, `<td class="ctaBbcodeTableCellLeft">`).replace(/\[\/td\]/gi, `</td>`);
+      bbcode = bbcode.replace(/\[b\]/gi, `<b>`).replace(/\[\/b\]/gi, `</b>`);
+      bbcode = bbcode.replace(/\[center\]/gi, `<div style="text-align: center">`).replace(/\[\/center\]/gi, `</div>`);
+      bbcode = bbcode.replace(/\[size=2\]/gi, `<span style="font-size: 10px">`).replace(/\[\/size\]/gi, `</span>`);
+    
+      const colorMatches = bbcode.match(/\[color=.+?\]/gi);
+      
+      for (let i = 0; i < colorMatches.length; i ++) {
+        const color = colorMatches[i].match(/color=([#\w]+)/gi)[0].replace(/color=|]/gi, ``);
+        const replacer = `<span style="color: ${color}">`;
+        bbcode = bbcode.replace(colorMatches[i], replacer).replace(/\[\/color\]/gi, `</span>`);
+      }
+    
+      const urlMatches = bbcode.match(/\[url=.+?\]/gi);
+    
+      for (let i = 0; i < urlMatches.length; i ++) {
+        const url = urlMatches[i].match(/url=([:/.?=\w]+)/gi)[0].replace(/url=|]/gi, ``);
+        const replacer = `<a href="${url}" target="_blank" class="externalLink">`;
+        bbcode = bbcode.replace(urlMatches[i], replacer).replace(/\[\/url\]/gi, `</a>`);
+      }
+      
+      return bbcode;
+    }
+
+    chrome.tabs.query({}, function (tabs) {
+      for (let i = 0; i < tabs.length; i ++) {
+        if (tabs[i].url.match(regex)) {
+          chrome.tabs.executeScript(tabs[i].id, {
+            frameId: tabs[i].frameId,
+            code: 
+              `document.getElementById('messageList').insertAdjacentHTML(
+                'beforeend',
+                '<li class="sectionMain message">' +
+                  '<div class="uix_message">' +
+          
+                    '<div class="messageUserInfo" itemscope="itemscope" itemtype="http://data-vocabulary.org/Person">' +
+                      '<div class="messageUserBlock ">' +
+                        '<div class="avatarHolder">' +
+                          '<div class="uix_avatarHolderInner">' +
+                            '<span class="helper"></span>' +
+                            '<a href="http://mturksuite.com/" class="avatar" >'+
+                              '<img src="${chrome.runtime.getURL(`media/icon_128.png`)}" width="96" height="96" alt="MTS">' +
+                            '</a>' +
+                          '</div>' +
+                        '</div>' +
+                        '<span class="arrow"><span></span></span>' +
+                      '</div>' +
+                    '</div>' +
+          
+                    '<div class="messageInfo primaryContent">' +
+                      '<div class="messageContentt">' +
+                        '<article>' +
+                          '<blockquote class="messageText SelectQuoteContainer ugc baseHtml">' +
+                            '${bbcodeToHtml(data.requestBody.formData.message_html[0])}' +
+                          '</blockquote>' +
+                        '</article>' +
+                      '</div>' +
+                    '</div>' +
+          
+                  '</div>' +
+                '</li>'
+              );`
+          });
+        }
+      }
+    });
+  }
+}
+
+turkopticon.initialize();
+
 
 // Adds context menu to paste worker id in input fields
 chrome.contextMenus.create({
@@ -124,11 +392,14 @@ chrome.contextMenus.create({
   type     : "normal",
   contexts : ["selection"],
   onclick  : function (info, tab) {
-    chrome.tabs.create({ url: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${info.selectionText}` });
+    chrome.tabs.create({
+      url: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&searchWords=${info.selectionText}`
+    });
   }
 });
 
 // Turkopticon IndexedDB
+/*
 let TODB;
 const TODB_request = window.indexedDB.open(`TODB`, 1);
 TODB_request.onsuccess = function (event) {
@@ -185,190 +456,21 @@ function TURKOPTICON_DB (tab, ids) {
     }
   };
 }
+*/
 
-function IRC_HIT_EXPORT (tab, info) {
-  const obj = { 
-    to: {
-      attrs: {
-        pay: 0.00,
-        fair: 0.00,
-        comm: 0.00,
-        fast: 0.00
-      },
-      reviews: 0,
-      tos_flags: 0
-    },
-    links: {
-      req: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${info.reqid}`,
-      preview: `https://www.mturk.com/mturk/preview?groupId=${info.groupid}`,
-      panda: `https://www.mturk.com/mturk/previewandaccept?groupId=${info.groupid}`,
-      to: `https://turkopticon.ucsd.edu/${info.reqid}`
-    }
-  };
-  
-  function success_ns4t (result, status, xhr) {
-    const urls = result.split(`;`);
-    obj.links.req = urls[0];
-    obj.links.preview = urls[1];
-    obj.links.panda = urls[2];
-    obj.links.to = urls[3];
-    
-    get_to();
-  }
-  
-  function error_ns4t (result, status, xhr) {
-    get_to();
-  }
-  
-  function get_to () {
-    const request = TODB.transaction([`requester`]).objectStore(`requester`).get(info.reqid);
-
-    request.onsuccess = function (event) {
-      if (request.result) obj.to = request.result;
-      chrome.tabs.sendMessage(tab, { msg : `irc_hit_export`, data : obj });
-    };
-  }
-
-  $.get(`https://ns4t.net/yourls-api.php?action=bulkshortener&title=MTurk&signature=39f6cf4959&urls[]=${encodeURIComponent(obj.links.req)}&urls[]=${encodeURIComponent(obj.links.preview)}&urls[]=${encodeURIComponent(obj.links.panda)}&urls[]=${encodeURIComponent(obj.links.to)}`).then(success_ns4t, error_ns4t);
-}
-
-function FORUM_HIT_EXPORT (tab, id) {
-  const request = TODB.transaction([`requester`]).objectStore(`requester`).get(id);
-
-  request.onsuccess = function (event) {
-    if (request.result) {
-      chrome.tabs.sendMessage(tab, { msg: `forum_hit_export`, data: request.result });
-    }
-    else {
-      chrome.tabs.sendMessage(tab, { msg: `forum_hit_export`, data: { attrs: { comm: 0.00, fair: 0.00, fast: 0.00, pay: 0.00 }, reviews: 0, tos_flags: 0 } });
-    }
-  };
-}
-
-function SEND_TH (tab, message) {
-  $.get(`https://turkerhub.com/forums/2/?order=post_date&direction=desc`, function (data) {
-    const $data = $(data);
-    const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
-    const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
-
-    $.get(`https://turkerhub.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
-      const group_id = message.match(/groupId=(\w+)/)[1];
-      
-      for (let i = 0; i < data.posts.length; i ++) if (data.posts[i].message.indexOf(group_id) !== -1) return;
-           
-      $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
-        _xfToken: xfToken,
-        message_html: message
-      });
-    });
-  });
-}
-
-function SEND_MTC (tab, message) {
-  $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, function (data) {
-    const $data = $(data);
-    const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
-    const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
-
-    $.get(`http://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
-      const group_id = message.match(/groupId=(\w+)/)[1];
-      
-      for (let i = 0; i < data.posts.length; i ++) if (data.posts[i].message.indexOf(group_id) !== -1) return;
-           
-      $.post(`http://www.mturkcrowd.com/threads/${thread}/add-reply`, {
-        _xfToken: xfToken,
-        message_html: message
-      });
-    });
-  });
-}
 
 chrome.webRequest.onBeforeRequest.addListener(
   function (data) {
     if (data.tabId === -1) {
-      MAKE_HIT(data);
+      hitExport.drawOnForum(data);
     }
-  },
-  { urls: [`http://www.mturkcrowd.com/threads/*/add-reply`, `https://turkerhub.com/threads/*/add-reply`] }, [`requestBody`]
+  }, {
+    urls: [
+      `http://www.mturkcrowd.com/threads/*/add-reply`,
+      `https://turkerhub.com/threads/*/add-reply`
+    ]
+  }, [`requestBody`]
 );
-
-function MAKE_HIT (data) {
-  const forum = data.url.match(/mturkcrowd|turkerhub/);
-  const thread = data.url.split(`threads/`)[1].split(`/`)[0];
-  const regex = new RegExp(`.+${forum}\.com\/threads\/.+\.${thread}`);
-
-  chrome.tabs.query({}, function (tabs) {
-    for (let i = 0; i < tabs.length; i ++) {
-      if (tabs[i].url.match(regex)) {
-        chrome.tabs.executeScript(tabs[i].id, {
-          frameId: tabs[i].frameId,
-          code: 
-          `document.getElementById('messageList').insertAdjacentHTML('beforeend', ` +
-          `'<li class="sectionMain message">' +` +
-          `'<div class="uix_message">' +` +
-          
-          `'<div class="messageUserInfo" itemscope="itemscope" itemtype="http://data-vocabulary.org/Person">' +` +
-          `'<div class="messageUserBlock ">' +`	+
-		  `'<div class="avatarHolder">' +` +
-          `'<div class="uix_avatarHolderInner">' +` +
-          `'<span class="helper"></span>' +` +
-          `'<a href="http://mturksuite.com/" class="avatar" >'+` +
-          `'<img src="${chrome.runtime.getURL(`media/icon_128.png`)}" width="96" height="96" alt="MTS">' +` +
-          `'</a>' +` +
-          `'</div>' +` +
-          `'</div>' +` +
-          `'<span class="arrow"><span></span></span>' +` +
-          `'</div>' +` +
-          `'</div>' +` +
-          
-          `'<div class="messageInfo primaryContent">' +` +
-          `'<div class="messageContentt">' +` +
-          `'<article>' +` +
-          `'<blockquote class="messageText SelectQuoteContainer ugc baseHtml">' +` +
-          `'${BBCODE_TO_HTML(data.requestBody.formData.message_html[0])}' +` +
-          `'</blockquote>' +` +
-          `'</article>' +` +
-          `'</div>' +` +
-          `'</div>' +` +
-          
-          `'</div>' +` +
-          `'</li>'` +
-          `);`
-        });
-      }
-    }
-  });
-}
-
-function BBCODE_TO_HTML (BBCODE) {
-  let bbcode = BBCODE;
-  bbcode = bbcode.replace(/(?:\r\n|\r|\n)/g, ``); // Remove line breaks
-  bbcode = bbcode.replace(/<p>/gi, ``).replace(/<\/p>/gi, `<br>`);
-  bbcode = bbcode.replace(/\[table\]/gi, `<table class="ctaBbcodeTable">`).replace(/\[\/table\]/gi, `</table>`);
-  bbcode = bbcode.replace(/\[tr\]/gi, `<tr class="ctaBbcodeTableRowTransparent">`).replace(/\[\/tr\]/gi, `</tr>`);
-  bbcode = bbcode.replace(/\[td\]/gi, `<td class="ctaBbcodeTableCellLeft">`).replace(/\[\/td\]/gi, `</td>`);
-  bbcode = bbcode.replace(/\[b\]/gi, `<b>`).replace(/\[\/b\]/gi, `</b>`);
-  bbcode = bbcode.replace(/\[center\]/gi, `<div style="text-align: center">`).replace(/\[\/center\]/gi, `</div>`);
-  bbcode = bbcode.replace(/\[size=2\]/gi, `<span style="font-size: 10px">`).replace(/\[\/size\]/gi, `</span>`);
-    
-  function url_color (string) {
-    const color_matches = string.match(/\[color=.+?\]/gi);
-    for (let i = 0; i < color_matches.length; i ++) {
-      const color = color_matches[i].match(/color=([#\w]+)/gi)[0].replace(/color=|]/gi, ``);
-      const replacer = `<span style="color: ${color}">`;
-      string = string.replace(color_matches[i], replacer).replace(/\[\/color\]/gi, `</span>`);
-    }
-    
-    const url_matches = string.match(/\[url=.+?\]/gi);
-    for (let i = 0; i < url_matches.length; i ++) {
-      const url = url_matches[i].match(/url=([:/.?=\w]+)/gi)[0].replace(/url=|]/gi, ``);
-      const replacer = `<a href="${url}" target="_blank" class="externalLink">`;
-      string = string.replace(url_matches[i], replacer).replace(/\[\/url\]/gi, `</a>`);
-    }
-    return string;
-  }
-  return url_color(bbcode);
-}
 
 //******* Experimental *******//
 chrome.webRequest.onCompleted.addListener(
