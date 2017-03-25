@@ -1,109 +1,156 @@
-function TURKOPTICON () {
-  const ids = [];
-
-  for (let element of document.querySelectorAll(`a[href*="requesterId="]`)) {
-    if (element.href.match(/requesterId=(\w+)/)) {
-      ids.push(element.href.match(/requesterId=(\w+)/)[1]);
+const turkopticon = {
+  grabIds: function () {
+    const ids = [];
+    
+    for (let element of document.querySelectorAll(`a[href*="requesterId="]`)) {
+      if (element.href.match(/requesterId=(\w+)/)) {
+        ids.push(element.href.match(/requesterId=(\w+)/)[1]);
+      }
     }
-  }
-  chrome.runtime.sendMessage({msg: `turkopticon`, data: ids});
-}
+    chrome.runtime.sendMessage({
+      type: `turkopticon`,
+      message: ids
+    });
+  },
+  draw: function (to) {
+    turkopticon.ratings = to;
+    
+    for (let element of document.getElementsByClassName(`requesterIdentity`)) {
+      const reqid = 
+        element.closest(`a[href*="requesterId="]`) ?
+        element.closest(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/)[1] :
+        element.closest(`td[bgcolor="#F0F6F9"]`).querySelector(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/) ?
+        element.closest(`td[bgcolor="#F0F6F9"]`).querySelector(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/)[1] :
+        null
+      ;
 
-function TURKOPTICON_WRITE (data) {
-  function to (id) {
+      if (element.parentNode === element.closest(`a[href*="requesterId="]`)) {
+        element.parentNode.insertAdjacentHTML(`beforebegin`, turkopticon.circle(reqid));
+      }
+      else {
+        element.insertAdjacentHTML(`beforebegin`, turkopticon.circle(reqid));
+      }
+    }
+    
+    if (document.getElementsByName(`requesterId`)[0] || document.querySelector(`a[href^="/mturk/return?"]`) && document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)) {
+      const reqid = 
+        document.getElementsByName(`requesterId`)[0] ?
+        document.getElementsByName(`requesterId`)[0].value :
+        document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/) ?
+        document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)[1] :
+        null;
+    
+      document.getElementsByClassName(`capsule_field_text`)[0].insertAdjacentHTML(`beforebegin`, turkopticon.circle(reqid));
+    }
+  },
+  circle: function (id) {
+    const to = turkopticon.ratings[id];
     const html = 
-      `<div style="float:left;">` +
-        `<div class="MTS-circle ${color(data[id].attrs.pay)}">TO</div>` +
-        `<div class="MTS-ratings">` +
-          rating(`Fair`, data[id].attrs.fair) +
-          rating(`Fast`, data[id].attrs.fast) +
-          rating(`Pay`, data[id].attrs.pay) +
-          rating(`Comm`, data[id].attrs.comm) +
-          `<br>` +
-          `<div>Scores based on <a href="https://turkopticon.ucsd.edu/${id}" target="_blank">${data[id].reviews} review(s)</a></div>` +
-          `<div>Terms of Service violation flags: ${data[id].tos_flags}</div>` +
-          `<div>` +
-            `<a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}" target="_blank">Report your experience with this requester »</a>` +
-          `</div>` +
-        `</div>` +
-      `</div>`
+      `<mts-to>
+        <mts-to-circle class="mts-toNone">TO</mts-to-circle>
+        <mts-to-reviews>
+          ${turkopticon.attrTable(to)}
+          ${turkopticon.linkTable(id)}
+        </mts-to-reviews>
+      </mts-to>`
     ;
     return html;
-  }
-  
-  function rating (type, rating) {
-    let html = ``;
-    
-    if (rating > 0.01) {
-      html =
-        `<div style="display: table; width: 100%; cursor: default; height: 25px;">` +
-          `<div class="capsule_field_title" style="display: table-cell; width:20%;">${type}:</div>` +
-          `<div style="display: table-cell; width:20%;">${rating} / 5</div>` +
-          `<div style="display: table-cell; width:60%;">` +
-            `<div style="width: 100%; height: 12px; border: 1px solid; border-radius: 3px; overflow: hidden;">` +
-              `<div class="${color(rating)}" style="height: 100%; user-select: none; width: ${rating / 5 * 100}%;"></div>` +
-            `</div>` +
-          `</div>` +
-        `</div>`
-      ;
-    }
-    else {
-      html =
-        `<div style="display: table; width: 100%; cursor: default; height: 25px;">` +
-          `<div class="capsule_field_title" style="display: table-cell; width:20%;">${type}:</div>` +
-          `<div style="display: table-cell; width:20%;">No Data</div>` +
-          `<div style="display: table-cell; width:60%;">` +
-            `<div style="width: 100%; height: 12px; border: 1px solid; border-radius: 3px;"></div>` +
-          `</div>` +
-        `</div>`
-      ;
-    }
-    return html;
-  }
-  
-  function color (rating) {
-    if (rating > 3.99) return `MTS-toHigh`;
-    if (rating > 2.99) return `MTS-toGood`;
-    if (rating > 1.99) return `MTS-toAverage`;
-    if (rating > 0.01) return `MTS-toLow`;
-    return `MTS-toNone`;
-  }
-  
-  for (let element of document.getElementsByClassName(`requesterIdentity`)) {
-    const reqid = 
-      element.closest(`a[href*="requesterId="]`) ?
-      element.closest(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/)[1] :
-      element.closest(`td[bgcolor="#F0F6F9"]`).querySelector(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/) ?
-      element.closest(`td[bgcolor="#F0F6F9"]`).querySelector(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/)[1] :
-      null
-    ;
+  },
+  attrTable: function (to) {
+    const to1 = to.to1;
+    const to2 = to.to2;
+    const html =
+      `<mts-table class="mts-attr-table">
+        <mts-tr style="text-align: left; background-color: #CCDDE9;">
+          <mts-th>TO 1</mts-th><mts-th></mts-th>
+          <mts-th>TO 2</mts-th><mts-th>Last 90 Days</mts-th><mts-th>All Time</mts-th>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Pay:</mts-td>
+          <mts-td>${to1 ? `${to1.attrs.pay} / 5` : `null`}</mts-td>
 
-    if (element.parentNode === element.closest(`a[href*="requesterId="]`)) {
-      element.parentNode.insertAdjacentHTML(`beforebegin`, to(reqid));
-    }
-    else {
-      element.insertAdjacentHTML(`beforebegin`, to(reqid));
-    }
+          <mts-td>Pay Rate:</mts-td>
+          <mts-td>${to2 ? to2.recent.reward[1] > 0 ? `$${((to2.recent.reward[0]/to2.recent.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.reward[1] > 0 ? `$${((to2.all.reward[0]/to2.all.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr` : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Fast:</mts-td>
+          <mts-td>${to1 ? `${to1.attrs.fast} / 5` : `null`}</mts-td>
+
+          <mts-td>Time Pending:</mts-td>
+          <mts-td>${to2 ? to2.recent.pending > 0 ? `${(to2.recent.pending / 86400).toFixed(2)} days` : `-- days` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.pending > 0 ? `${(to2.all.pending / 86400).toFixed(2)} days` : `-- days` : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Comm:</mts-td>
+          <mts-td>${to1 ? `${to1.attrs.comm} / 5` : `null`}</mts-td>
+
+          <mts-td>Response:</mts-td>
+          <mts-td>${to2 ? to2.recent.comm[1] > 0 ? `${Math.round(100 * to2.recent.comm[0] / to2.recent.comm[1])}% of ${to2.recent.comm[1]}` : `-- of 0` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.comm[1] > 0 ? `${Math.round(100 * to2.all.comm[0] / to2.all.comm[1])}% of ${to2.all.comm[1]}` : `-- of 0` : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Fair:</mts-td>
+          <mts-td>${to1 ? `${to1.attrs.fair} / 5` : `null`}</mts-td>
+
+          <mts-td>Recommend:</mts-td>
+          <mts-td>${to2 ? to2.recent.recommend[1] > 0 ? `${Math.round(100 * to2.recent.recommend[0] / to2.recent.recommend[1])}% of ${to2.recent.recommend[1]}` : `-- of 0` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.recommend[1] > 0 ? `${Math.round(100 * to2.all.recommend[0] / to2.all.recommend[1])}% of ${to2.all.recommend[1]}` : `-- of 0` : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Reviews:</mts-td>
+          <mts-td>${to1 ? `${to1.reviews}` : `null`}</mts-td>
+
+          <mts-td>Rejected:</mts-td>
+          <mts-td>${to2 ? to2.recent.rejected[0] : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.rejected[0] : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>TOS:</mts-td>
+          <mts-td>${to1 ? `${to1.tos_flags}` : `null`}</mts-td>
+
+          <mts-td>TOS:</mts-td>
+          <mts-td>${to2 ? to2.recent.tos[0] : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.tos[0] : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td></mts-td>
+          <mts-td></mts-td>
+
+          <mts-td>Broken:</mts-td>
+          <mts-td>${to2 ? to2.recent.broken[0] : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.broken[0] : `null`}</mts-td>
+        </mts-tr>
+      </mts-table>`
+    ;
+    return html;
+  },
+  linkTable: function (id) {
+    const html = 
+      `<mts-table class="mts-link-table">
+        <mts-tr>
+          <mts-td><a href="https://turkopticon.ucsd.edu/${id}">View on TO 1</a></mts-td>
+          <mts-td><a href="https://turkopticon.info/requesters/${id}">View on TO 2</a></mts-td>
+        </mts-tr>
+
+        <mts-tr>
+          <mts-td><a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}">Add review on TO 1</a></mts-td>
+          <mts-td><a href="https://turkopticon.info/reviews/new?rid=${id}">Add review on TO 2</a></mts-td>
+        </mts-tr>
+      </mts-table>`
+    ;
+    return html;
   }
-  
-  if (document.getElementsByName(`requesterId`)[0] || document.querySelector(`a[href^="/mturk/return?"]`) && document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)) {
-    const reqid = 
-      document.getElementsByName(`requesterId`)[0] ?
-      document.getElementsByName(`requesterId`)[0].value :
-      document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/) ?
-      document.querySelector(`a[href^="/mturk/return?"]`).href.match(/requesterId=(\w+)/)[1] :
-      null;
-    
-    document.getElementsByClassName(`capsule_field_text`)[0].insertAdjacentHTML(`beforebegin`, to(reqid));
-  }
-}
+};
 
 if (document.querySelector(`a[href*="requesterId="]`)) {
   chrome.runtime.onMessage.addListener( function (request) {
-    switch (request.msg) {
-      case `turkopticon.js`: TURKOPTICON_WRITE(request.data); break;
+    switch (request.type) {
+      case `turkopticon`:
+        turkopticon.draw(request.message);
+        break;
     }
   });
   
-  TURKOPTICON();
+  turkopticon.grabIds();
 }

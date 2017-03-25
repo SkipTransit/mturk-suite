@@ -259,31 +259,176 @@ function EXPORT_TO_CLIP (template) {
   document.body.removeChild(document.getElementById(`clipboard`));
 }
 
-function EXPORT_TO_TH (template) {
-  const confirm_post = prompt(
-    `Do you want to post this HIT to TurkerHub.com?\n\n` +
-    `Want to add a comment about your HIT? Fill out the box below.\n\n` +
-    `To send the HIT, click "Ok" or hit "Enter"`,
-    ``
-  );
-  if (confirm_post !== null) chrome.runtime.sendMessage({ msg: `send_th`, data: `${template}<p>${confirm_post}</p>` });
-}
-
-function EXPORT_TO_MTC (template) {
-  const confirm_post = prompt(
-    `Do you want to post this HIT to MturkCrowd.com?\n\n` +
-    `Want to add a comment about your HIT? Fill out the box below.\n\n` +
-    `To send the HIT, click "Ok" or hit "Enter"`,
-    ``
-  );
-  if (confirm_post !== null) chrome.runtime.sendMessage({ msg: `send_mtc`, data: `${template}<p>${confirm_post}</p>` });
-}
+const hitExport = {
+  irc: function (msg) {
+    console.log(`hitExport.irc`, msg);
+    const to1 = msg.to.to1, to2 = msg.to.to2, links = msg.links;
+    const hit = HITS[EXPORT.key];
+    
+    const to1Template =
+      to1
+    ?
+      `Pay=${to1.attrs.pay} ` +
+      `Fast=${to1.attrs.fast} ` +
+      `Comm=${to1.attrs.comm} ` +
+      `Fair=${to1.attrs.fair} ` +
+      `Reviews=${to1.reviews} ` +
+      `TOS=${to1.tos_flags} ` +
+      `${links.to1}`
+    :
+      `N/A ${links.to1}`
+    ;
+    
+    const to2Template = 
+      to2
+    ?
+      `Rate=${to2.recent.reward[1] > 0 ? `$${((to2.recent.reward[0] / to2.recent.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr`} ` +
+      `Rej=${to2.recent.rejected[0]} ` +
+      `TOS=${to2.recent.tos[0]} ` +
+      `${links.to2}`
+    :
+      `N/A ${links.to2}`
+    ;
+    
+    const template = 
+      `${hit.quals.match(/Masters has been granted|Masters Exists/) ? `MASTERS • ` : ``}` +
+      `Req: ${hit.reqname} ${links.req} • ` +
+      `Title: ${hit.title} ${links.preview} • ` +
+      `Time: ${hit.time} • ` +
+      `Avail: ${hit.avail} • ` +
+      `Reward: ${hit.reward} • ` +
+      `TO 1: ${to1Template} • ` +
+      `TO 2: ${to2Template} • ` +
+      `PANDA: ${links.panda}`
+    ;
+  
+    EXPORT_TO_CLIP(template);
+  },
+  forum: function (msg) {
+    const to1 = msg.to1, to2 = msg.to2;
+    const hit = HITS[EXPORT.key];
+    
+    function to1Rating (rating) {
+      if (rating > 3.99) return `[color=#00cc00]${rating}[/color]`;
+      if (rating > 2.99) return `[color=#cccc00]${rating}[/color]`;
+      if (rating > 1.99) return `[color=#cc6600]${rating}[/color]`;
+      return `[color=#cc0000]${rating}[/color]`;
+    }
+    
+    function to2Rating (rating) {
+      if (rating[1] > 0) {
+        const percent = Math.round(100 * rating[0] / rating[1]);
+        
+        if (percent > 79) return `[color=#00cc00]${percent}%[/color] of ${rating[1]}`;
+        if (percent > 59) return `[color=#cccc00]${percent}%[/color] of ${rating[1]}`;
+        if (percent > 39) return `[color=#cc6600]${percent}%[/color] of ${rating[1]}`;
+        return `[color=#cc0000]${percent}%[/color] of ${rating[1]}`;
+      }
+      return `-- of 0`;
+    }
+    
+    const to1Template =
+      to1
+    ?
+      `[b][Pay: ${to1Rating(to1.attrs.pay)}][/b] ` +
+      `[b][Fast: ${to1Rating(to1.attrs.fast)}][/b] ` +
+      `[b][Comm: ${to1Rating(to1.attrs.comm)}][/b] ` +
+      `[b][Fair: ${to1Rating(to1.attrs.fair)}][/b] ` +
+      `[b][Reviews: ${to1.reviews}][/b] ` +
+      `[b][ToS: [color=${to1.tos_flags === 0 ? `#00cc00` : `#cc0000`}]${to1.tos_flags}[/color]][/b]`
+    :
+      `Not Available`
+    ;
+    
+    const to2Template = 
+      to2
+    ?
+      `[b][Rate: ${to2.recent.reward[1] > 0 ? `$${((to2.recent.reward[0] / to2.recent.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr`}][/b] ` +
+      `[b][Pen: ${to2.recent.pending > 0 ? `${(to2.recent.pending / 86400).toFixed(2)} days` : `-- days`}][/b] ` +
+      `[b][Res: ${to2Rating(to2.recent.comm)}][/b] ` +
+      `[b][Rec: ${to2Rating(to2.recent.recommend)}][/b] ` +
+      `[b][Rej: [color=${to2.recent.rejected[0] === 0 ? `#00cc00` : `#cc0000`}]${to2.recent.rejected[0]}[/color]][/b] ` +
+      `[b][ToS: [color=${to2.recent.tos[0] === 0 ? `#00cc00` : `#cc0000`}]${to2.recent.tos[0]}[/color]][/b] ` +
+      `[b][Brk: [color=${to2.recent.broken[0] === 0 ? `#00cc00` : `#cc0000`}]${to2.recent.broken[0]}[/color]][/b]`
+    :
+      `Not Available`
+    ;
+    
+    const forumTemplate =
+      `[table][tr][td][b]Title:[/b] [url=https://www.mturk.com/mturk/preview?groupId=${hit.groupid}]${hit.title}[/url] | [url=https://www.mturk.com/mturk/previewandaccept?groupId=${hit.groupid}]PANDA[/url]\n` +
+      `[b]Worker:[/b] [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/]Preview[/url] | [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/accept_random]Accept[/url] | [url=https://worker.mturk.com/requesters/${hit.reqid}/projects]Requester[/url]\n` +
+      `[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])\n` +
+      `[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO 1[/url]:[/b] ${to1Template}\n` +
+      `[b][url=https://turkopticon.info/requesters/${hit.reqid}]TO 2[/url]:[/b] ${to2Template}\n` +
+      `[b]${hit.desc ? `Description:[/b] ${hit.desc}` : `Auto Approval:[/b] ${hit.aa}`}\n` +
+      `[b]Time:[/b] ${hit.time}\n` +
+      `[b]HITs Available:[/b] ${hit.avail}\n` +
+      `[b]Reward:[/b] [color=green][b] ${hit.reward}[/b][/color]\n` +
+      `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}\n` +
+      `[/td][/tr][/table]`
+    ;
+    
+    const directTemplate =
+      `<p>[table][tr][td][b]Title:[/b] [url=https://www.mturk.com/mturk/preview?groupId=${hit.groupid}]${hit.title}[/url] | [url=https://www.mturk.com/mturk/previewandaccept?groupId=${hit.groupid}]PANDA[/url]</p>` +
+      `<p>[b]Worker:[/b] [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/]Preview[/url] | [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/accept_random]Accept[/url] | [url=https://worker.mturk.com/requesters/${hit.reqid}/projects]Requester[/url]</p>` +
+      `<p>[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])</p>` +
+      `<p>[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO 1[/url]:[/b] ${to1Template}</p>` +
+      `<p>[b][url=https://turkopticon.info/requesters/${hit.reqid}]TO 2[/url]:[/b] ${to2Template}</p>` +
+      `<p>[b]${hit.desc ? `Description:[/b] ${hit.desc}` : `Auto Approval:[/b] ${hit.aa}`}</p>` +
+      `<p>[b]Time:[/b] ${hit.time}</p>` +
+      `<p>[b]HITs Available:[/b] ${hit.avail}</p>` +
+      `<p>[b]Reward:[/b] [color=green][b] ${hit.reward}[/b][/color]</p>` +
+      `<p>[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]</p>` +
+      `<p>[tr][td][center][size=2]HIT exported from [url=http://mturksuite.com/]Mturk Suite[/url] v${chrome.runtime.getManifest().version}[/size][/center][/td][/tr][/table]</p>`
+    ;
+    
+    switch (EXPORT.type) {
+      case `forum`: EXPORT_TO_CLIP(forumTemplate); break;
+      case `forum_th`: hitExport.thDirect(directTemplate); break;
+      case `forum_mtc`: hitExport.mtcDirect(directTemplate); break;
+    }
+  },
+  thDirect: function (msg) {
+    const confirm_post = prompt(
+      `Do you want to post this HIT to TurkerHub.com?\n\n` +
+      `Want to add a comment about your HIT? Fill out the box below.\n\n` +
+      `To send the HIT, click "Ok" or hit "Enter"`,
+      ``
+    );
+  
+    if (confirm_post !== null) {
+      chrome.runtime.sendMessage({
+        type: `hitExportThDirect`,
+        message: `${msg}<p>${confirm_post}</p>`
+      });
+    }
+  },
+  mtcDirect: function (msg) {
+    const confirm_post = prompt(
+      `Do you want to post this HIT to MturkCrowd.com?\n\n` +
+      `Want to add a comment about your HIT? Fill out the box below.\n\n` +
+      `To send the HIT, click "Ok" or hit "Enter"`,
+      ``
+    );
+    
+    if (confirm_post !== null) {
+      chrome.runtime.sendMessage({
+        type: `hitExportMtcDirect`,
+        message: `${msg}<p>${confirm_post}</p>`
+      });
+    }
+  }
+};
 
 if (document.querySelector(`a[href*="roupId="]`) || document.getElementsByName(`groupId`)[0] && document.getElementsByName(`groupId`)[0].value !== ``) {
   chrome.runtime.onMessage.addListener( function (request) {
-    switch (request.msg) {
-      case `irc_hit_export`: IRC_HIT_EXPORT(request.data); break;
-      case `forum_hit_export`: FORUM_HIT_EXPORT(request.data); break;
+    switch (request.type) {
+      case `ircHitExport`:
+        hitExport.irc(request.message);
+        break;
+      case `forumHitExport`:
+        hitExport.forum(request.message);
+        break;
     }
   });
   
@@ -311,8 +456,8 @@ if (document.querySelector(`a[href*="roupId="]`) || document.getElementsByName(`
       
       if (EXPORT.type.match(/irc/)) {
         chrome.runtime.sendMessage({
-          msg: `irc_hit_export`,
-          data: {
+          type: `ircHitExport`,
+          message: {
             reqid: HITS[EXPORT.key].reqid,
             groupid: HITS[EXPORT.key].groupid
           }
@@ -320,8 +465,8 @@ if (document.querySelector(`a[href*="roupId="]`) || document.getElementsByName(`
       }
       if (EXPORT.type.match(/forum/)) {
         chrome.runtime.sendMessage({
-          msg: `forum_hit_export`,
-          data: HITS[EXPORT.key].reqid
+          type: `forumHitExport`,
+          message: HITS[EXPORT.key].reqid
         });
       }
     }

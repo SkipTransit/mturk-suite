@@ -1,4 +1,12 @@
-.MTS-circle {
+mts-to {
+  float: left;
+  font-size: 11px;
+  -webkit-border-horizontal-spacing: 0px;
+  -webkit-border-vertical-spacing: 2px;
+}
+
+mts-to-circle {
+  display: block;
   cursor: default;
   width: 18px;
   height: 18px;
@@ -11,12 +19,12 @@
   margin-right: 2px;
 }
 
-.MTS-circle:hover + .MTS-ratings, .MTS-ratings:hover {
+mts-to-circle:hover + mts-to-reviews, mts-to-reviews:hover {
   display: block;
 }
 
-.MTS-ratings {
-  width: 300px;
+mts-to-reviews {
+  width: 400px;
   position:absolute;
   display: none;
   border: 1px solid;
@@ -25,18 +33,55 @@
   padding: 3px;
 }
 
-.MTS-toHigh {
+mts-table {
+  display: table;
+}
+
+mts-tr {
+  display: table-row;
+}
+
+mts-th {
+  display: table-cell;
+}
+
+mts-td {
+  display: table-cell;
+}
+
+.MTS-info-table mts-td {
+  text-align: center;
+}
+
+.mts-attr-table {
+  width: 100%
+}
+
+.mts-attr-table mts-td:nth-child(1), .mts-attr-table mts-td:nth-child(3) {
+  color: #336699;
+  font-weight: bold;
+}
+
+.mts-link-table {
+  width: 100%
+}
+
+.mts-link-table mts-td {
+  text-align: center;
+}
+
+.mts-toHigh {
   background-color: rgba(0, 255, 0, 0.65);
 }
-.MTS-toGood {
+.mts-toGood {
   background-color: rgba(255, 255, 0, 0.65);
 }
-.MTS-toAverage {
+.mts-toAverage {
   background-color: rgba(255, 140, 0, 0.65);
 }
-.MTS-toLow {
+.mts-toLow {
   background-color: rgba(255, 0, 0, 0.65);
 }
-.MTS-toNone {
+.mts-toNone {
   background-color: rgba(160, 160, 160, 0.65);
 }
