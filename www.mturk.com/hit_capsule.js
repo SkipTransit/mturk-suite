@@ -22,7 +22,7 @@ function HIT_CAPSULE () {
   document.getElementsByClassName(`capsule_field_text`)[0].parentElement.insertAdjacentHTML(`beforeend`,
     `<td><img src="/media/spacer.gif" width="25" height="1" border="0"></td>` +
     `<td align="right" valign="top" nowrap="" class="capsule_field_title">AA:&nbsp;&nbsp;</td>` +
-    `<td align="left" valign="top" nowrap="" class="capsule_field_text">${aa !== 0 ? aa_time : `0 seconds`}</td>`
+    `<td align="left" valign="top" nowrap="" class="capsule_field_text">${aa_time.length ? aa_time : `0 seconds`}</td>`
   );
   
   document.getElementsByClassName(`capsule_field_text`)[0].innerHTML =
