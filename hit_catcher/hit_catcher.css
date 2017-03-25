@@ -163,7 +163,6 @@ select {
   width: 120px;
 }
 
-
 .input-group-xs .input-group-addon {
   padding: 1px 2px !important;
   font-size: 12px !important;
@@ -175,4 +174,8 @@ select {
 .input-group-xs .form-control {
   height: 20px;
   padding: 0;
+}
+
+.selected {
+  border: 2px solid yellow !important;
 }
