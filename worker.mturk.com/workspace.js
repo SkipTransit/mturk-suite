@@ -5,7 +5,7 @@ const workspace = {
     
     const container = document.getElementsByClassName(`task-question-iframe-container`)[0];
 
-    if (settings.workspace && document.getElementsByName(`_method`)[0].value === `delete`) {
+    if (workspace.mts.workspace && document.getElementsByName(`_method`)[0].value === `delete`) {
       if (container) {
         container.style.height = `100vh`;
         container.children[0].focus();
