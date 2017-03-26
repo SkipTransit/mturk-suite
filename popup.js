@@ -73,7 +73,7 @@ const settings = {
     // Theme
     document.getElementById(`theme`).checked = settings.mts.theme;
     
-    document.getElementById(`hc`).parentElement.parentElement.style.display = SETTINGS.hc_beta ? `` : `none`;
+    document.getElementById(`hc`).parentElement.parentElement.style.display = settings.mts.hcBeta ? `` : `none`;
   }
 }
 
