@@ -1341,9 +1341,11 @@ const turkopticon = {
     
     transaction.oncomplete = function (event) {
       if (get) {
+        console.log(`request TO`);
         turkopticon.get(ids);
       }
       else {
+        console.log(`request TO from cache`);
         turkopticon.send(temp);
       }
     }
