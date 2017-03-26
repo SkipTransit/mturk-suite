@@ -2,6 +2,7 @@ document.addEventListener(`DOMContentLoaded`, function () {
   SET_CONFIG();
   BLOCK_LIST_WRITE();
   INCLUDE_LIST_WRITE();
+  turkopticon.initialize();
 });
 
 let timeout;
@@ -46,7 +47,19 @@ const CONFIG = {
   irc : LOADED_CONFIG.hasOwnProperty(`irc`) ? LOADED_CONFIG.irc : true,
   forum : LOADED_CONFIG.hasOwnProperty(`forum`) ? LOADED_CONFIG.forum : true,
   forum_th : LOADED_CONFIG.hasOwnProperty(`forum_th`) ? LOADED_CONFIG.forum_th : true,
-  forum_mtc : LOADED_CONFIG.hasOwnProperty(`forum_mtc`) ? LOADED_CONFIG.forum_mtc : true
+  forum_mtc : LOADED_CONFIG.hasOwnProperty(`forum_mtc`) ? LOADED_CONFIG.forum_mtc : true,
+  
+  to1Use : LOADED_CONFIG.hasOwnProperty(`to1Use`) ? LOADED_CONFIG.to1Use : true,
+  to1High : LOADED_CONFIG.hasOwnProperty(`to1High`) ? LOADED_CONFIG.to1High : 4.00,
+  to1Good : LOADED_CONFIG.hasOwnProperty(`to1Good`) ? LOADED_CONFIG.to1Good : 3.00,
+  to1Average : LOADED_CONFIG.hasOwnProperty(`to1Average`) ? LOADED_CONFIG.to1Average : 2.00,
+  to1Low : LOADED_CONFIG.hasOwnProperty(`to1Low`) ? LOADED_CONFIG.to1Low : 0.01,
+  
+  to2Use : LOADED_CONFIG.hasOwnProperty(`to2Use`) ? LOADED_CONFIG.to2Use : false,
+  to2High : LOADED_CONFIG.hasOwnProperty(`to2High`) ? LOADED_CONFIG.to2High : 12.00,
+  to2Good : LOADED_CONFIG.hasOwnProperty(`to2Good`) ? LOADED_CONFIG.to2Good : 9.00,
+  to2Average : LOADED_CONFIG.hasOwnProperty(`to2Average`) ? LOADED_CONFIG.to2Average : 6.00,
+  to2Low : LOADED_CONFIG.hasOwnProperty(`to2Low`) ? LOADED_CONFIG.to2Low : 0.01,
 };
 
 // Find HITs Stuff
@@ -182,7 +195,7 @@ function PARSE_OLD (result, status, xhr) {
     if (logged_in) {
       HIT_FINDER_DB(KEYS);
       if (CONFIG.enable_to) {
-        TURKOPTICON_DB(ids);
+        turkopticon.check(ids);
       }
       else {
         HITS_WRITE_LOGGED_IN(false);
@@ -283,7 +296,7 @@ function PARSE_NEW (result, status, xhr) {
   HIT_FINDER_DB(KEYS);
   
   if (CONFIG.enable_to) {
-    TURKOPTICON_DB(ids);
+    turkopticon.check(ids);
   }
   else {
     HITS_WRITE_LOGGED_IN(false);
@@ -296,9 +309,10 @@ function HITS_WRITE_LOGGED_IN (to) {
   for (let i = 0; i < KEYS.length; i ++) {
     const hit = HITS[KEYS[i]];
     const time = TIME();
-    const tr_color = TO_COLOR((to ? to[hit.reqid].attrs.pay : 0));
+    const tr_color = TO_COLOR(to[hit.reqid]);
     const blocked = IS_BLOCKED(hit);
     const included = IS_INCLUDED(hit);
+    const toRating = TO_RATING(to[hit.reqid]);
     
     let classes = ``, log = true;
     
@@ -317,7 +331,7 @@ function HITS_WRITE_LOGGED_IN (to) {
       classes += CONFIG.hide_m ? ` m_hidden` : ` m`;
       if (CONFIG.hide_m) {log = false;}
     }
-    if (Number(CONFIG.min_avail) > Number(hit.avail) || to && Number(CONFIG.min_to) > Number(to[hit.reqid].attrs.pay)) {
+    if (Number(CONFIG.min_avail) > Number(hit.avail) || to && (+CONFIG.min_to) > toRating && toRating > 0) {
       classes += ` hidden`;
       log = false;
     }
@@ -357,8 +371,8 @@ function HITS_WRITE_LOGGED_IN (to) {
         `  <td class="text-center"><a href="${hit.pandlink}" target="_blank">${hit.reward}</a></td>` +
         // TO
         `  <td class="text-center">` +
-        `    <a href="https://turkopticon.ucsd.edu/${hit.reqid}" target="_blank" data-toggle="tooltip" data-placement="left" data-html="true" ` +
-        (to ? `title="Pay: ${to[hit.reqid].attrs.pay} Fair: ${to[hit.reqid].attrs.fair}<br>Comm: ${to[hit.reqid].attrs.comm} Fast: ${to[hit.reqid].attrs.fast}<br>Reviews: ${to[hit.reqid].reviews} ToS: ${to[hit.reqid].tos_flags}">${to[hit.reqid].attrs.pay}</a>`: `title="TO Off">Off</a>`) +
+        `    <a class="to-hover" href="${CONFIG.to1Use ? `https://turkopticon.ucsd.edu/` : `https://turkopticon.info/requesters/`}${hit.reqid}" target="_blank">${CONFIG.to1Use ? (+toRating).toFixed(2) : toRating > 0 ? `$${(toRating).toFixed(2)}/hr` : `--/hr`}</a>` +
+        `    ${hitFinder.draw.to(to[hit.reqid])}` +
         `  </td>` +
         // Masters
         `  <td class="text-center">${hit.masters ? `Y` : `N`}</td>` +
@@ -505,12 +519,46 @@ function HITS_WRITE_LOGGED_OUT () {
   timeout = document.getElementById(`scan`).textContent === `Stop` ? setTimeout(FIND, CONFIG.scan_delay * 1000) : null;
 }
 
-function TO_COLOR (rating) {
-  if (rating > 3.99) return `toHigh`;
-  if (rating > 2.99) return `toGood`;
-  if (rating > 1.99) return `toAverage`;
-  if (rating > 0.01) return `toLow`;
-  return `toNone`;
+function TO_COLOR (to) {
+  let color = `toNone`;
+  if (to) {
+    if (to.to1) {
+      if (CONFIG.to1Use) {
+        const pay = to.to1.attrs.pay;
+        if (pay >= CONFIG.to1High) color = `toHigh`;
+        else if (pay >= CONFIG.to1Good) color = `toGood`;
+        else if (pay >= CONFIG.to1Average) color = `toAverage`;
+        else if (pay >= CONFIG.to1Low) color = `toLow`;
+      }
+    }
+    if (to.to2) {
+      if (CONFIG.to2Use) {
+        const pay = to.to2.recent.reward[1] > 0 ? (to.to2.recent.reward[0] / to.to2.recent.reward[1]) * 60 ** 2 : 0;
+        if (pay >= CONFIG.to2High) color = `toHigh`;
+        else if (pay >= CONFIG.to2Good) color = `toGood`;
+        else if (pay >= CONFIG.to2Average) color = `toAverage`;
+        else if (pay >= CONFIG.to2Low) color = `toLow`;
+      }
+    }
+  }
+  return color;
+}
+
+function TO_RATING (to) {
+  let rating = 0.00;
+  if (to) {
+    if (to.to1) {
+      if (CONFIG.to1Use) {
+        rating = to.to1.attrs.pay;
+      }
+    }
+    if (to.to2) {
+      if (CONFIG.to2Use) {
+        rating = to.to2.recent.reward[1] > 0 ? (to.to2.recent.reward[0] / to.to2.recent.reward[1]) * 60 ** 2 : 0.00;
+      }
+    }
+  }
+  return rating;
 }
 
 function EXPORT_WRITE (key) {
@@ -527,8 +575,8 @@ function EXPORT_WRITE (key) {
       `<button type="button" class="btn btn-primary btn-xxs export_hit" ` +
       (CONFIG.irc ? `data-type="irc"` : ``) +
       (CONFIG.forum ? `data-type="forum"` : ``) +
-      (CONFIG.forum_th ? `data-type="forum_th"` : ``) +
-      (CONFIG.forum_mtc ? `data-type="forum_mtc"` : ``) +
+      (CONFIG.forum_th ? `data-type="thDirect"` : ``) +
+      (CONFIG.forum_mtc ? `data-type="mtcDirect"` : ``) +
       `data-key="${key}">Export</button>`
     ;
   }
@@ -542,8 +590,8 @@ function EXPORT_WRITE (key) {
       `<ul class="dropdown-menu">` +
       (CONFIG.irc ? `<li><a class="export_hit" data-type="irc" data-key="${key}">IRC</a></li>` : ``) +
       (CONFIG.forum ? `<li><a class="export_hit" data-type="forum" data-key="${key}">Forum</a></li>` : ``) +
-      (CONFIG.forum_th ? `<li><a class="export_hit" data-type="forum_th" data-key="${key}">TH Direct</a></li>` : ``) +
-      (CONFIG.forum_mtc ? `<li><a class="export_hit" data-type="forum_mtc" data-key="${key}">MTC Direct</a></li>` : ``) +
+      (CONFIG.forum_th ? `<li><a class="export_hit" data-type="thDirect" data-key="${key}">TH Direct</a></li>` : ``) +
+      (CONFIG.forum_mtc ? `<li><a class="export_hit" data-type="mtcDirect" data-key="${key}">MTC Direct</a></li>` : ``) +
       `</ul>` +
       `</div>`
     ;
@@ -557,6 +605,105 @@ function SECONDS_TO_STRING (s) {
   const m = Math.floor(s % 3600 / 60);
   return `${h > 0 ? `${h} hour${h > 1 ? `s` : ``} ` : ``}${m > 0 ? `${m} minute${m > 1 ? `s` : ``}` : ``}`;
 }
+
+const hitFinder = {
+  draw: {
+    to: function (to) {
+      //console.log(to);
+      const html = 
+        `<mts-to-reviews>
+          ${hitFinder.draw.toAttrTable(to)}
+          ${hitFinder.draw.toLinkTable(to.id)}
+        </mts-to-reviews>`
+      return html;
+    },
+    toAttrTable: function (to) {
+      const to1 = to.to1;
+      const to2 = to.to2;
+    const html =
+      `<mts-table class="mts-attr-table">
+        <mts-tr style="color: #FFFFFF; background-color: #222222;">
+          <mts-th>TO 1</mts-th><mts-th></mts-th>
+          <mts-th>TO 2</mts-th><mts-th>Last 90 Days</mts-th><mts-th>All Time</mts-th>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Pay:</mts-td>
+          <mts-td>${to1 ? `${to1.attrs.pay} / 5` : `null`}</mts-td>
+
+          <mts-td>Pay Rate:</mts-td>
+          <mts-td>${to2 ? to2.recent.reward[1] > 0 ? `$${((to2.recent.reward[0] / to2.recent.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.reward[1] > 0 ? `$${((to2.all.reward[0] / to2.all.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr` : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Fast:</mts-td>
+          <mts-td>${to1 ? `${to1.attrs.fast} / 5` : `null`}</mts-td>
+
+          <mts-td>Time Pending:</mts-td>
+          <mts-td>${to2 ? to2.recent.pending > 0 ? `${(to2.recent.pending / 86400).toFixed(2)} days` : `-- days` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.pending > 0 ? `${(to2.all.pending / 86400).toFixed(2)} days` : `-- days` : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Comm:</mts-td>
+          <mts-td>${to1 ? `${to1.attrs.comm} / 5` : `null`}</mts-td>
+
+          <mts-td>Response:</mts-td>
+          <mts-td>${to2 ? to2.recent.comm[1] > 0 ? `${Math.round(100 * to2.recent.comm[0] / to2.recent.comm[1])}% of ${to2.recent.comm[1]}` : `-- of 0` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.comm[1] > 0 ? `${Math.round(100 * to2.all.comm[0] / to2.all.comm[1])}% of ${to2.all.comm[1]}` : `-- of 0` : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Fair:</mts-td>
+          <mts-td>${to1 ? `${to1.attrs.fair} / 5` : `null`}</mts-td>
+
+          <mts-td>Recommend:</mts-td>
+          <mts-td>${to2 ? to2.recent.recommend[1] > 0 ? `${Math.round(100 * to2.recent.recommend[0] / to2.recent.recommend[1])}% of ${to2.recent.recommend[1]}` : `-- of 0` : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.recommend[1] > 0 ? `${Math.round(100 * to2.all.recommend[0] / to2.all.recommend[1])}% of ${to2.all.recommend[1]}` : `-- of 0` : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>Reviews:</mts-td>
+          <mts-td>${to1 ? `${to1.reviews}` : `null`}</mts-td>
+
+          <mts-td>Rejected:</mts-td>
+          <mts-td>${to2 ? to2.recent.rejected[0] : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.rejected[0] : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td>TOS:</mts-td>
+          <mts-td>${to1 ? `${to1.tos_flags}` : `null`}</mts-td>
+
+          <mts-td>TOS:</mts-td>
+          <mts-td>${to2 ? to2.recent.tos[0] : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.tos[0] : `null`}</mts-td>
+        </mts-tr>
+        <mts-tr>
+          <mts-td></mts-td>
+          <mts-td></mts-td>
+
+          <mts-td>Broken:</mts-td>
+          <mts-td>${to2 ? to2.recent.broken[0] : `null`}</mts-td>
+          <mts-td>${to2 ? to2.all.broken[0] : `null`}</mts-td>
+        </mts-tr>
+      </mts-table>`
+    ;
+    return html;
+    },
+    toLinkTable: function (id) {
+      const html = 
+      `<mts-table class="mts-link-table">
+        <mts-tr>
+          <mts-td><a target="_blank" href="https://turkopticon.ucsd.edu/${id}">View on TO 1</a></mts-td>
+          <mts-td><a target="_blank" href="https://turkopticon.info/requesters/${id}">View on TO 2</a></mts-td>
+        </mts-tr>
+
+        <mts-tr>
+          <mts-td><a target="_blank" href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}">Add review on TO 1</a></mts-td>
+          <mts-td><a target="_blank" href="https://turkopticon.info/reviews/new?rid=${id}">Add review on TO 2</a></mts-td>
+        </mts-tr>
+      </mts-table>`
+    ;
+    return html;
+    }
+  }
+};
 
 // Block List Stuff
 function IS_BLOCKED (hit) {
@@ -952,6 +1099,18 @@ function SET_CONFIG () {
   document.getElementById(`forum`).checked = CONFIG.forum;
   document.getElementById(`forum_th`).checked = CONFIG.forum_th;
   document.getElementById(`forum_mtc`).checked = CONFIG.forum_mtc;
+  
+  document.getElementById(`to1-use`).checked = CONFIG.to1Use;
+  document.getElementById(`to1-high`).value = CONFIG.to1High;
+  document.getElementById(`to1-good`).value = CONFIG.to1Good;
+  document.getElementById(`to1-average`).value = CONFIG.to1Average;
+  document.getElementById(`to1-low`).value = CONFIG.to1Low;
+  
+  document.getElementById(`to2-use`).checked = CONFIG.to2Use;
+  document.getElementById(`to2-high`).value = CONFIG.to2High;
+  document.getElementById(`to2-good`).value = CONFIG.to2Good;
+  document.getElementById(`to2-average`).value = CONFIG.to2Average;
+  document.getElementById(`to2-low`).value = CONFIG.to2Low;
 }
 
 function SAVE_CONFIG () {
@@ -980,6 +1139,18 @@ function SAVE_CONFIG () {
   CONFIG.forum = document.getElementById(`forum`).checked;
   CONFIG.forum_th = document.getElementById(`forum_th`).checked;
   CONFIG.forum_mtc = document.getElementById(`forum_mtc`).checked;
+  
+  CONFIG.to1Use = document.getElementById(`to1-use`).checked;
+  CONFIG.to1High = document.getElementById(`to1-high`).value;
+  CONFIG.to1Good = document.getElementById(`to1-good`).value;
+  CONFIG.to1Average = document.getElementById(`to1-average`).value;
+  CONFIG.to1Low = document.getElementById(`to1-low`).value;
+  
+  CONFIG.to2Use = document.getElementById(`to2-use`).checked;
+  CONFIG.to2High = document.getElementById(`to2-high`).value;
+  CONFIG.to2Good = document.getElementById(`to2-good`).value;
+  CONFIG.to2Average = document.getElementById(`to2-average`).value;
+  CONFIG.to2Low = document.getElementById(`to2-low`).value;
   
   localStorage.setItem(`CONFIG`, JSON.stringify(CONFIG));
 
@@ -1135,130 +1306,379 @@ function TIME () {
   return `${ hours }:${ minutes }${ ampm }`;
 }
 
-// Turkopticon IndexedDB
-let TODB;
-const TODB_request = window.indexedDB.open(`TODB`, 1);
-TODB_request.onsuccess = function (event) {
-  TODB = event.target.result;
-};
-TODB_request.onupgradeneeded = function (event) {
-  const TODB = event.target.result;
-  TODB.createObjectStore(`requester`, {keyPath: `id`});
-};
-
-function TURKOPTICON_DB (ids) {
-  let grab = false;
-  const to = {};
-  const time = new Date().getTime();
-  const transaction = TODB.transaction([`requester`], `readonly`);
-  const objectStore = transaction.objectStore(`requester`);
-  
-  for (let i = 0; i < ids.length; i ++) {
-    const request = objectStore.get(ids[i]);
-    request.onsuccess = function (event) {
-      if (request.result && request.result.edited > time - 21600000) {
-        to[ids[i]] = request.result;
-      }
-      else {
-        grab = true;
-      }
-    };
-  }
-  
-  transaction.oncomplete = function (event) {
-    if (!grab) return HITS_WRITE_LOGGED_IN(to);
+const turkopticon = {
+  db: null,
+  initialize: function () {
+    const dbRequest = window.indexedDB.open(`TODB`, 1);
     
-    function to_success (result, status, xhr) {
-      const transaction = TODB.transaction([`requester`], `readwrite`);
-      const objectStore = transaction.objectStore(`requester`);
-        
-      const json = JSON.parse(result);
-      for (let i = 0; i < ids.length; i ++) {
-        const id = ids[i];
-        if (json[id]) {
-          to[id] = json[id];
-          json[id].id = id;
-          json[id].edited = time;
-          objectStore.put(json[id]);
+    dbRequest.onsuccess = function (event) {
+      turkopticon.db = event.target.result;
+    };
+    dbRequest.onupgradeneeded = function (event) {
+      turkopticon.db = event.target.result;
+      turkopticon.db.createObjectStore(`requester`, {keyPath: `id`});
+    }
+  },
+  check: function (ids) {
+    const temp = {};
+    const time = new Date().getTime();
+    const transaction = turkopticon.db.transaction([`requester`], `readonly`);
+    const objectStore = transaction.objectStore(`requester`);
+    
+    let get = false;
+    
+    for (let i = 0; i < ids.length; i ++) {
+      const request = objectStore.get(ids[i]);
+      request.onsuccess = function (event) {
+        if (request.result && request.result.time > time - 3600000 * 2) { 
+          temp[ids[i]] = request.result;
         }
         else {
-          to[id] = {attrs: {comm: 0, fair: 0, fast: 0, pay: 0}, reviews: 0, tos_flags: 0};
+          get = true;
         }
+      };
+    }
+    
+    transaction.oncomplete = function (event) {
+      if (get) {
+        console.log(`update`);
+        turkopticon.get(ids);
       }
-      HITS_WRITE_LOGGED_IN(to);
+      else {
+        console.log(`cached`);
+        turkopticon.send(temp);
+      }
     }
+  },
+  get: function (ids) {
+    let temp = {};
+    
+    $.when(
+      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`),
+      $.get(`https://api.turkopticon.info/requesters?rids=${ids}&fields[requesters]=rid,aggregates`)
+    ).done(function (to1, to2) {
+      temp = turkopticon.to1Parse(to1, ids, temp);
+      temp = turkopticon.to2Parse(to2, ids, temp);
+      turkopticon.getDone(ids, temp);
+    });
+  },
+  to1Parse: function (result, ids, temp) {
+    const json = JSON.parse(result[0]);
+    
+    for (let i = 0; i < ids.length; i ++) {
+      const id = ids[i];
       
-    function to_error (result, status, xhr) {
-      console.error(status, xhr);
-      HITS_WRITE_LOGGED_IN(false);
+      if (!temp[id]) {
+        temp[id] = {};
+      }
+      
+      if (json[id]) {
+        temp[id].id = id;
+        temp[id].to1 = json[id];
+      }
+    }
+    return temp;
+  },
+  to2Parse: function (result, ids, temp) {
+    const array = result[0].data;
+    
+    for (let i = 0; i < array.length; i ++) {
+      const id = array[i].id;
+      
+      if (!temp[id]) {
+        temp[id] = {};
+      }
+      
+      temp[id].id = id;
+      temp[id].to2 = array[i].attributes.aggregates;
+    }
+    return temp;
+  },
+  getDone: function (ids, temp) {
+    const time = new Date().getTime();
+    const transaction = turkopticon.db.transaction([`requester`], `readwrite`);
+    const objectStore = transaction.objectStore(`requester`);
+    
+    for (let i = 0; i < ids.length; i ++) {
+      const id = ids[i];
+      
+      temp[id].time = time;
+      
+      if (temp[id] && temp[id].id) {
+        objectStore.put(temp[id]);
+      }
     }
     
-    $.ajax({
-      url: `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`,
-      type: `GET`,
-      timeout: 5000
-    }).then(to_success, to_error);
-  };
-}
+    turkopticon.send(temp);
+  },
+  send: function (temp) {
+    HITS_WRITE_LOGGED_IN(temp);
+  }
+};
 
-function INIT_IRC_HIT_EXPORT (info) {
-  const obj = { 
-    to: {
-      attrs: {
-        pay: 0.00,
-        fair: 0.00,
-        comm: 0.00,
-        fast: 0.00
-      },
-      reviews: 0,
-      tos_flags: 0
-    },
-    links: {
-      req: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${info.reqid}`,
-      preview: `https://www.mturk.com/mturk/preview?groupId=${info.groupid}`,
-      panda: `https://www.mturk.com/mturk/previewandaccept?groupId=${info.groupid}`,
-      to: `https://turkopticon.ucsd.edu/${info.reqid}`
-    }
-  };
-  
-  function success_ns4t (result, status, xhr) {
-    const urls = result.split(`;`);
-    obj.links.req = urls[0];
-    obj.links.preview = urls[1];
-    obj.links.panda = urls[2];
-    obj.links.to = urls[3];
+const hitExport = {
+  info: {},
+  irc: function (msg) {
+    const to1 = msg.to.to1, to2 = msg.to.to2, links = msg.links;
+    const hit = HITS[hitExport.info.key];
     
-    get_to();
-  }
+    const to1Template =
+      to1
+    ?
+      `Pay=${to1.attrs.pay} ` +
+      `Fast=${to1.attrs.fast} ` +
+      `Comm=${to1.attrs.comm} ` +
+      `Fair=${to1.attrs.fair} ` +
+      `Reviews=${to1.reviews} ` +
+      `TOS=${to1.tos_flags} ` +
+      `${links.to1}`
+    :
+      `N/A ${links.to1}`
+    ;
+    
+    const to2Template = 
+      to2
+    ?
+      `Rate=${to2.recent.reward[1] > 0 ? `$${((to2.recent.reward[0] / to2.recent.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr`} ` +
+      `Rej=${to2.recent.rejected[0]} ` +
+      `TOS=${to2.recent.tos[0]} ` +
+      `${links.to2}`
+    :
+      `N/A ${links.to2}`
+    ;
+    
+    const exportTemplate = [
+      `Req: ${hit.reqname} ${links.req}`,
+      `Title: ${hit.title} ${links.preview}`,
+      `Time: ${hit.time}`,
+      `Avail: ${hit.avail}`,
+      `Reward: ${hit.reward}`,
+      `TO 1: ${to1Template}`,
+      `TO 2: ${to2Template}`,
+      `PANDA: ${links.panda}`
+    ];
   
-  function error_ns4t (result, status, xhr) {
-    get_to();
-  }
+    hitExport.copyToClip(`${hit.quals.match(/Masters (.+ granted|Exists)/) ? `MASTERS • ` : ``}${exportTemplate.join(` • `)}`);
+  },
+  forum: function (msg) {
+    const to1 = msg.to1, to2 = msg.to2;
+    const hit = HITS[hitExport.info.key];
+    
+    function to1Rating (rating) {
+      if (rating > 3.99) return `[color=#00cc00]${rating}[/color]`;
+      if (rating > 2.99) return `[color=#cccc00]${rating}[/color]`;
+      if (rating > 1.99) return `[color=#cc6600]${rating}[/color]`;
+      return `[color=#cc0000]${rating}[/color]`;
+    }
+    
+    function to2Rating (rating) {
+      if (rating[1] > 0) {
+        const percent = Math.round(100 * rating[0] / rating[1]);
+        
+        if (percent > 79) return `[color=#00cc00]${percent}%[/color] of ${rating[1]}`;
+        if (percent > 59) return `[color=#cccc00]${percent}%[/color] of ${rating[1]}`;
+        if (percent > 39) return `[color=#cc6600]${percent}%[/color] of ${rating[1]}`;
+        return `[color=#cc0000]${percent}%[/color] of ${rating[1]}`;
+      }
+      return `-- of 0`;
+    }
+    
+    const to1Template =
+      to1
+    ?
+      `[b][Pay: ${to1Rating(to1.attrs.pay)}][/b] ` +
+      `[b][Fast: ${to1Rating(to1.attrs.fast)}][/b] ` +
+      `[b][Comm: ${to1Rating(to1.attrs.comm)}][/b] ` +
+      `[b][Fair: ${to1Rating(to1.attrs.fair)}][/b] ` +
+      `[b][Reviews: ${to1.reviews}][/b] ` +
+      `[b][ToS: [color=${to1.tos_flags === 0 ? `#00cc00` : `#cc0000`}]${to1.tos_flags}[/color]][/b]`
+    :
+      `Not Available`
+    ;
+    
+    const to2Template = 
+      to2
+    ?
+      `[b][Rate: ${to2.recent.reward[1] > 0 ? `$${((to2.recent.reward[0] / to2.recent.reward[1]) * 60 ** 2).toFixed(2)}/hr` : `--/hr`}][/b] ` +
+      `[b][Pen: ${to2.recent.pending > 0 ? `${(to2.recent.pending / 86400).toFixed(2)} days` : `-- days`}][/b] ` +
+      `[b][Res: ${to2Rating(to2.recent.comm)}][/b] ` +
+      `[b][Rec: ${to2Rating(to2.recent.recommend)}][/b] ` +
+      `[b][Rej: [color=${to2.recent.rejected[0] === 0 ? `#00cc00` : `#cc0000`}]${to2.recent.rejected[0]}[/color]][/b] ` +
+      `[b][ToS: [color=${to2.recent.tos[0] === 0 ? `#00cc00` : `#cc0000`}]${to2.recent.tos[0]}[/color]][/b] ` +
+      `[b][Brk: [color=${to2.recent.broken[0] === 0 ? `#00cc00` : `#cc0000`}]${to2.recent.broken[0]}[/color]][/b]`
+    :
+      `Not Available`
+    ;
   
-  function get_to () {
-    const request = TODB.transaction([`requester`]).objectStore(`requester`).get(info.reqid);
-
-    request.onsuccess = function (event) {
-      if (request.result) obj.to = request.result;
-      IRC_HIT_EXPORT(obj);
+    const exportTemplate = [
+      `[table][tr][td][b]Title:[/b] [url=https://www.mturk.com/mturk/preview?groupId=${hit.groupid}]${hit.title}[/url] | [url=https://www.mturk.com/mturk/previewandaccept?groupId=${hit.groupid}]PANDA[/url]`,
+      `[b]Worker:[/b] [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/]Preview[/url] | [url=https://worker.mturk.com/projects/${hit.groupid}/tasks/accept_random]Accept[/url] | [url=https://worker.mturk.com/requesters/${hit.reqid}/projects]Requester[/url]`,
+      `[b]Requester:[/b] [url=https://www.mturk.com/mturk/searchbar?requesterId=${hit.reqid}]${hit.reqname}[/url] [${hit.reqid}] ([url=https://www.mturk.com/mturk/contact?requesterId=${hit.reqid}]Contact[/url])`,
+      `[b][url=https://turkopticon.ucsd.edu/${hit.reqid}]TO 1[/url]:[/b] ${to1Template}`,
+      `[b][url=https://turkopticon.info/requesters/${hit.reqid}]TO 2[/url]:[/b] ${to2Template}`,
+      `[b]${hit.desc ? `Description:[/b] ${hit.desc}` : `Auto Approval:[/b] ${hit.aa}`}`,
+      `[b]Time:[/b] ${hit.time}`,
+      `[b]HITs Available:[/b] ${hit.avail}`,
+      `[b]Reward:[/b] [color=green][b] ${hit.reward}[/b][/color]`,
+      `[b]Qualifications:[/b] ${hit.quals.replace(/Masters has been granted/, `[color=red]Masters has been granted[/color]`).replace(/Masters Exists/, `[color=red]Masters Exists[/color]`)}[/td][/tr]`,
+      `[tr][td][center][size=2]HIT exported from [url=http://mturksuite.com/]Mturk Suite[/url] v${chrome.runtime.getManifest().version}[/size][/center][/td][/tr]`,
+      `[/table]`
+    ];
+    
+    switch (hitExport.info.type) {
+      case `forum`:
+        exportTemplate.splice(10, 1);
+        hitExport.copyToClip(exportTemplate.join(`\n`));
+        break;
+      case `thDirect`:
+        hitExport.thDirect(`<p>${exportTemplate.join(`</p><p>`)}</p>`);
+        break;
+      case `mtcDirect`:
+        hitExport.mtcDirect(`<p>${exportTemplate.join(`</p><p>`)}</p>`);
+        break;
+    }
+  },
+  initIrc: function (msg) {
+    const obj = { 
+      links: {
+        req: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${msg.reqid}`,
+        preview: `https://www.mturk.com/mturk/preview?groupId=${msg.groupid}`,
+        panda: `https://www.mturk.com/mturk/previewandaccept?groupId=${msg.groupid}`,
+        to1: `https://turkopticon.ucsd.edu/${msg.reqid}`,
+        to2: `https://turkopticon.info/requesters/${msg.reqid}`
+      }
     };
+  
+    function ns4tSuccess (result, status, xhr) {
+      const urls = result.split(`;`);
+      obj.links.req = urls[0];
+      obj.links.preview = urls[1];
+      obj.links.panda = urls[2];
+      obj.links.to1 = urls[3];
+      obj.links.to2 = urls[4];
+    
+      getTo();
+    }
+  
+    function ns4tError (result, status, xhr) {
+      getTo();
+    }
+  
+    function getTo () {
+      const request = turkopticon.db.transaction([`requester`]).objectStore(`requester`).get(msg.reqid);
+      request.onsuccess = function (event) {
+        obj.to = request.result ? request.result : {};
+        hitExport.irc(obj);
+      };
+    }
+
+    $.get(`https://ns4t.net/yourls-api.php?action=bulkshortener&title=MTurk&signature=39f6cf4959&urls[]=${encodeURIComponent(obj.links.req)}&urls[]=${encodeURIComponent(obj.links.preview)}&urls[]=${encodeURIComponent(obj.links.panda)}&urls[]=${encodeURIComponent(obj.links.to1)}&urls[]=${encodeURIComponent(obj.links.to2)}`).then(ns4tSuccess, ns4tError);
+
+  },
+  initForum: function (msg) {
+    const request = turkopticon.db.transaction([`requester`]).objectStore(`requester`).get(msg);
+    request.onsuccess = function (event) {
+      hitExport.forum(request.result ? request.result : {});
+    };
+  },
+  thDirect: function (msg) {
+    const confirm_post = prompt(
+      `Do you want to post this HIT to TurkerHub.com?\n\n` +
+      `Want to add a comment about your HIT? Fill out the box below.\n\n` +
+      `To send the HIT, click "Ok" or hit "Enter"`,
+      ``
+    );
+  
+    if (confirm_post !== null) {
+      chrome.runtime.sendMessage({
+        type: `hitExportThDirect`,
+        message: `${msg}<p>${confirm_post}</p>`
+      });
+    }
+  },
+  mtcDirect: function (msg) {
+    const confirm_post = prompt(
+      `Do you want to post this HIT to MturkCrowd.com?\n\n` +
+      `Want to add a comment about your HIT? Fill out the box below.\n\n` +
+      `To send the HIT, click "Ok" or hit "Enter"`,
+      ``
+    );
+    
+    if (confirm_post !== null) {
+      chrome.runtime.sendMessage({
+        type: `hitExportMtcDirect`,
+        message: `${msg}<p>${confirm_post}</p>`
+      });
+    }
+  },
+  sendThDirect: function (msg) {
+    $.get(`https://turkerhub.com/forums/2/?order=post_date&direction=desc`, function (data) {
+      const $data = $(data);
+      const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
+      const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
+
+      $.get(`https://turkerhub.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
+        const groupId = msg.match(/groupId=(\w+)/)[1];
+      
+        for (let i = 0; i < data.posts.length; i ++) {
+          if (data.posts[i].message.indexOf(groupId) !== -1) {
+            return;
+          }
+        } 
+           
+        $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
+          _xfToken: xfToken,
+          message_html: msg
+        });
+      });
+    });
+  },
+  sendMtcDirect: function (msg) {
+    $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, function (data) {
+      const $data = $(data);
+      const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
+      const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
+
+      $.get(`http://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
+        const groupId = msg.match(/groupId=(\w+)/)[1];
+      
+        for (let i = 0; i < data.posts.length; i ++) {
+          if (data.posts[i].message.indexOf(groupId) !== -1) {
+            return;
+          }
+        }
+          
+        $.post(`http://www.mturkcrowd.com/threads/${thread}/add-reply`, {
+          _xfToken: xfToken,
+          message_html: msg
+        });
+      });
+    });
+  },
+  copyToClip: function (msg) {
+    document.body.insertAdjacentHTML(`afterbegin`, `<textarea id="clipboard" style="opacity: 0;">${msg}</textarea>`);
+    document.getElementById(`clipboard`).select();
+  
+    const copy = document.execCommand(`copy`);
+    alert(copy ? `HIT export has been copied to your clipboard.` : msg);
+
+    document.body.removeChild(document.getElementById(`clipboard`));
   }
+};
 
-  $.get(`https://ns4t.net/yourls-api.php?action=bulkshortener&title=MTurk&signature=39f6cf4959&urls[]=${encodeURIComponent(obj.links.req)}&urls[]=${encodeURIComponent(obj.links.preview)}&urls[]=${encodeURIComponent(obj.links.panda)}&urls[]=${encodeURIComponent(obj.links.to)}`).then(success_ns4t, error_ns4t);
-}
 
-function INIT_FORUM_HIT_EXPORT (info) {
-  const request = TODB.transaction([`requester`]).objectStore(`requester`).get(info.reqid);
-
-  request.onsuccess = function (event) {
-    if (request.result) {
-      FORUM_HIT_EXPORT(request.result);
-    }
-    else {
-      FORUM_HIT_EXPORT({ attrs: { comm: 0.00, fair: 0.00, fast: 0.00, pay: 0.00 }, reviews: 0, tos_flags: 0 })
-    }
-  };
-}
+// Export Stuff
+$(`html`).on(`click`, `.export_hit`, function () {
+  hitExport.info.key = $(this).data(`key`);
+  hitExport.info.type = $(this).data(`type`);
+    
+  if (hitExport.info.type.match(/irc/)) {
+    hitExport.initIrc({reqid: HITS[hitExport.info.key].reqid, groupid: HITS[hitExport.info.key].groupid})
+  }
+  if (hitExport.info.type.match(/forum|thDirect|mtcDirect/)) {
+    hitExport.initForum(HITS[hitExport.info.key].reqid);
+  }
+});
 
 // HIT Finder IndexedDB
 let HFDB;
@@ -1423,15 +1843,6 @@ $(`html`).on(`change`, `#include_sound`, function () {
 
 $(`html`).on(`change`, `#new_hit_sound`, function () {
   NEW_HIT_SOUND();
-});
-
-// Export Stuff
-$(`html`).on(`click`, `.export_hit`, function () {
-  EXPORT.key = $(this).data(`key`);
-  EXPORT.type = $(this).data(`type`);
-    
-  if (EXPORT.type.match(/irc/)) INIT_IRC_HIT_EXPORT(HITS[EXPORT.key]);
-  if (EXPORT.type.match(/forum/)) INIT_FORUM_HIT_EXPORT(HITS[EXPORT.key]);
 });
 
 // Modal Stuff
