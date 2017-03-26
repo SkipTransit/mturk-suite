@@ -3,16 +3,16 @@ const acceptNext = {
   execute: function () {
     console.log(`acceptNext.execute()`);
     
-    const element = $(`label:contains(Auto-accept Next Task)`).children()[0];
+    const element = $(`span:contains(Auto-accept next HIT)`).prev()[0];
     const checked = element.checked;
     
-    if (settings.accept_next !== checked) {
+    if (acceptNext.mts.acceptNext !== checked) {
       element.click();
     } 
   }
 };
 
-if ($(`label:contains(Auto-accept Next Task)`)[0]) {
+if ($(`span:contains(Auto-accept next HIT)`)[0]) {
   chrome.storage.onChanged.addListener( function (changes) {
     if (changes.settings) {
       acceptNext.mts = changes.settings.newValue;
