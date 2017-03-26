@@ -1341,11 +1341,9 @@ const turkopticon = {
     
     transaction.oncomplete = function (event) {
       if (get) {
-        console.log(`update`);
         turkopticon.get(ids);
       }
       else {
-        console.log(`cached`);
         turkopticon.send(temp);
       }
     }
@@ -1369,11 +1367,12 @@ const turkopticon = {
       const id = ids[i];
       
       if (!temp[id]) {
-        temp[id] = {};
+        temp[id] = {
+          id: id
+        };
       }
       
       if (json[id]) {
-        temp[id].id = id;
         temp[id].to1 = json[id];
       }
     }
