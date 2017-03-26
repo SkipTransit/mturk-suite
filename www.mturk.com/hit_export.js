@@ -150,7 +150,7 @@ const hitExport = {
         ;
       }
       
-    if (document.querySelector(`mts-export`)) {
+    if (document.querySelector(`mts-exports`)) {
       document.querySelector(`mts-exports`).innerHTML = html;
     }
     else {
