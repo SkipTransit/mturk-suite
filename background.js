@@ -491,9 +491,6 @@ const hitExport = {
   }
 }
 
-
-
-
 // Adds context menu to paste worker id in input fields
 chrome.contextMenus.create({
   title    : "Paste Mturk Worker ID",
