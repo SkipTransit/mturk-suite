@@ -1,6 +1,7 @@
 const turkopticon = {
   mts: {},
-  grabIds: function () {
+  execute: function () {
+    console.log(`turkopticon.execute()`);
     const ids = [];
     
     for (let element of document.querySelectorAll(`a[href*="requesterId="]`)) {
@@ -14,6 +15,7 @@ const turkopticon = {
     });
   },
   draw: function (to) {
+    console.log(`turkopticon.draw()`);
     turkopticon.ratings = to;
     
     for (let element of document.getElementsByClassName(`requesterIdentity`)) {
@@ -154,13 +156,13 @@ const turkopticon = {
     const html = 
       `<mts-table class="mts-link-table">
         <mts-tr>
-          <mts-td><a href="https://turkopticon.ucsd.edu/${id}">View on TO 1</a></mts-td>
-          <mts-td><a href="https://turkopticon.info/requesters/${id}">View on TO 2</a></mts-td>
+          <mts-td><a target="_blank" href="https://turkopticon.ucsd.edu/${id}">View on TO 1</a></mts-td>
+          <mts-td><a target="_blank" href="https://turkopticon.info/requesters/${id}">View on TO 2</a></mts-td>
         </mts-tr>
 
         <mts-tr>
-          <mts-td><a href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}">Add review on TO 1</a></mts-td>
-          <mts-td><a href="https://turkopticon.info/reviews/new?rid=${id}">Add review on TO 2</a></mts-td>
+          <mts-td><a target="_blank" href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}">Add review on TO 1</a></mts-td>
+          <mts-td><a target="_blank" href="https://turkopticon.info/reviews/new?rid=${id}">Add review on TO 2</a></mts-td>
         </mts-tr>
       </mts-table>`
     ;
@@ -179,6 +181,6 @@ if (document.querySelector(`a[href*="requesterId="]`)) {
   
   chrome.storage.local.get(`settings`, function (result) {
     turkopticon.mts = result.settings ? result.settings : {};
-    turkopticon.grabIds();
+    turkopticon.execute();
   });
 }

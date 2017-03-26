@@ -1,5 +1,15 @@
-const hitCatcherExporter = {};
 const hitCatcherButtons = {
+  execute: function () {
+    console.log(`hitCatcherButtons.execute()`);
+    
+    if (document.querySelector(`a[href^="/mturk/preview?groupId="]`)) {
+      hitCatcherButtons.drawAll();
+    }
+    if (document.URL.match(/groupId=(.*)/)) {
+      hitCatcherButtons.drawHeader();
+    }
+  },
+  hits: {},
   html: function (key) {
     const html =
       `<button type="button" class="hitCatcherButtonPanda MTS-export" style="margin-right: 0px;" data-key="${key}">Panda</button>
@@ -8,10 +18,12 @@ const hitCatcherButtons = {
     return html;
   },
   drawAll: function () {
+    console.log(`hitCatcherButtons.drawAll()`);
+    
     for (let hit of document.querySelectorAll(`table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr`)) {
       const key = hit.querySelector(`[href*="roupId="]`).getAttribute(`href`).match(/roupId=(.*)/)[1];
     
-      hitCatcherExporter[key] = {
+      hitCatcherButtons.hits[key] = {
         nickname: null,
         once: false, 
         sound: true,
@@ -50,9 +62,11 @@ const hitCatcherButtons = {
     }
   },
   drawHeader: function () {
+    console.log(`hitCatcherButtons.drawHeader()`);
+    
     const key = document.URL.match(/roupId=(.*)/)[1];
     
-    hitCatcherExporter[key] = {
+    hitCatcherButtons.hits[key] = {
       nickname: null,
       once: false, 
       sound: true,
@@ -79,18 +93,31 @@ const hitCatcherButtons = {
         hitCatcherButtons.html(key)
       );
     }
+  },
+  sendOnceWatcher: function (obj) {
+    console.log(`hitCatcherButtons.sendOnceWatcher()`);
+    
+    obj.once = true;
+      
+    chrome.runtime.sendMessage({ 
+      type: `hitCatcherAddWatcher`,
+      message: obj
+    });
+  },
+  sendPandaWatcher: function (obj) {
+    console.log(`hitCatcherButtons.sendPandaWatcher()`);
+          
+    chrome.runtime.sendMessage({ 
+      type: `hitCatcherAddWatcher`,
+      message: obj
+    });
   }
 };
 
 if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
   chrome.runtime.onMessage.addListener( function (request) {
     if (request.type === `hitCatcherPing` && request.message === true) {
-      if (document.querySelector(`a[href^="/mturk/preview?groupId="]`)) {
-        hitCatcherButtons.drawAll();
-      }
-      if (document.URL.match(/groupId=(.*)/)) {
-        hitCatcherButtons.drawHeader();
-      }
+      hitCatcherButtons.execute();
     }
   });
   
@@ -101,23 +128,14 @@ if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
   document.addEventListener(`click`, function (event) {
     const element = event.target;
   
-    if (element.matches(`.hitCatcherButtonPanda`)) {
-      const obj = hitCatcherExporter[element.dataset.key];
-      
-      chrome.runtime.sendMessage({ 
-        type: `hitCatcherAddWatcher`,
-        message: obj
-      });
+    if (element.matches(`.hitCatcherButtonOnce`)) {
+      const obj = hitCatcherButtons.hits[element.dataset.key];
+      hitCatcherButtons.sendOnceWatcher(obj);
     }
     
-    if (element.matches(`.hitCatcherButtonOnce`)) {
-      const obj = hitCatcherExporter[element.dataset.key];
-      obj.once = true;
-      
-      chrome.runtime.sendMessage({ 
-        type: `hitCatcherAddWatcher`,
-        message: obj
-      });
+    if (element.matches(`.hitCatcherButtonPanda`)) {
+      const obj = hitCatcherButtons.hits[element.dataset.key];
+      hitCatcherButtons.sendPandaWatcher(obj);
     }
   });
 }

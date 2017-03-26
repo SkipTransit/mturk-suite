@@ -1,9 +1,13 @@
-function loggedIn () {
-  chrome.runtime.sendMessage({ 
-    type: `loggedIn`
-  });
-}
+const loggedIn = {
+  execute: function () {
+    console.log(`loggedIn.execute()`);
+    
+    chrome.runtime.sendMessage({ 
+      type: `loggedIn`
+    });
+  }
+};
 
 if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
-  loggedIn();
+  loggedIn.execute();
 }
