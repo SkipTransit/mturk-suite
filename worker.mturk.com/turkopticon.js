@@ -139,7 +139,7 @@ const turkopticon = {
       `<mts-to class="label ${color}">TO</mts-to>` +
       `<mts-to-reviews>` +
         turkopticon.attrTable(to) +
-        turkopticon.linkTable(to) +
+        turkopticon.linkTable(id) +
       `</mts-to-reviews>`
     ;
     return html;
