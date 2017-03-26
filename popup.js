@@ -1,85 +1,98 @@
-const SETTINGS = {
-  // Today's Projected Earnings Settings
-  goal: 20.00,
-  
-  // General Settings
-  accept_next: true,
-  workspace: true,
-  pre_reloader: true,
-  
-  // HIT Export Settings
-  hit_export: { 
-    irc: true,
-    forum: true,
-    forum_th: true,
-    forum_mtc: true
+const settings = {
+  mts: {},
+  load: function (obj) {
+    settings.mts = obj;
   },
-  
-  // Theme
-  theme: false
-};
-
-function SAVE_SETTINGS () {
-  // Today's Projected Earnings Settings
-    
-  // General Settings
-  SETTINGS.accept_next = document.getElementById(`accept_next`).checked;
-    
-  // HIT Export Settings
-    
-  // Theme
-  SETTINGS.theme = document.getElementById(`theme`).checked;
-  
-  chrome.storage.local.set({
-    settings: SETTINGS
-  });
-}
-
-function LOAD_SETTINGS (settings) {    
-  if (settings) {
+  save: function () {
     // Today's Projected Earnings Settings
-    if (settings.hasOwnProperty(`goal`)) SETTINGS.goal = settings.goal;
-      
-    // General Settings
-    if (settings.hasOwnProperty(`workspace`)) SETTINGS.workspace = settings.workspace;
-    if (settings.hasOwnProperty(`pre_reloader`)) SETTINGS.pre_reloader = settings.pre_reloader;
-    if (settings.hasOwnProperty(`accept_next`)) SETTINGS.accept_next = settings.accept_next;
-    if (settings.hasOwnProperty(`hc_beta`)) SETTINGS.hc_beta = settings.hc_beta;
-      
-    // HIT Export Settings
-    if (settings.hasOwnProperty(`hit_export`)) {
-      if (settings.hit_export.hasOwnProperty(`irc`)) SETTINGS.hit_export.irc = settings.hit_export.irc;
-      if (settings.hit_export.hasOwnProperty(`forum`)) SETTINGS.hit_export.forum = settings.hit_export.forum;
-      if (settings.hit_export.hasOwnProperty(`forum_th`)) SETTINGS.hit_export.forum_th = settings.hit_export.forum_th;
-      if (settings.hit_export.hasOwnProperty(`forum_mtc`)) SETTINGS.hit_export.forum_mtc = settings.hit_export.forum_mtc;
-    }  
-      
-    // Theme
-    if (settings.hasOwnProperty(`theme`)) SETTINGS.theme = settings.theme;
-  }
-  
-  // Today's Projected Earnings Settings
+    //settings.mts.goal = (+document.getElementById(`goal`).value).toFixed(2);
     
-  // General Settings
-  document.getElementById(`accept_next`).checked = SETTINGS.accept_next;
-  document.getElementById(`hc`).parentElement.parentElement.style.display = SETTINGS.hc_beta ? `` : `none`;
-
-      
-  // HIT Export Settings
-      
-  // Theme
-  document.getElementById(`theme`).checked = SETTINGS.theme;
+    // General Settings
+    settings.mts.acceptNext = document.getElementById(`accept-next`).checked;
+    //settings.mts.workspace = document.getElementById(`workspace`).checked;
+    //settings.mts.preReloader = document.getElementById(`pre-reloader`).checked;
+    //settings.mts.hcBeta = document.getElementById(`hc-beta`).checked;
+    
+    // HIT Export Settings
+    //settings.mts.hitExport.irc = document.getElementById(`irc`).checked;
+    //settings.mts.hitExport.forum = document.getElementById(`forum`).checked;
+    //settings.mts.hitExport.thDirect = document.getElementById(`th-direct`).checked;
+    //settings.mts.hitExport.mtcDirect = document.getElementById(`mtc-direct`).checked;
+    
+    // TO 1 Settings
+    //settings.mts.to.to1.use = document.getElementById(`to1-use`).checked;
+    //settings.mts.to.to1.high = (+document.getElementById(`to1-high`).value).toFixed(2);
+    //settings.mts.to.to1.good = (+document.getElementById(`to1-good`).value).toFixed(2);
+    //settings.mts.to.to1.average = (+document.getElementById(`to1-average`).value).toFixed(2);
+    //settings.mts.to.to1.low = (+document.getElementById(`to1-low`).value).toFixed(2);
+    
+    // TO 2 Settings
+    //settings.mts.to.to2.use = document.getElementById(`to2-use`).checked;
+    //settings.mts.to.to2.high = (+document.getElementById(`to2-high`).value).toFixed(2);
+    //settings.mts.to.to2.good = (+document.getElementById(`to2-good`).value).toFixed(2);
+    //settings.mts.to.to2.average = (+document.getElementById(`to2-average`).value).toFixed(2);
+    //settings.mts.to.to2.low = (+document.getElementById(`to2-low`).value).toFixed(2);
+    
+    // Theme
+    settings.mts.theme = document.getElementById(`theme`).checked;
+    
+    chrome.storage.local.set({
+      settings: settings.mts
+    });
+  },
+  update: function () {
+    // Today's Projected Earnings Settings
+    //document.getElementById(`goal`).value = settings.obj.goal;
+    
+    // General Settings
+    document.getElementById(`accept-next`).checked = settings.mts.acceptNext;
+    //document.getElementById(`workspace`).checked = settings.mts.workspace;
+    //document.getElementById(`pre-reloader`).checked = settings.mts.preReloader;
+    //document.getElementById(`hc-beta`).checked = settings.mts.hcBeta;
+    
+    // HIT Export Settings
+    //document.getElementById(`irc`).checked = settings.mts.hitExport.irc;
+    //document.getElementById(`forum`).checked = settings.mts.hitExport.forum;
+    //document.getElementById(`th-direct`).checked = settings.mts.hitExport.thDirect;
+    //document.getElementById(`mtc-direct`).checked = settings.mts.hitExport.mtcDirect;
+    
+    // TO 1 Settings
+    //document.getElementById(`to1-use`).checked = settings.mts.to.to1.use;
+    //document.getElementById(`to1-high`).value = settings.mts.to.to1.high;
+    //document.getElementById(`to1-good`).value = settings.mts.to.to1.good;
+    //document.getElementById(`to1-average`).value = settings.mts.to.to1.average;
+    //document.getElementById(`to1-low`).value = settings.mts.to.to1.low;
+    
+    // TO 2 Settings
+    //document.getElementById(`to2-use`).checked = settings.mts.to.to2.use;
+    //document.getElementById(`to2-high`).value = settings.mts.to.to2.high;
+    //document.getElementById(`to2-good`).value = settings.mts.to.to2.good;
+    //document.getElementById(`to2-average`).value = settings.mts.to.to2.average;
+    //document.getElementById(`to2-low`).value = settings.mts.to.to2.low;
+    
+    // Theme
+    document.getElementById(`theme`).checked = settings.mts.theme;
+    
+    document.getElementById(`hc`).parentElement.parentElement.style.display = SETTINGS.hc_beta ? `` : `none`;
+  }
 }
 
 document.addEventListener(`DOMContentLoaded`, function () {
   chrome.storage.onChanged.addListener( function (changes) {
-    if (changes.settings) LOAD_SETTINGS(changes.settings.newValue);
+    if (changes.settings) {
+      settings.load(changes.settings.newValue);
+      settings.update();
+    }
   });
   
   chrome.storage.local.get(`settings`, function (result) {
-    LOAD_SETTINGS(result.settings ? result.settings : null);
+    settings.load(result.settings);
+    settings.update();
   });
   
-  $(`input`).on(`change`, SAVE_SETTINGS);
   document.getElementById(`version`).textContent = `v${chrome.runtime.getManifest().version}`;
+});
+
+document.addEventListener(`change`, function (event) {
+  settings.save();
 });
