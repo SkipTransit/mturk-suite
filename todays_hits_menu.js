@@ -260,6 +260,9 @@ document.addEventListener(`DOMContentLoaded`, function () {
       case `sync_tpe_running`:
         SYNC_PROGRESS(request.data.current, request.data.total);
         break;
+      case `sync_tpe_done`:
+        window.location.reload();
+        break;
       case `bonus`:
         BONUS(request.data.starting, request.data.current);
         break;
