@@ -693,11 +693,6 @@ const hitFinder = {
           <mts-td><a target="_blank" href="https://turkopticon.ucsd.edu/${id}">View on TO 1</a></mts-td>
           <mts-td><a target="_blank" href="https://turkopticon.info/requesters/${id}">View on TO 2</a></mts-td>
         </mts-tr>
-
-        <mts-tr>
-          <mts-td><a target="_blank" href="https://turkopticon.ucsd.edu/report?requester[amzn_id]=${id}">Add review on TO 1</a></mts-td>
-          <mts-td><a target="_blank" href="https://turkopticon.info/reviews/new?rid=${id}">Add review on TO 2</a></mts-td>
-        </mts-tr>
       </mts-table>`
     ;
     return html;

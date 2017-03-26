@@ -153,24 +153,8 @@ select {
 
 
 mts-to {
-  float: left;
-  font-size: 11px;
-  -webkit-border-horizontal-spacing: 0px;
-  -webkit-border-vertical-spacing: 2px;
-}
-
-mts-to-circle {
-  display: block;
-  cursor: default;
-  width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  font-size: 9px;
-  color: #000;
-  line-height: 18px;
-  text-align: center;
-  font-weight: bold;
-  margin-right: 2px;
+  
+  font-size: 8px !important;
 }
 
 .to-hover:hover + mts-to-reviews, mts-to-reviews:hover {
@@ -178,9 +162,15 @@ mts-to-circle {
 }
 
 mts-to-reviews {
+  float: left;
+  font-size: 10px !important;
+  -webkit-border-horizontal-spacing: 0px;
+  -webkit-border-vertical-spacing: 1px;
+  
   z-index: 9999;
-  transform: translate(-325px, -3px);
-  width: 400px;
+  transform: translate(0px, -3px);
+  right: 25px;
+  width: 300px;
   position: absolute;
   display: none;
   border: 1px solid;
