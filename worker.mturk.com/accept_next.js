@@ -1,18 +1,27 @@
-function ACCEPT_NEXT (settings) {
-  if (!settings) settings = { accept_next: true };
+const acceptNext = {
+  mts: {},
+  execute: function () {
+    console.log(`acceptNext.execute()`);
     
-  const element = $(`label:contains(Auto-accept Next Task)`).children()[0];
-  const checked = element.checked;
+    const element = $(`label:contains(Auto-accept Next Task)`).children()[0];
+    const checked = element.checked;
     
-  if (settings.accept_next !== checked) element.click();
-}
+    if (settings.accept_next !== checked) {
+      element.click();
+    } 
+  }
+};
 
 if ($(`label:contains(Auto-accept Next Task)`)[0]) {
   chrome.storage.onChanged.addListener( function (changes) {
-    if (changes.settings) ACCEPT_NEXT(changes.settings.newValue);
+    if (changes.settings) {
+      acceptNext.mts = changes.settings.newValue;
+      acceptNext.execute();
+    }
   });
 
   chrome.storage.local.get(`settings`, function (result) {
-    ACCEPT_NEXT(result.settings ? result.settings : null);
+    acceptNext.mts = result.settings;
+    acceptNext.execute();
   });
 }

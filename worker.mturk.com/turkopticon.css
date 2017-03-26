@@ -1,35 +1,72 @@
-.MTS-TO {
+mts-to {
   margin-right: 2px;
 }
 
-.MTS-TO:hover + .MTS-RATINGS, .MTS-RATINGS:hover {
+mts-to:hover + mts-to-reviews, mts-to-reviews:hover {
   display: block;
 }
 
-.MTS-RATINGS {
+mts-to-reviews {
   z-index: 9999;
-  width: 300px;
-  position: absolute;
   transform: translate(-3px, -3px);
+  width: 400px;
+  position: absolute;
   display: none;
   border: 1px solid;
-  border-color: #000000;
-  background-color: #f4f4f4;
+  border-color: rgb(221, 221, 221);
+  background-color: #FFFFFF;
   padding: 3px;
+  box-shadow: 0px 0px 30px 5px rgba(0,0,0,0.75);
 }
 
-.MTS-toHigh {
-  background-color: #00cc00;
+mts-table {
+  display: table;
 }
-.MTS-toGood {
-  background-color: #cccc00;
+
+mts-tr {
+  display: table-row;
 }
-.MTS-toAverage {
-  background-color: #cc6600;
+
+mts-th {
+  display: table-cell;
 }
-.MTS-toLow {
-  background-color: #cc0000;
+
+mts-td {
+  display: table-cell;
 }
-.MTS-toNone {
-  background-color: grey;
+
+.MTS-info-table mts-td {
+  text-align: center;
+}
+
+.mts-attr-table {
+  width: 100%
+}
+
+.mts-attr-table mts-td:nth-child(1), .mts-attr-table mts-td:nth-child(3) {
+  font-weight: bold;
+}
+
+.mts-link-table {
+  width: 100%
+}
+
+.mts-link-table mts-td {
+  text-align: center;
+}
+
+.mts-toHigh {
+  background-color: rgba(0, 255, 0, 0.65);
+}
+.mts-toGood {
+  background-color: rgba(255, 255, 0, 0.65);
+}
+.mts-toAverage {
+  background-color: rgba(255, 140, 0, 0.65);
+}
+.mts-toLow {
+  background-color: rgba(255, 0, 0, 0.65);
+}
+.mts-toNone {
+  background-color: rgba(160, 160, 160, 0.65);
 }
