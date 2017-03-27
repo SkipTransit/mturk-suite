@@ -25,7 +25,8 @@ mts-to-circle:hover + mts-to-reviews, mts-to-reviews:hover {
 
 mts-to-reviews {
   width: 400px;
-  position:absolute;
+  position: absolute;
+  transform: translate(0px, -3px);
   display: none;
   border: 1px solid;
   border-color: #336699;
