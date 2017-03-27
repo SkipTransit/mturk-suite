@@ -75,12 +75,12 @@ html > body {
   background-color : #16181d !important;
 }
 
-.MTS-ratings {
-  color            : #FFFFFF !important;
-  background-color : #16181d !important;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #FFFFFF;
+[style="text-align: left; background-color: #CCDDE9;"] {
+  background-color: #222222 !important;
+}
+
+mts-to-reviews {
+  background-color: #333333 !important;
 }
 
 .footer_separator {
