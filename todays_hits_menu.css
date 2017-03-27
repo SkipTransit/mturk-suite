@@ -24,7 +24,23 @@
   border-color: #222222 !important;
   background-color: #222222 !important;
 }
+
+.nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
+  color: #FFFFFF !important;
+  background-color: #222222 !important;
+}
 /**********************************************/
+
+body {
+  padding-top: 70px;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+[role="presentation"] > a, [role="presentation"] > a {
+  color: #000000;
+  font-weight: bold;
+}
 
 /* Fixed width table */
 .table-fixed {
@@ -51,7 +67,7 @@
 
 .table-fixed > tbody {
   overflow-y: scroll;
-  height: 480px;
+  height: calc(100vh - 212px);
 }
 
 .table-fixed > thead {

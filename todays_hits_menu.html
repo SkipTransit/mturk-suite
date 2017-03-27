@@ -2,6 +2,7 @@
 <html style="overflow: hidden;">
   <head>
     <meta charset="utf-8">
+    <title>MTS - HIT Menu</title>
     <!-- Scripts -->
     <script src="jquery-3.1.1.min.js"></script>
     <script src="todays_hits_menu.js"></script>
@@ -10,11 +11,18 @@
     <link href="todays_hits_menu.css" rel="stylesheet" media="screen">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
   </head>
-  <body style="padding: 3px;">
+  <body>
+    
+    <!-- Header -->
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">HIT Menu</a>
+          </div>
+        </div>
+      </nav>
     <div class="row">
-      <div class="col-xs-8">
-        <h4><b>Today's HIT Menu</b></h4>
-      </div>
+      
       <div style="margin-right: 15px;">
         <div class="text-right">
           <div class="btn-group">
@@ -27,15 +35,13 @@
             <li><a id="export_breakdown">Requester Breakdown</a></li>
           </ul>
             </div>
-          <button id="sync" type="button" class="btn btn-primary">Sync</button>
-          <button id="close" type="button" class="btn btn-danger">Close</button>
-        
+          <button id="sync" type="button" class="btn btn-primary">Sync</button>        
           </div>
       </div>
     </div>
-    <div>
+    <div style="margin-top: 3px;">
       <!-- Nav tabs -->
-      <ul class="nav nav-tabs" role="tablist">
+      <ul class="nav nav-pills nav-justified" role="tablist">
         <li role="presentation" class="active"><a href="#overview" aria-controls="overview" role="tab" data-toggle="tab">Overview</a></li>
         <li role="presentation"><a href="#requester" aria-controls="requester" role="tab" data-toggle="tab">Requester Breakdown</a></li>
         <li role="presentation"><a href="#detailed" aria-controls="detailed" role="tab" data-toggle="tab">Detailed Breakdown</a></li>
