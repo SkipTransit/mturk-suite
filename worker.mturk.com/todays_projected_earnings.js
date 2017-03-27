@@ -60,4 +60,12 @@ if (document.querySelector(`a[href="/account"]`)) {
     todaysProjectedEarnings.mts = result.tpe;
     todaysProjectedEarnings.execute();
   });
+  
+  document.addEventListener(`click`, function (event) {
+    const element = event.target;
+     
+    if (element.closest(`#tpe`)) {
+      window.open(chrome.runtime.getURL(`/todays_hits_menu.html`));
+     }
+  });
 }
