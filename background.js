@@ -3,7 +3,8 @@ chrome.storage.local.get(`version`, function (result) {
   const version = chrome.runtime.getManifest().version;
   
   if (result.version !== version) {
-    chrome.tabs.create({ url: chrome.extension.getURL(`settings.html`) });
+    chrome.tabs.create({url: chrome.extension.getURL(`settings.html`)});
+    chrome.tabs.create({url: `http://mturksuite.com/`});
   }
   
   chrome.storage.local.set({
