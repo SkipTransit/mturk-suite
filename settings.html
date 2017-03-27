@@ -33,7 +33,7 @@
           <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-html="true" data-container="body" data-placement="right"
                 title="
                        <div style='text-align: left;'>
-                       <b><u>Goal:</u></b> Set you daily projected earnings goal.
+                       <b><u>Goal:</u></b> Sets your daily projected earnings goal
                        </div>
                        "></span>
         </div>
@@ -58,13 +58,30 @@
           <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-html="true" data-container="body" data-placement="right"
                 title="
                        <div style='text-align: left;'>
-                       <b><u>Workspace Expand & Scroll:</u></b> Expands the HIT to fill the browser viewport and scrolls it into focus for accepted HITs.<br><br>
-                       <b><u>PRE Auto Reloader:</u></b> Automatically reloads a page request error page after 1 second.
+                       <b><u>Accept Next Checked:</u></b> Keeps the accept next HIT checkbox checked on https://www.mturk.com/ and https://worker.mturk.com/<br><br>
+                       <b><u>Workspace Expand & Scroll:</u></b> Expands the HIT to fill the browser viewport and scrolls it into focus for accepted HITs on https://www.mturk.com/ and https://worker.mturk.com/<br><br>
+                       <b><u>PRE Auto Reloader:</u></b> Automatically reloads a page request error page after 1 second.<br><br>
+                       <b><u>Theme:</u></b> Changes mturk to a dark color scheme on https://www.mturk.com/<br><br>
+                       <b><u>HIT Catcher (Beta):</u></b> Adds a link to HIT Catcher (Beta) in the extension popup menu
                        </div>
                        "></span>
         </div>
 
         <div class="panel-body row">
+          
+          <!-- Accept Next Checked -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="accept-next" name="accept-next" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="accept-next" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="accept-next" class="btn btn-default active">Enable Accept Next Checked</label>
+              </div>
+            </div>
+          </div>
     
           <!-- Workspace Expand & Scroll -->
           <div class="col-xs-6">
@@ -94,6 +111,20 @@
             </div>
           </div>
           
+          <!-- Theme -->
+          <div class="col-xs-6">
+            <div class="form-group">
+              <input id="theme" name="theme" type="checkbox" autocomplete="off" />
+              <div class="btn-group btn-group-sm">
+                <label for="theme" class="btn btn-default">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  <span> </span>
+                </label>
+                <label for="theme" class="btn btn-default active">Enable Theme</label>
+              </div>
+            </div>
+          </div>
+          
           <!-- HIT Catcher (Beta) -->
           <div class="col-xs-6">
             <div class="form-group">
@@ -119,11 +150,11 @@
           <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-html="true" data-container="body" data-placement="right"
                 title="
                        <div style='text-align: left;'>
-                       <b><u>IRC Export:</u></b> Copies to clipboard. Formatted for single line use. URLs shortened.<br><br>
-                       <b><u>Forum Export:</u></b> Copies to clipboard. Formatted for a forum.<br><br>
-                       <b><u>TH Direct Export:</u></b> Directly exports to TurkerHub.com if logged in.<br><br>
+                       <b><u>IRC Export:</u></b> Copies to clipboard. Formatted for single line use. URLs shortened<br><br>
+                       <b><u>Forum Export:</u></b> Copies to clipboard. Formatted for a forum<br><br>
+                       <b><u>TH Direct Export:</u></b> Directly exports to TurkerHub.com if logged in<br><br>
                        
-                       <b><u>MTC Direct Export:</u></b> Directly exports to MTurkCrowd.com if logged in.
+                       <b><u>MTC Direct Export:</u></b> Directly exports to MTurkCrowd.com if logged in
                        </div>
                        "></span>
         </div>
@@ -198,9 +229,9 @@
           <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-html="true" data-container="body" data-placement="right"
                 title="
                        <div style='text-align: left;'>
-                       <b><u>Use TO 1 Coloring:</u></b> Uses the values below to color the TO elements on mturk pages.<br><br>
-                       <b><u>Use TO 2 Coloring:</u></b> Uses the values below to color the TO elements on mturk pages.<br><br>
-                       <b><u>Ratings:</u></b> What color the TO element will be if the pay value is greater than or equal to the provided value.
+                       <b><u>Use TO 1 Coloring:</u></b> Uses the values below to color the TO elements on https://www.mturk.com/ and https://worker.mturk.com/<br><br>
+                       <b><u>Use TO 2 Coloring:</u></b> Uses the values below to color the TO elements on https://www.mturk.com/ and https://worker.mturk.com/<br><br>
+                       <b><u>Values:</u></b> Colors the TO element if the TO 1 pay or the TO 2 pay rate is greater than or equal to the value
                        </div>
                        "></span>
         </div>
