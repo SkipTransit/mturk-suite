@@ -73,3 +73,12 @@ body {
 .tooltip-inner {
   max-width: 350px !important;
 }
+
+.modal-content {
+  color: #FFFFFF;
+  background-color: #222222;
+}
+
+.modal-header, .modal-footer {
+  border-color: rgba(255,255,255,.2);;
+}
