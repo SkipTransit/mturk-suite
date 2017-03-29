@@ -50,6 +50,7 @@ const turkopticon = {
     const to = turkopticon.ratings[id];
     const mts = turkopticon.mts;
     
+    /*
     let color = `mts-toNone`;
     if (mts.to) {
       if (mts.to.to1 && to.to1) {
@@ -72,6 +73,7 @@ const turkopticon = {
       }
     }
     
+    
     const html = 
       `<mts-to>
         <mts-to-circle class="${color}">TO</mts-to-circle>
@@ -81,6 +83,37 @@ const turkopticon = {
         </mts-to-reviews>
       </mts-to>`
     ;
+    */
+    
+    let to1Color = `rgba(160, 160, 160, 0.65)`;
+    let to2Color = `rgba(160, 160, 160, 0.65)`;
+    if (mts.to) {
+      if (mts.to.to1 && to.to1) {
+        const pay = to.to1.attrs.pay;
+        if (pay >= mts.to.to1.high) to1Color = `rgba(0, 255, 0, 0.65)`;
+        else if (pay >= mts.to.to1.good) to1Color = `rgba(255, 255, 0, 0.65)`;
+        else if (pay >= mts.to.to1.average) to1Color = `rgba(255, 140, 0, 0.65)`;
+        else if (pay >= mts.to.to1.low) to1Color = `rgba(255, 0, 0, 0.65)`;
+      }
+      if (mts.to.to2 && to.to2) {
+        const pay = to.to2.recent.reward[1] > 0 ? (to.to2.recent.reward[0] / to.to2.recent.reward[1]) * 60 ** 2 : 0;
+        if (pay >= mts.to.to2.high) to2Color = `rgba(0, 255, 0, 0.65)`;
+        else if (pay >= mts.to.to2.good) to2Color = `rgba(255, 255, 0, 0.65)`;
+        else if (pay >= mts.to.to2.average) to2Color = `rgba(255, 140, 0, 0.65)`;
+        else if (pay >= mts.to.to2.low) to2Color = `rgba(255, 0, 0, 0.65)`;
+      }
+    }
+    
+    const html = 
+      `<mts-to>
+        <mts-to-circle style="background: linear-gradient(90deg, ${to1Color} 50%, ${to2Color} 50%);">TO</mts-to-circle>
+        <mts-to-reviews>
+          ${turkopticon.attrTable(to)}
+          ${turkopticon.linkTable(id)}
+        </mts-to-reviews>
+      </mts-to>`
+    ;
+    
     return html;
   },
   attrTable: function (to) {
