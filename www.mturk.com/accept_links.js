@@ -1,5 +1,5 @@
 const acceptLinks = {
-  execute: function () {
+  execute () {
     console.log(`acceptLinks.execute()`);
     
     for (let element of document.querySelectorAll(`a[href^="/mturk/preview?groupId="]`)) {
