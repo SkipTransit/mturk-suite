@@ -7,9 +7,11 @@
     <script src="jquery-3.1.1.min.js"></script>
     <script src="settings.js"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="bootstrap4/js/bootbox.min.js"></script>
+    
     <!-- Cascading Style Sheets -->
-    <link href="settings.css" rel="stylesheet" media="screen">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="settings.css" rel="stylesheet" media="screen">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700" rel="stylesheet">
     <style>body { font-family: 'Open Sans', sans-serif !important; }</style>
   </head>
@@ -310,6 +312,33 @@
               <div class="input-group-addon" style="background-color: rgba(255, 0, 0, 0.65);">TO 2: Low</div>
               <input id="to2-low" type="number" class="form-control" step="0.1" min="0" value="0.01" disabled>
             </div>
+          </div>
+          
+        </div>
+        
+      </div>
+      
+      <!-- TO Settings -->
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          Reset
+          <span class="glyphicon glyphicon-question-sign" aria-hidden="true" data-toggle="tooltip" data-html="true" data-container="body" data-placement="right"
+                title="
+                       <div style='text-align: left;'>
+                       <b><u>Reset Settings:</u></b> Resets all MTS settings. Not HIT Finder or HIT Catcher settings.<br><br>
+                       <b><u>Reset Turkopticon DB:</u></b> Resets the turkopticon database
+                       </div>
+                       "></span>
+        </div>
+      
+        <div class="panel-body row">
+        
+          <div class="col-xs-6">
+            <button id="reset-settings" type="button" class="btn btn-primary" style="width: 100%">Reset Settings</button>
+          </div>
+          
+          <div class="col-xs-6">
+            <button id="reset-turkopticon" type="button" class="btn btn-primary" style="width: 100%">Reset Turkopticon DB</button>
           </div>
           
         </div>
