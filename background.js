@@ -1,101 +1,3 @@
-// New Version
-chrome.storage.local.get(`version`, function (result) {
-  const version = chrome.runtime.getManifest().version;
-  
-  if (result.version !== version) {
-    //chrome.tabs.create({url: chrome.extension.getURL(`settings.html`)});
-    //chrome.tabs.create({url: `http://mturksuite.com/`});
-  }
-  
-  chrome.storage.local.set({
-    version: version
-  });
-});
-
-const settings = {
-  validator: {
-    goal: 20.00,
-    acceptNext: true,
-    workspace: true,
-    preReloader: true,
-    hcBeta: true,
-    hitExport: {
-      irc: true,
-      forum: true,
-      thDirect: true,
-      mtcDirect: true
-    },
-    to: {
-      to1: {
-        use: true,
-        high: 4.00,
-        good: 3.00,
-        average: 2.00,
-        low: 0.01
-      },
-      to2: {
-        use: false,
-        high: 12.00,
-        good: 9.00,
-        average: 6.00,
-        low: 0.01
-      }
-    },
-    theme: false
-  },
-  initialize: function () {
-    chrome.storage.local.get(`settings`, function (result) {
-      const load = result.settings;
-      const valid = settings.validator;
-      
-      // Today's Projected Earnings Settings
-      if (load.hasOwnProperty(`goal`)) valid.goal = load.goal;
-      
-      // General Settings
-      if (load.hasOwnProperty(`acceptNext`)) valid.acceptNext = load.acceptNext;
-      if (load.hasOwnProperty(`workspace`)) valid.workspace = load.workspace;
-      if (load.hasOwnProperty(`preReloader`)) valid.preReloader = load.preReloader;
-      if (load.hasOwnProperty(`hcBeta`)) valid.hcBeta = load.hcBeta;
-      
-      // TO Settings
-      if (load.hasOwnProperty(`to`)) {
-        
-        // TO 1 Settings
-        if (load.to.hasOwnProperty(`to1`)) {
-          if (load.to.to1.hasOwnProperty(`use`)) valid.to.to1.use = load.to.to1.use;
-          if (load.to.to1.hasOwnProperty(`high`)) valid.to.to1.high = load.to.to1.high;
-          if (load.to.to1.hasOwnProperty(`good`)) valid.to.to1.good = load.to.to1.good;
-          if (load.to.to1.hasOwnProperty(`average`)) valid.to.to1.average = load.to.to1.average;
-          if (load.to.to1.hasOwnProperty(`low`)) valid.to.to1.low = load.to.to1.low;
-        }
-        
-        // TO 2 Settings
-        if (load.to.hasOwnProperty(`to2`)) {
-          if (load.to.to2.hasOwnProperty(`use`)) valid.to.to2.use = load.to.to2.use;
-          if (load.to.to2.hasOwnProperty(`high`)) valid.to.to2.high = load.to.to2.high;
-          if (load.to.to2.hasOwnProperty(`good`)) valid.to.to2.good = load.to.to2.good;
-          if (load.to.to2.hasOwnProperty(`average`)) valid.to.to2.average = load.to.to2.average;
-          if (load.to.to2.hasOwnProperty(`low`)) valid.to.to2.low = load.to.to2.low;
-        }
-      }
-      
-      // HIT Export Settings
-      if (load.hasOwnProperty(`hitExport`)) {
-        if (load.hitExport.hasOwnProperty(`irc`)) valid.hitExport.irc = load.hitExport.irc;
-        if (load.hitExport.hasOwnProperty(`forum`)) valid.hitExport.forum = load.hitExport.forum;
-        if (load.hitExport.hasOwnProperty(`thDirect`)) valid.hitExport.thDirect = load.hitExport.thDirect;
-        if (load.hitExport.hasOwnProperty(`mtcDirect`)) valid.hitExport.mtcDirect = load.hitExport.mtcDirect;
-      }
-      
-      // Theme
-      if (load.hasOwnProperty(`theme`)) valid.theme = load.theme;
-      
-      chrome.storage.local.set({
-        settings: settings.validator
-      });
-    });
-  }
-}
 
 let tpe = { goal: 20.00 }, hits  = {}, requests = {};
 let syncing_tpe = { tab: null, running: false };
@@ -142,26 +44,8 @@ chrome.storage.local.get(`bonus`, function (result) {
 
 chrome.runtime.onMessage.addListener( function (request, sender, sendResponse) {
   switch (request.msg) {
-    case `turkopticon`:
-      TURKOPTICON_DB(sender.tab.id, request.data);
-      break;
-    case `irc_hit_export`:
-      IRC_HIT_EXPORT(sender.tab.id, request.data);
-      break;
-    case `forum_hit_export`:
-      FORUM_HIT_EXPORT(sender.tab.id, request.data);
-      break;
     case `sync_tpe`:
       sync_tpe(sender.tab.id, request.data);
-      break;
-    case `close_tpe_menu`:
-      chrome.tabs.sendMessage(sender.tab.id, { msg: `close_tpe_menu` });
-      break;
-    case `send_th`:
-      SEND_TH(sender.tab.id, request.data);
-      break;
-    case `send_mtc`:
-      SEND_MTC(sender.tab.id, request.data);
       break;
     case `bonus`:
       GET_BONUS(sender.tab.id);
@@ -198,29 +82,190 @@ const onMessageHandler = {
   },
   hitExportMtcDirect: function (tabId, message) {
     hitExport.mtcDirect(tabId, message);
+  },
+  resetSettings: function (tabId, message) {
+    settings.reset(tabId, message);
+  },
+  resetTurkopticon: function (tabId, message) {
+    turkopticon.reset(tabId, message);
+  }
+};
+
+const mturkSuite = {
+  initialize: function () {
+    console.log(`mturkSuite.initialize()`);
+    
+    settings.initialize();
+    turkopticon.initialize();
+    
+    mturkSuite.versionCheck();
+  },
+  
+  versionCheck: function () {
+    console.log(`mturkSuite.versionCheck()`);
+    
+    chrome.storage.local.get(`version`, function (result) {
+      const version = chrome.runtime.getManifest().version;
+  
+      if (result.version !== version) {
+        //chrome.tabs.create({url: `http://mturksuite.com/change-log.html`});
+      }
+  
+      chrome.storage.local.set({
+        version: version
+      });
+    });
+  }
+};
+
+const settings = {
+  default: {
+    goal: `20.00`,
+    acceptNext: true,
+    workspace: true,
+    preReloader: true,
+    hcBeta: true,
+    hitExport: {
+      irc: true,
+      forum: true,
+      thDirect: true,
+      mtcDirect: true
+    },
+    to: {
+      to1: {
+        use: true,
+        high: `4.00`,
+        good: `3.00`,
+        average: `2.00`,
+        low: `0.01`
+      },
+      to2: {
+        use: false,
+        high: `12.00`,
+        good: `9.00`,
+        average: `6.00`,
+        low: `0.01`
+      }
+    },
+    theme: false
+  },
+  
+  reset: function () {
+    console.log(`settings.reset()`);
+    
+    chrome.storage.local.set({
+      settings: settings.default
+    });
+  },
+  
+  initialize: function () {
+    console.log(`settings.initialize()`);
+    
+    chrome.storage.local.get(`settings`, function (result) {
+      const load = result.settings;
+      const valid = JSON.parse(JSON.stringify(settings.default));
+      
+      // Today's Projected Earnings Settings
+      if (load.hasOwnProperty(`goal`)) valid.goal = load.goal;
+      
+      // General Settings
+      if (load.hasOwnProperty(`acceptNext`)) valid.acceptNext = load.acceptNext;
+      if (load.hasOwnProperty(`workspace`)) valid.workspace = load.workspace;
+      if (load.hasOwnProperty(`preReloader`)) valid.preReloader = load.preReloader;
+      if (load.hasOwnProperty(`hcBeta`)) valid.hcBeta = load.hcBeta;
+      
+      // TO Settings
+      if (load.hasOwnProperty(`to`)) {
+        
+        // TO 1 Settings
+        if (load.to.hasOwnProperty(`to1`)) {
+          if (load.to.to1.hasOwnProperty(`use`)) valid.to.to1.use = load.to.to1.use;
+          if (load.to.to1.hasOwnProperty(`high`)) valid.to.to1.high = load.to.to1.high;
+          if (load.to.to1.hasOwnProperty(`good`)) valid.to.to1.good = load.to.to1.good;
+          if (load.to.to1.hasOwnProperty(`average`)) valid.to.to1.average = load.to.to1.average;
+          if (load.to.to1.hasOwnProperty(`low`)) valid.to.to1.low = load.to.to1.low;
+        }
+        
+        // TO 2 Settings
+        if (load.to.hasOwnProperty(`to2`)) {
+          if (load.to.to2.hasOwnProperty(`use`)) valid.to.to2.use = load.to.to2.use;
+          if (load.to.to2.hasOwnProperty(`high`)) valid.to.to2.high = load.to.to2.high;
+          if (load.to.to2.hasOwnProperty(`good`)) valid.to.to2.good = load.to.to2.good;
+          if (load.to.to2.hasOwnProperty(`average`)) valid.to.to2.average = load.to.to2.average;
+          if (load.to.to2.hasOwnProperty(`low`)) valid.to.to2.low = load.to.to2.low;
+        }
+      }
+      
+      // HIT Export Settings
+      if (load.hasOwnProperty(`hitExport`)) {
+        if (load.hitExport.hasOwnProperty(`irc`)) valid.hitExport.irc = load.hitExport.irc;
+        if (load.hitExport.hasOwnProperty(`forum`)) valid.hitExport.forum = load.hitExport.forum;
+        if (load.hitExport.hasOwnProperty(`thDirect`)) valid.hitExport.thDirect = load.hitExport.thDirect;
+        if (load.hitExport.hasOwnProperty(`mtcDirect`)) valid.hitExport.mtcDirect = load.hitExport.mtcDirect;
+      }
+      
+      // Theme
+      if (load.hasOwnProperty(`theme`)) valid.theme = load.theme;
+                  
+      chrome.storage.local.set({
+        settings: valid
+      });
+    });
   }
 };
 
 const turkopticon = {
   db: null,
-  initialize: function () {
-    const dbRequest = window.indexedDB.open(`TODB`, 1);
+  
+  reset: function () {
+    console.log(`turkopticon.reset()`);
     
-    dbRequest.onsuccess = function (event) {
+    if (turkopticon.db) {
+      turkopticon.db.close();
+    }
+    
+    const deleteDatabase = window.indexedDB.deleteDatabase(`TODB`);
+    
+    deleteDatabase.onsuccess = function () {
+      console.log(`TODB Reset: Success!`);
+      chrome.runtime.reload();
+      //turkopticon.initialize();
+    };
+    deleteDatabase.onerror = function () {
+      console.log(`TODB Reset: Error!`);
+    };
+    deleteDatabase.onblocked = function () {
+      console.log(`TODB Reset: Blocked!`);
+    };
+  },
+  
+  initialize: function () {
+    console.log(`turkopticon.initialize()`);
+    
+    const open = window.indexedDB.open(`TODB`, 1);
+    
+    open.onsuccess = function (event) {
+      console.log(`TODB Open: Success!`);
       turkopticon.db = event.target.result;
     };
-    dbRequest.onupgradeneeded = function (event) {
+    open.onerror = function (event) {
+      console.log(`TODB Open: Error!`);
+    };
+    open.onupgradeneeded = function (event) {
+      console.log(`TODB Open: Upgrade Needed!`);
       turkopticon.db = event.target.result;
       turkopticon.db.createObjectStore(`requester`, {keyPath: `id`});
-    }
+    };
   },
   check: function (tab, ids) {
+    console.log(`turkopticon.check()`);
+    
     const temp = {};
     const time = new Date().getTime();
     const transaction = turkopticon.db.transaction([`requester`], `readonly`);
     const objectStore = transaction.objectStore(`requester`);
     
-    let get = false;
+    let get = true;
     
     for (let i = 0; i < ids.length; i ++) {
       const request = objectStore.get(ids[i]);
@@ -236,17 +281,15 @@ const turkopticon = {
     
     transaction.oncomplete = function (event) {
       if (get) {
-        console.log(`request TO`);
         turkopticon.get(tab, ids);
       }
       else {
-        console.log(`request TO from cache`);
         turkopticon.send(tab, temp);
       }
-    }
+    };
   },
   get: function (tab, ids) {
-    
+    console.log(`turkopticon.get()`);
     
     let temp = {};
     
@@ -284,7 +327,9 @@ const turkopticon = {
       const id = array[i].id;
       
       if (!temp[id]) {
-        temp[id] = {};
+        temp[id] = {
+          id: id
+        };
       }
       
       temp[id].id = id;
@@ -297,19 +342,24 @@ const turkopticon = {
     const transaction = turkopticon.db.transaction([`requester`], `readwrite`);
     const objectStore = transaction.objectStore(`requester`);
     
-    for (let i = 0; i < ids.length; i ++) {
-      const id = ids[i];
-      
-      temp[id].time = time;
-      
-      if (temp[id] && temp[id].id) {
-        objectStore.put(temp[id]);
+    for (let key in temp) {
+      console.log(temp[key]);
+      if (temp[key].hasOwnProperty(`id`)) {
+        temp[key].time = time;
+        
+        const put = objectStore.put(temp[key]);
+        
+        put.onerror = function (event) {
+          console.log(`put: Error!`, temp[key], event);
+        };
       }
     }
     
     turkopticon.send(tab, temp);
   },
   send: function (tab, temp) {
+    console.log(`turkopticon.send()`);
+    
     chrome.tabs.sendMessage(tab, {
       type: `turkopticon`,
       message: temp
@@ -491,7 +541,30 @@ const hitExport = {
       }
     });
   }
-}
+};
+
+const webRequests = {
+  wwwMturkReturn: function (data) {
+    console.log(`webRequests.wwwMturkReturn()`);
+    
+    if (data.statusCode !== 200) {
+      return;
+    }
+    
+    const id = data.url.match(/hitId=(\w+)/)[1];
+    
+    if (hits[id]) {
+      hits[id].status = `Returned`;
+    }
+    else {
+      for (let key in hits) {
+        if (hits[key].assignid === id) {
+          hits[key].status = `Returned`;
+        }
+      }
+    }
+  }
+};
 
 // Adds context menu to paste worker id in input fields
 chrome.contextMenus.create({
@@ -538,20 +611,11 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 //******* Experimental *******//
 chrome.webRequest.onCompleted.addListener(
-  function (data) {
-    if (data.statusCode !== 200) return;
-    
-    const id = data.url.match(/hitId=(\w+)/)[1];
-    
-    if (hits[id]) {
-      hits[id].status = `Returned`;
-    }
-    else {
-      for (let key in hits) if (hits[key].assignid === id) hits[key].status = `Returned`;
-    }
-  },
-  { urls: [`https://www.mturk.com/mturk/return?*`] }, [`responseHeaders`]
+  webRequests.wwwMturkReturn,
+  {urls: [`https://www.mturk.com/mturk/return?*`]},
+  [`responseHeaders`]
 );
+
 
 chrome.storage.local.get(`hits`, function (data) {
   hits = data.hits || {}; update_tpe();
@@ -747,41 +811,6 @@ function dst () {
 }
 
 
-/********** HIT Finder Database **********/
-const HFDB_request = window.indexedDB.open(`HFDB`);
-HFDB_request.onsuccess = function (event) {
-  const HFDB = event.target.result;
-    
-  if (HFDB.version !== 1) {
-    HFDB.close();
-    window.indexedDB.deleteDatabase(`HFDB`);
-    return;
-  }
-  
-  if (!HFDB.objectStoreNames.length) {
-    HFDB.close();
-    window.indexedDB.deleteDatabase(`HFDB`);
-    return;
-  }
-  
-  const transaction = HFDB.transaction([`hit`], `readonly`).objectStore(`hit`).indexNames;
-  const check = $.map(transaction, value => value);
-  if (check.indexOf(`seen`) === -1) {
-    HFDB.close();
-    window.indexedDB.deleteDatabase(`HFDB`);
-    return;
-  }
-  HFDB.close();
-};
-HFDB_request.onupgradeneeded = function (event) {
-  const HFDB = event.target.result;
-  
-  const createObjectStore = HFDB.createObjectStore(`hit`, { keyPath: `groupid` });
-  for (let index of [`reqid`, `reqname`, `title`, `reward`, `seen`]) {
-    createObjectStore.createIndex(index, index, {unique: false});
-  }
-};
-
 /********** Bonus Tracking **********/
 function BONUS_NEW_DAY_CHECK () {
   if (BONUS.date !== mturk_date(Date.now())) GET_BONUS();
@@ -818,5 +847,4 @@ function GET_BONUS (tab) {
   });
 }
 
-settings.initialize();
-turkopticon.initialize();
+mturkSuite.initialize();
