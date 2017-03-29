@@ -1303,36 +1303,43 @@ function TIME () {
 
 const turkopticon = {
   db: null,
-  initialize: function () {
-    console.log(`turkopticon.initialize()`);
+  
+  initialize () {    
+    const open = window.indexedDB.open(`TODB`, 1);
     
-    const dbRequest = window.indexedDB.open(`TODB`, 1);
-    
-    dbRequest.onsuccess = function (event) {
+    open.onsuccess = function (event) {
       turkopticon.db = event.target.result;
     };
-    dbRequest.onupgradeneeded = function (event) {
+    open.onupgradeneeded = function (event) {
       turkopticon.db = event.target.result;
       turkopticon.db.createObjectStore(`requester`, {keyPath: `id`});
-    }
+    };
   },
-  check: function (ids) {
-    console.log(`turkopticon.check()`);
-    
+  
+  check (ids) {    
     const temp = {};
     const time = new Date().getTime();
     const transaction = turkopticon.db.transaction([`requester`], `readonly`);
     const objectStore = transaction.objectStore(`requester`);
     
     let get = false;
-    
+       
     for (let i = 0; i < ids.length; i ++) {
-      const request = objectStore.get(ids[i]);
+      const id = ids[i];
+      const request = objectStore.get(id);      
+      
       request.onsuccess = function (event) {
-        if (request.result && request.result.time > time - 3600000 * 2) { 
-          temp[ids[i]] = request.result;
+        if (this.result) {
+          temp[id] = this.result;
+          
+          if (this.result.time < time - 3600000 * 2) {
+            get = true;
+          }
         }
         else {
+          temp[id] = {
+            id: id
+          };
           get = true;
         }
       };
@@ -1340,65 +1347,66 @@ const turkopticon = {
     
     transaction.oncomplete = function (event) {
       if (get) {
-        console.log(`request TO`);
-        turkopticon.get(ids);
+        turkopticon.fetch(ids, temp);
       }
       else {
-        console.log(`request TO from cache`);
         turkopticon.send(temp);
       }
-    }
+    };
   },
-  get: function (ids) {
-    console.log(`turkopticon.get()`);
-    
-    let temp = {};
-    
+  
+  fetch (ids, temp) {
     $.when(
-      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`),
-      $.get(`https://api.turkopticon.info/requesters?rids=${ids}&fields[requesters]=rid,aggregates`)
-    ).done(function (to1, to2) {
-      temp = turkopticon.to1Parse(to1, ids, temp);
-      temp = turkopticon.to2Parse(to2, ids, temp);
-      turkopticon.getDone(ids, temp);
-    });
+      $.ajax({
+        url: `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`,
+        type: `GET`,
+        timeout: 1500
+      }),
+      $.ajax({
+        url: `https://api.turkopticon.info/requesters?rids=${ids}&fields[requesters]=rid,aggregates`,
+        type: `GET`,
+        timeout: 1500
+      })
+    ).done(
+      function (to1, to2) {
+        temp = turkopticon.to1Parse(to1, ids, temp);
+        temp = turkopticon.to2Parse(to2, ids, temp);
+        turkopticon.fetchDone(ids, temp);
+      }
+    ).fail(
+      function () {
+        turkopticon.send(temp);
+      }
+    );
   },
-  to1Parse: function (result, ids, temp) {
+  
+  to1Parse (result, ids, temp) {
     const json = JSON.parse(result[0]);
     
     for (let i = 0; i < ids.length; i ++) {
       const id = ids[i];
       
-      if (!temp[id]) {
-        temp[id] = {
-          id: id
-        };
-      }
-      
       if (json[id]) {
         temp[id].to1 = json[id];
       }
     }
+    
     return temp;
   },
-  to2Parse: function (result, ids, temp) {
+  
+  to2Parse (result, ids, temp) {
     const array = result[0].data;
     
     for (let i = 0; i < array.length; i ++) {
       const id = array[i].id;
       
-      if (!temp[id]) {
-        temp[id] = {
-          id: id
-        };
-      }
-      
-      temp[id].id = id;
       temp[id].to2 = array[i].attributes.aggregates;
     }
+    
     return temp;
   },
-  getDone: function (ids, temp) {
+  
+  fetchDone (ids, temp) {
     const time = new Date().getTime();
     const transaction = turkopticon.db.transaction([`requester`], `readwrite`);
     const objectStore = transaction.objectStore(`requester`);
@@ -1406,24 +1414,14 @@ const turkopticon = {
     for (let key in temp) {
       if (temp[key].hasOwnProperty(`id`)) {
         temp[key].time = time;
-          
-        const put = objectStore.put(temp[key]);
-        
-        put.onsuccess = function (event) {
-          console.log(`put: Success!`, temp[key], event);
-        };
-      
-        put.onerror = function (event) {
-          console.log(`put: Error!`, temp[key], event);
-        };
+        objectStore.put(temp[key]);
       }
     }
     
     turkopticon.send(temp);
   },
-  send: function (temp) {
-    console.log(`turkopticon.send()`);
-    
+  
+  send (temp) {    
     HITS_WRITE_LOGGED_IN(temp);
   }
 };

@@ -217,9 +217,7 @@ const settings = {
 const turkopticon = {
   db: null,
   
-  reset: function () {
-    console.log(`turkopticon.reset()`);
-    
+  reset () {
     if (turkopticon.db) {
       turkopticon.db.close();
     }
@@ -227,39 +225,23 @@ const turkopticon = {
     const deleteDatabase = window.indexedDB.deleteDatabase(`TODB`);
     
     deleteDatabase.onsuccess = function () {
-      console.log(`TODB Reset: Success!`);
       chrome.runtime.reload();
-      //turkopticon.initialize();
-    };
-    deleteDatabase.onerror = function () {
-      console.log(`TODB Reset: Error!`);
-    };
-    deleteDatabase.onblocked = function () {
-      console.log(`TODB Reset: Blocked!`);
     };
   },
   
-  initialize: function () {
-    console.log(`turkopticon.initialize()`);
-    
+  initialize () {    
     const open = window.indexedDB.open(`TODB`, 1);
     
     open.onsuccess = function (event) {
-      console.log(`TODB Open: Success!`);
       turkopticon.db = event.target.result;
     };
-    open.onerror = function (event) {
-      console.log(`TODB Open: Error!`);
-    };
     open.onupgradeneeded = function (event) {
-      console.log(`TODB Open: Upgrade Needed!`);
       turkopticon.db = event.target.result;
       turkopticon.db.createObjectStore(`requester`, {keyPath: `id`});
     };
   },
-  check: function (tab, ids) {
-    console.log(`turkopticon.check()`);
-    
+  
+  check (tab, ids) {    
     const temp = {};
     const time = new Date().getTime();
     const transaction = turkopticon.db.transaction([`requester`], `readonly`);
@@ -268,12 +250,21 @@ const turkopticon = {
     let get = true;
     
     for (let i = 0; i < ids.length; i ++) {
-      const request = objectStore.get(ids[i]);
+      const id = ids[i];
+      const request = objectStore.get(id);      
+      
       request.onsuccess = function (event) {
-        if (request.result && request.result.time > time - 3600000 * 2) { 
-          temp[ids[i]] = request.result;
+        if (this.result) {
+          temp[id] = this.result;
+          
+          if (this.result.time < time - 3600000 * 2) {
+            get = true;
+          }
         }
         else {
+          temp[id] = {
+            id: id
+          };
           get = true;
         }
       };
@@ -281,85 +272,81 @@ const turkopticon = {
     
     transaction.oncomplete = function (event) {
       if (get) {
-        turkopticon.get(tab, ids);
+        turkopticon.fetch(tab, ids, temp);
       }
       else {
         turkopticon.send(tab, temp);
       }
     };
   },
-  get: function (tab, ids) {
-    console.log(`turkopticon.get()`);
-    
-    let temp = {};
-    
+  
+  fetch (tab, ids, temp) {
     $.when(
-      $.get(`https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`),
-      $.get(`https://api.turkopticon.info/requesters?rids=${ids}&fields[requesters]=rid,aggregates`)
-    ).done(function (to1, to2) {
-      temp = turkopticon.to1Parse(to1, ids, temp);
-      temp = turkopticon.to2Parse(to2, ids, temp);
-      turkopticon.getDone(tab, ids, temp);
-    });
+      $.ajax({
+        url: `https://turkopticon.ucsd.edu/api/multi-attrs.php?ids=${ids}`,
+        type: `GET`,
+        timeout: 1500
+      }),
+      $.ajax({
+        url: `https://api.turkopticon.info/requesters?rids=${ids}&fields[requesters]=rid,aggregates`,
+        type: `GET`,
+        timeout: 1500
+      })
+    ).done(
+      function (to1, to2) {
+        temp = turkopticon.to1Parse(to1, ids, temp);
+        temp = turkopticon.to2Parse(to2, ids, temp);
+        turkopticon.fetchDone(tab, ids, temp);
+      }
+    ).fail(
+      function () {
+        turkopticon.send(tab, temp);
+      }
+    );
   },
-  to1Parse: function (result, ids, temp) {
+  
+  to1Parse (result, ids, temp) {
     const json = JSON.parse(result[0]);
     
     for (let i = 0; i < ids.length; i ++) {
       const id = ids[i];
       
-      if (!temp[id]) {
-        temp[id] = {
-          id: id
-        };
-      }
-      
       if (json[id]) {
         temp[id].to1 = json[id];
       }
     }
+    
     return temp;
   },
-  to2Parse: function (result, ids, temp) {
+  
+  to2Parse (result, ids, temp) {
     const array = result[0].data;
     
     for (let i = 0; i < array.length; i ++) {
       const id = array[i].id;
       
-      if (!temp[id]) {
-        temp[id] = {
-          id: id
-        };
-      }
-      
-      temp[id].id = id;
       temp[id].to2 = array[i].attributes.aggregates;
     }
+    
     return temp;
   },
-  getDone: function (tab, ids, temp) {
+  
+  fetchDone (tab, ids, temp) {
     const time = new Date().getTime();
     const transaction = turkopticon.db.transaction([`requester`], `readwrite`);
     const objectStore = transaction.objectStore(`requester`);
     
     for (let key in temp) {
-      console.log(temp[key]);
       if (temp[key].hasOwnProperty(`id`)) {
         temp[key].time = time;
-        
-        const put = objectStore.put(temp[key]);
-        
-        put.onerror = function (event) {
-          console.log(`put: Error!`, temp[key], event);
-        };
+        objectStore.put(temp[key]);
       }
     }
     
     turkopticon.send(tab, temp);
   },
-  send: function (tab, temp) {
-    console.log(`turkopticon.send()`);
-    
+  
+  send (tab, temp) {    
     chrome.tabs.sendMessage(tab, {
       type: `turkopticon`,
       message: temp
