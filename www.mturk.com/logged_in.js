@@ -1,7 +1,8 @@
 const loggedIn = {
   execute () {    
     chrome.runtime.sendMessage({ 
-      type: `loggedIn`
+      type: `loggedIn`,
+      message `www`
     });
   }
 };
