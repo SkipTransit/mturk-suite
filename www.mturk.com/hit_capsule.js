@@ -1,7 +1,5 @@
 const hitCapsule = {
-  execute: function () {
-    console.log(`hitCapsule.execute()`);
-    
+  execute () {    
     const reqname = document.getElementsByClassName(`capsule_field_text`)[0].textContent;
     const reqid =
       document.getElementsByName(`requesterId`)[0] ?

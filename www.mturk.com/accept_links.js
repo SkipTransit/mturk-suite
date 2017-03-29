@@ -1,7 +1,5 @@
 const acceptLinks = {
-  execute () {
-    console.log(`acceptLinks.execute()`);
-    
+  execute () {    
     for (let element of document.querySelectorAll(`a[href^="/mturk/preview?groupId="]`)) {
       element.insertAdjacentHTML(
         `beforebegin`,

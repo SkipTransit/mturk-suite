@@ -1,7 +1,5 @@
 const loggedIn = {
-  execute: function () {
-    console.log(`loggedIn.execute()`);
-    
+  execute () {    
     chrome.runtime.sendMessage({ 
       type: `loggedIn`
     });

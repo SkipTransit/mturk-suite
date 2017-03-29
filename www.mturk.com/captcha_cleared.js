@@ -1,7 +1,5 @@
 const captchaCleared = {
-  execute: function () {
-    console.log(`captchaCleared.execute()`);
-    
+  execute () {    
     if (document.URL.match(`captcha=`) && document.URL.match(`userCaptchaResponse=`)) {
       chrome.runtime.sendMessage({ 
         type: `captchaCleared`

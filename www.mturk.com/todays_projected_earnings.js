@@ -1,8 +1,7 @@
 const todaysProjectedEarnings = {
   mts: {},
-  execute: function () {
-    console.log(`todaysProjectedEarnings.execute()`);
-    
+  
+  execute () {
     const html =
       `<div>
         <div id="tpe_goal_outer">
@@ -22,24 +21,30 @@ const todaysProjectedEarnings = {
       );
     }
   },
-};
-
-if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
-  chrome.storage.onChanged.addListener( function (changes) {
+  
+  storageLocalGet (result) {
+    todaysProjectedEarnings.mts = result.tpe;
+    todaysProjectedEarnings.execute();
+  },
+  
+  storageOnChanged (changes) {
     if (changes.tpe) {
-      const newVal = changes.tpe.newValue, oldVal = changes.tpe.oldValue;
+      const newVal = changes.tpe.newValue;
+      const oldVal = changes.tpe.oldValue;
+      
       todaysProjectedEarnings.mts = {
         tpe: newVal.tpe ? newVal.tpe : oldVal.tpe,
         goal: newVal.goal ? newVal.goal : oldVal.goal
-      }
+      };
+      
       todaysProjectedEarnings.execute();
     }
-  });
-  
-  chrome.storage.local.get(`tpe`, function (result) {
-    todaysProjectedEarnings.mts = result.tpe;
-    todaysProjectedEarnings.execute();
-  });
+  }
+};
+
+if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
+  chrome.storage.local.get(`tpe`, todaysProjectedEarnings.storageLocalGet);
+  chrome.storage.onChanged.addListener(todaysProjectedEarnings.storageOnChanged);
   
   document.addEventListener(`click`, function (event) {
     const element = event.target;
@@ -49,5 +54,3 @@ if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
      }
   });
 }
-
-

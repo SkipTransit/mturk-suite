@@ -1,7 +1,5 @@
 const unqualledContact = {
-  execute: function () {
-    console.log(`unqualledContact.execute()`);
-    
+  execute () {    
     for (let element of document.getElementsByClassName(`capsuletarget`)) {
       if (!element.querySelector(`a[href^="/mturk/contact?"]`)) {
         const reqid = element.closest(`table`).querySelector(`a[href*="requesterId="]`).href.match(/requesterId=(\w+)/)[1];

@@ -1,7 +1,5 @@
 const queueValue = {
-  execute: function () {
-    console.log(`queueValue.execute()`);
-    
+  execute () {    
     const total = [...document.getElementsByClassName(`reward`)]
     .map(element => +element.textContent.replace(/[^0-9.]/g, ``))
     .reduce((a, b) => a + b, 0);

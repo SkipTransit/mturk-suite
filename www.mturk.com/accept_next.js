@@ -1,9 +1,7 @@
 const acceptNext = {
   mts: {},
   
-  execute () {
-    console.log(`acceptNext.execute()`);
-    
+  execute () {    
     if (this.mts.acceptNext) {
       document.getElementsByName(`autoAcceptEnabled`)[0].checked = true;
     }
