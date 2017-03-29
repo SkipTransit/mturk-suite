@@ -1304,6 +1304,8 @@ function TIME () {
 const turkopticon = {
   db: null,
   initialize: function () {
+    console.log(`turkopticon.initialize()`);
+    
     const dbRequest = window.indexedDB.open(`TODB`, 1);
     
     dbRequest.onsuccess = function (event) {
@@ -1315,6 +1317,8 @@ const turkopticon = {
     }
   },
   check: function (ids) {
+    console.log(`turkopticon.check()`);
+    
     const temp = {};
     const time = new Date().getTime();
     const transaction = turkopticon.db.transaction([`requester`], `readonly`);
@@ -1346,6 +1350,8 @@ const turkopticon = {
     }
   },
   get: function (ids) {
+    console.log(`turkopticon.get()`);
+    
     let temp = {};
     
     $.when(
@@ -1382,7 +1388,9 @@ const turkopticon = {
       const id = array[i].id;
       
       if (!temp[id]) {
-        temp[id] = {};
+        temp[id] = {
+          id: id
+        };
       }
       
       temp[id].id = id;
@@ -1395,19 +1403,27 @@ const turkopticon = {
     const transaction = turkopticon.db.transaction([`requester`], `readwrite`);
     const objectStore = transaction.objectStore(`requester`);
     
-    for (let i = 0; i < ids.length; i ++) {
-      const id = ids[i];
+    for (let key in temp) {
+      if (temp[key].hasOwnProperty(`id`)) {
+        temp[key].time = time;
+          
+        const put = objectStore.put(temp[key]);
+        
+        put.onsuccess = function (event) {
+          console.log(`put: Success!`, temp[key], event);
+        };
       
-      temp[id].time = time;
-      
-      if (temp[id] && temp[id].id) {
-        objectStore.put(temp[id]);
+        put.onerror = function (event) {
+          console.log(`put: Error!`, temp[key], event);
+        };
       }
     }
     
     turkopticon.send(temp);
   },
   send: function (temp) {
+    console.log(`turkopticon.send()`);
+    
     HITS_WRITE_LOGGED_IN(temp);
   }
 };
@@ -1415,6 +1431,8 @@ const turkopticon = {
 const hitExport = {
   info: {},
   irc: function (msg) {
+    console.log(`hitExport.irc()`);
+    
     const to1 = msg.to.to1, to2 = msg.to.to2, links = msg.links;
     const hit = HITS[hitExport.info.key];
     
@@ -1457,6 +1475,8 @@ const hitExport = {
     hitExport.copyToClip(`${hit.quals.match(/Masters (.+ granted|Exists)/) ? `MASTERS • ` : ``}${exportTemplate.join(` • `)}`);
   },
   forum: function (msg) {
+    console.log(`hitExport.forum()`);
+    
     const to1 = msg.to1, to2 = msg.to2;
     const hit = HITS[hitExport.info.key];
     
@@ -1535,6 +1555,8 @@ const hitExport = {
     }
   },
   initIrc: function (msg) {
+    console.log(`hitExport.initIrc()`);
+    
     const obj = { 
       links: {
         req: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${msg.reqid}`,
@@ -1572,12 +1594,16 @@ const hitExport = {
 
   },
   initForum: function (msg) {
+    console.log(`hitExport.initForum()`);
+    
     const request = turkopticon.db.transaction([`requester`]).objectStore(`requester`).get(msg);
     request.onsuccess = function (event) {
       hitExport.forum(request.result ? request.result : {});
     };
   },
   thDirect: function (msg) {
+    console.log(`hitExport.thDirect()`);
+    
     const confirm_post = prompt(
       `Do you want to post this HIT to TurkerHub.com?\n\n` +
       `Want to add a comment about your HIT? Fill out the box below.\n\n` +
@@ -1593,6 +1619,8 @@ const hitExport = {
     }
   },
   mtcDirect: function (msg) {
+    console.log(`hitExport.mtcDirect()`);
+    
     const confirm_post = prompt(
       `Do you want to post this HIT to MturkCrowd.com?\n\n` +
       `Want to add a comment about your HIT? Fill out the box below.\n\n` +
@@ -1608,6 +1636,8 @@ const hitExport = {
     }
   },
   sendThDirect: function (msg) {
+    console.log(`hitExport.sendThDirect()`);
+    
     $.get(`https://turkerhub.com/forums/2/?order=post_date&direction=desc`, function (data) {
       const $data = $(data);
       const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
@@ -1630,6 +1660,8 @@ const hitExport = {
     });
   },
   sendMtcDirect: function (msg) {
+    console.log(`hitExport.sendMtcDirect()`);
+    
     $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, function (data) {
       const $data = $(data);
       const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
@@ -1652,6 +1684,8 @@ const hitExport = {
     });
   },
   copyToClip: function (msg) {
+    console.log(`hitExport.copyToClip()`);
+    
     document.body.insertAdjacentHTML(`afterbegin`, `<textarea id="clipboard" style="opacity: 0;">${msg}</textarea>`);
     document.getElementById(`clipboard`).select();
   
