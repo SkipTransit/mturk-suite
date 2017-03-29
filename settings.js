@@ -1,15 +1,7 @@
 const settings = {
   mts: {},
   
-  load (obj) {
-    console.log(`settings.load()`);
-    
-    this.mts = obj;
-  },
-  
   save () {
-    console.log(`settings.save()`);
-
     this.mts = {
       // Today's Projected Earnings Settings
       goal: (+document.getElementById(`goal`).value).toFixed(2),
@@ -56,8 +48,6 @@ const settings = {
   },
   
   update () {
-    console.log(`settings.update()`);
-    
     if (this.mts) {
       // Today's Projected Earnings Settings
       document.getElementById(`goal`).value = this.mts.goal;
@@ -89,13 +79,23 @@ const settings = {
       document.getElementById(`to2-average`).value = this.mts.to.to2.average;
       document.getElementById(`to2-low`).value = this.mts.to.to2.low;
     }
+  },
+  
+  storageLocalGet (result) {
+    settings.mts = result.settings;
+    settings.update();
+  },
+  
+  storageOnChanged (changes) {
+    if (changes.settings) {
+      settings.mts = changes.settings.newValue;
+      settings.update();
+    }
   }
 };
 
 const reset = {
-  settings () {
-    console.log(`reset.settings()`);
-    
+  settings () {    
     bootbox.confirm({
       message: `This will reset your settings. Are you sure?`,
       buttons: {
@@ -117,9 +117,7 @@ const reset = {
     });
   },
   
-  turkopticon () {
-    console.log(`reset.turkopticon()`);
-    
+  turkopticon () {    
     bootbox.confirm({
       message: `This will reset the turkopticon database and reload Mturk Suite. Are you sure? `,
       buttons: {
@@ -143,17 +141,8 @@ const reset = {
 };
 
 document.addEventListener(`DOMContentLoaded`, function () {
-  chrome.storage.onChanged.addListener( function (changes) {
-    if (changes.settings) {
-      settings.load(changes.settings.newValue);
-      settings.update();
-    }
-  });
-  
-  chrome.storage.local.get(`settings`, function (result) {
-    settings.load(result.settings);
-    settings.update();
-  });
+  chrome.storage.local.get(`settings`, settings.storageLocalGet);
+  chrome.storage.onChanged.addListener(settings.storageOnChanged);
   
   $(document.querySelectorAll(`[data-toggle="tooltip"]`)).tooltip(); 
 });
