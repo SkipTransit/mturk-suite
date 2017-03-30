@@ -92,23 +92,19 @@ const onMessageHandler = {
 };
 
 const mturkSuite = {
-  initialize: function () {
-    console.log(`mturkSuite.initialize()`);
-    
+  initialize () {    
     settings.initialize();
     turkopticon.initialize();
     
     mturkSuite.versionCheck();
   },
   
-  versionCheck: function () {
-    console.log(`mturkSuite.versionCheck()`);
-    
+  versionCheck () {    
     chrome.storage.local.get(`version`, function (result) {
       const version = chrome.runtime.getManifest().version;
   
       if (result.version !== version) {
-        //chrome.tabs.create({url: `http://mturksuite.com/change-log.html`});
+        chrome.tabs.create({url: `http://mturksuite.com/change-log.html`});
       }
   
       chrome.storage.local.set({
