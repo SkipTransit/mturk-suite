@@ -140,7 +140,7 @@ const settings = {
         low: `0.01`
       },
       to2: {
-        use: false,
+        use: true,
         high: `12.00`,
         good: `9.00`,
         average: `6.00`,

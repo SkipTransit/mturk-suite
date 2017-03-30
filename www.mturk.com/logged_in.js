@@ -2,7 +2,7 @@ const loggedIn = {
   execute () {    
     chrome.runtime.sendMessage({ 
       type: `loggedIn`,
-      message `www`
+      message: `www`
     });
   }
 };

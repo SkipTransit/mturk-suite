@@ -3,7 +3,7 @@ const captchaCleared = {
     if (document.URL.match(`captcha=`) && document.URL.match(`userCaptchaResponse=`)) {
       chrome.runtime.sendMessage({ 
         type: `captchaCleared`,
-        message `www`
+        message: `www`
       });
     }
   }
