@@ -113,30 +113,50 @@ const turkopticon = {
     const to = turkopticon.ratings[id];
     const mts = turkopticon.mts;
     
+    let style = ``;
     let color = `mts-toNone`;
+    let to1Color = `rgba(160, 160, 160, 0.65)`;
+    let to2Color = `rgba(160, 160, 160, 0.65)`;
+    
     if (mts.to) {
-      if (mts.to.to1 && to.to1) {
-        if (mts.to.to1.use) {
+      if (mts.to.to1.use && mts.to.to2.use) {
+        if (to.to1) {
+          const pay = to.to1.attrs.pay;
+          if (pay >= mts.to.to1.high) to1Color = `rgba(0, 255, 0, 0.65)`;
+          else if (pay >= mts.to.to1.good) to1Color = `rgba(255, 255, 0, 0.65)`;
+          else if (pay >= mts.to.to1.average) to1Color = `rgba(255, 140, 0, 0.65)`;
+          else if (pay >= mts.to.to1.low) to1Color = `rgba(255, 0, 0, 0.65)`;
+        }
+        if (to.to2) {
+          const pay = to.to2.recent.reward[1] > 0 ? (to.to2.recent.reward[0] / to.to2.recent.reward[1]) * 60 ** 2 : 0;
+          if (pay >= mts.to.to2.high) to2Color = `rgba(0, 255, 0, 0.65)`;
+          else if (pay >= mts.to.to2.good) to2Color = `rgba(255, 255, 0, 0.65)`;
+          else if (pay >= mts.to.to2.average) to2Color = `rgba(255, 140, 0, 0.65)`;
+          else if (pay >= mts.to.to2.low) to2Color = `rgba(255, 0, 0, 0.65)`;
+        }
+        style = `class="label" style="background: linear-gradient(90deg, ${to1Color} 50%, ${to2Color} 50%);"`;
+      }
+      else {
+        if (mts.to.to1.use && to.to1) {
           const pay = to.to1.attrs.pay;
           if (pay >= mts.to.to1.high) color = `mts-toHigh`;
           else if (pay >= mts.to.to1.good) color = `mts-toGood`;
           else if (pay >= mts.to.to1.average) color = `mts-toAverage`;
           else if (pay >= mts.to.to1.low) color = `mts-toLow`;
         }
-      }
-      if (mts.to.to2 && to.to2) {
-        if (mts.to.to2.use) {
+        else if (mts.to.to2.use && to.to2) {
           const pay = to.to2.recent.reward[1] > 0 ? (to.to2.recent.reward[0] / to.to2.recent.reward[1]) * 60 ** 2 : 0;
           if (pay >= mts.to.to2.high) color = `mts-toHigh`;
           else if (pay >= mts.to.to2.good) color = `mts-toGood`;
           else if (pay >= mts.to.to2.average) color = `mts-toAverage`;
           else if (pay >= mts.to.to2.low) color = `mts-toLow`;
         }
+        style = `class="label ${color}"`;
       }
     }
     
     const html = 
-      `<mts-to class="label ${color}">TO</mts-to>` +
+      `<mts-to ${style}>TO</mts-to>` +
       `<mts-to-reviews>` +
         turkopticon.attrTable(to) +
         turkopticon.linkTable(id) +

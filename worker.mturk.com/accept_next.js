@@ -6,7 +6,7 @@ const acceptNext = {
     const element = $(`span:contains(Auto-accept next HIT)`).prev()[0];
     const checked = element.checked;
     
-    if (acceptNext.mts.acceptNext !== checked) {
+    if (acceptNext.mts.acceptNext && !checked) {
       element.click();
     } 
   }
