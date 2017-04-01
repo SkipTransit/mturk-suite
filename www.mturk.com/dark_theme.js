@@ -80,7 +80,8 @@ html > body {
 }
 
 mts-to-reviews {
-  background-color: #333333 !important;
+  color: #FFFFFF !important;
+  background-color: #111111 !important;
 }
 
 .footer_separator {
@@ -129,7 +130,7 @@ a.subnavclass, a.nonboldsubnavclass, a.header_links {
   color: #336699 !important;
 }
 
-#tpe_earnings {
+mts-tpe-projected {
   color: #FFFFFF !important;
 }
 
