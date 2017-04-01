@@ -1,25 +1,30 @@
 const todaysProjectedEarnings = {
   mts: {},
   
-  execute () {
-    const html =
-      `<div>
-        <div id="tpe_goal_outer">
-          <div id="tpe_goal_inner" style="width: ${+todaysProjectedEarnings.mts.tpe / +todaysProjectedEarnings.mts.goal * 100}%;"></div>
-        </div>
-        <div id="tpe_earnings">$${(+todaysProjectedEarnings.mts.tpe).toFixed(2)}/${(+todaysProjectedEarnings.mts.goal).toFixed(2)}<div>
-      </div>`
-    ;
-    
-    if (document.getElementById(`tpe`)) {
-      document.getElementById(`tpe`).innerHTML = html;
-    }
-    else {
-      document.getElementById(`subtabs_and_searchbar`).insertAdjacentHTML(
-        `afterbegin`,
-        `<div id="tpe">${html}</div>`
-      );
-    }
+  execute () {    
+    document.getElementById(`subtabs_and_searchbar`).insertAdjacentHTML(
+      `afterbegin`,
+      `<mts-tpe>
+        <mts-tpe-bar>
+          <mts-tpe-progress style="width: ${+this.mts.tpe / +this.mts.goal * 100}%;" />
+        </mts-tpe-bar>
+        <mts-tpe-projected>
+          <mts-tpe-earnings>$${(+this.mts.tpe).toFixed(2)}</mts-tpe-earnings>
+          /
+          <mts-tpe-goal>${(+this.mts.goal).toFixed(2)}</mts-tpe-goal>
+        </mts-tpe-projected>
+      </mts-tpe>`
+    );
+  },
+  
+  update () {    
+    const progress = document.querySelector(`mts-tpe-progress`);
+    const earnings = document.querySelector(`mts-tpe-earnings`);
+    const goal = document.querySelector(`mts-tpe-goal`);
+
+    if (progress) progress.style.width = `${+this.mts.tpe / +this.mts.goal * 100}%`;
+    if (earnings) earnings.textContent = `$${(+this.mts.tpe).toFixed(2)}`;
+    if (goal) goal.textContent = (+this.mts.goal).toFixed(2);
   },
   
   storageLocalGet (result) {
@@ -37,7 +42,7 @@ const todaysProjectedEarnings = {
         goal: newVal.goal ? newVal.goal : oldVal.goal
       };
       
-      todaysProjectedEarnings.execute();
+      todaysProjectedEarnings.update();
     }
   }
 };
@@ -49,7 +54,7 @@ if (document.querySelector(`a[href="/mturk/beginsignout"]`)) {
   document.addEventListener(`click`, function (event) {
     const element = event.target;
      
-    if (element.closest(`#tpe`)) {
+    if (element.closest(`mts-tpe`)) {
       window.open(chrome.runtime.getURL(`/todays_hits_menu.html`));
      }
   });
