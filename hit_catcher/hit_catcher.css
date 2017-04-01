@@ -179,3 +179,48 @@ select {
 .selected {
   border: 2px solid yellow !important;
 }
+
+@media (min-width: 576px) and (max-width: 767px) {
+  .col-sm-4 {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+  
+  .col-sm-4:nth-child(3n + 1) {
+    padding-left: 15px;
+  }
+  
+  .col-sm-4:nth-child(3n) {
+    padding-right: 15px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .col-md-3 {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+  
+  .col-md-3:nth-child(4n + 1) {
+    padding-left: 15px;
+  }
+  
+  .col-md-3:nth-child(4n) {
+    padding-right: 15px;
+  }
+}
+
+@media (min-width: 992px) {
+  .col-lg-2 {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+  
+  .col-lg-2:nth-child(6n+ 1) {
+    padding-left: 15px;
+  }
+  
+  .col-lg-2:nth-child(6n) {
+    padding-right: 15px;
+  }
+}

@@ -178,7 +178,7 @@ const watcher = {
     
     document.getElementById(`hits`).insertAdjacentHTML(
       `beforeend`,
-      `<div id="${obj.hitSetId}" class="col-sm-3">
+      `<div id="${obj.hitSetId}" class="col-sm-4 col-md-3 col-lg-2" /*style="padding-left: 5px; padding-right: 5px;"*/>
         <div class="watcher card card-inverse card-hit">
           <div class="card-header" style="word-wrap: break-word;">
             <div class="float-right" style="position: relative; left: 3px; background-color: #444; height: 100%;">
@@ -287,6 +287,20 @@ const watcher = {
     if (obj.sound) {
       notifications.speak(`HIT Caught: ${obj.nickname ? obj.nickname : obj.requesterName}, ${obj.reward}, ${obj.once ? obj.assignmentDuration : ``}`);
     }
+  },
+  
+  notQual (obj) {
+    console.log(`watcher.notQual()`, obj);
+    const elem = document.getElementById(obj.hitSetId).getElementsByClassName(`watcher`)[0];
+    elem.className = elem.className.replace(`card-inverse`, `card-warning`);
+    notifications.speak(`Not Qualified... watcher stopped.`);
+  },
+  
+  blocked (obj) {
+    console.log(`watcher.blocked()`, obj);
+    const elem = document.getElementById(obj.hitSetId).getElementsByClassName(`watcher`)[0];
+    elem.className = elem.className.replace(`card-inverse`, `card-danger`);
+    notifications.speak(`Blocked... watcher stopped.`);
   }
 };
 
@@ -297,19 +311,21 @@ const catcher = {
     status: false,
     reason: null
   },
-  delay: function () {
+  
+  delay () {
     const nextCatch = catcher.time + catcher.settings.speed;
     const adjustedDelay = nextCatch - new Date().getTime();
     return adjustedDelay > 0 ? adjustedDelay : 1;
   },
-  catch: function () {
+  
+  catch () {
     clearTimeout(catcher.timeout);
-    
+        
     if (!catcher.ids[0] || catcher.paused.status) {
       return;
     }
       
-    catcher.id = catcher.repeat ? catcher.id : catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
+    catcher.id = catcher.repeat && catcher.ids.includes(catcher.id) ? catcher.id : catcher.ids[catcher.index = catcher.index >= catcher.ids.length -1 ? 0 : catcher.index + 1];
     catcher.time = new Date().getTime();
     catcher.repeat = false;
     
@@ -322,32 +338,35 @@ const catcher = {
       5000
     }).then(catcher.wwwParse, catcher.wwwError);
   },
-  pauseOn: function (reason) {
+  
+  pauseOn (reason) {
     const element = document.getElementById(`pause`);
     element.className = element.className.replace(`btn-default`, `btn-danger`);
     catcher.paused.status = true;
     catcher.paused.reason = reason;
   },
-  pauseOff: function () {
+  
+  pauseOff () {
     const element = document.getElementById(`pause`);
     element.className = element.className.replace(`btn-danger`, `btn-default`);
     catcher.paused.status = false;
     catcher.paused.reason = null;
     catcher.catch();
   },
-  wwwParse: function (result, status, xhr) {
+  
+  wwwParse (result, status, xhr) {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
     const obj = watcher.watchers[catcher.id];
     
-    // Page request error
-    if (doc.querySelector(`[class="error_title"]`)) {
-      obj.pre = obj.pre > 0 ? obj.pre + 1 : 1;
-      catcher.repeat = true;
+    // Logged out
+    if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {      
+      catcher.loggedOut();
     }
     
-    // Logged out
-    else if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {      
-      catcher.loggedOut();
+    // Page request error
+    else if (doc.querySelector(`[class="error_title"]`)) {
+      obj.pre = obj.pre > 0 ? obj.pre + 1 : 1;
+      catcher.repeat = true;
     }
     
     // Captcha
@@ -355,8 +374,25 @@ const catcher = {
       catcher.captchaFound();
     }
     
+    else if (doc.querySelector(`[id="alertBox"]`)) {
+      // Not qualified
+      if (doc.querySelector(`[id="alertBox"]`).textContent.match(/Qualifications/)) {
+        obj.nickname = `Not Qualified`;
+        watcher.update(obj);
+        watcher.notQual(obj);
+        watcher.catchOff(obj);
+      }
+      // Blocked
+      else if (doc.querySelector(`[id="alertBox"]`).textContent.match(/prevent/)) {
+        obj.nickname = `Blocked`;
+        watcher.update(obj);
+        watcher.blocked(obj);
+        watcher.catchOff(obj);
+      }
+    }
+    
     // Accepted
-    else if (doc.querySelector(`[name="isAccepted"]`)) {      
+    else if (doc.querySelector(`[name="isAccepted"]`) && doc.querySelector(`[name="isAccepted"]`).value === `true`) {     
       const hit = {
         reqname: doc.querySelector(`[name="prevRequester"]`).value,
         reqid: doc.querySelector(`[name="prevRequester"]`).value,
@@ -400,16 +436,20 @@ const catcher = {
     watcher.stats(obj);
     catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
-  wwwError: function (result, status, xhr) {
+  
+  wwwError (result, status, xhr) {
     catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
-  workerParse: function (result, status, xhr) {
+  
+  workerParse (result, status, xhr) {
     catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
-  workerError: function (result, status, xhr) {
+  
+  workerError (result, status, xhr) {
     catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
-  loggedOut: function () {
+  
+  loggedOut () {
     catcher.pauseOn(`loggedOut`);
     
     notifications.speak(`You are logged out. HIT Catcher paused.`);
@@ -432,7 +472,8 @@ const catcher = {
       }
     });
   },
-  captchaFound: function () {
+  
+  captchaFound () {
     catcher.pauseOn(`captchaFound`);
     
     notifications.speak(`Captcha found. HIT Catcher paused.`);
@@ -462,7 +503,7 @@ const catcher = {
 };
 
 const notifications = {
-  speak: function (phrase) {
+  speak (phrase) {
     chrome.tts.speak(phrase, {
       enqueue: true,
       voiceName: `Google US English`
