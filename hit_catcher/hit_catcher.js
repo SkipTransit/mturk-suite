@@ -358,15 +358,15 @@ const catcher = {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
     const obj = watcher.watchers[catcher.id];
     
-    // Logged out
-    if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {      
-      catcher.loggedOut();
-    }
-    
     // Page request error
-    else if (doc.querySelector(`[class="error_title"]`)) {
+    if (doc.querySelector(`[class="error_title"]`)) {
       obj.pre = obj.pre > 0 ? obj.pre + 1 : 1;
       catcher.repeat = true;
+    }
+    
+    // Logged out
+    else if (!doc.querySelector(`[href="/mturk/beginsignout"]`)) {      
+      catcher.loggedOut();
     }
     
     // Captcha
