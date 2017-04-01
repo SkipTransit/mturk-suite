@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.20.16",
+  "version": "1.20.17",
   
   "permissions": [
     "tts",
@@ -79,9 +79,6 @@
     },
     
     {
-      "matches": [
-        "https://www.mturk.com/*"
-      ],
       "js": [
         "www.mturk.com/accept_links.js",
         "www.mturk.com/accept_next.js",
@@ -98,7 +95,11 @@
         "www.mturk.com/unqualled_contact.js",
         "www.mturk.com/workspace.js"
       ],
-      "run_at": "document_end"
+      "matches": [
+        "https://www.mturk.com/*"
+      ],
+      "run_at": "document_end",
+      "all_frames": true
     },
     
     {
