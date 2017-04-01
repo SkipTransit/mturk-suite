@@ -2,7 +2,7 @@ const preReloader = {
   mts: {},
   
   execute () {   
-    if (preReloader.mts.preReloader) {
+    if (this.mts.preReloader) {
       setTimeout( function () {
         window.location.reload();
       }, 1000);
