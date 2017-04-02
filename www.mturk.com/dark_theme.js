@@ -44,6 +44,25 @@ function CSS_WRITE (data) {
   document.documentElement.insertBefore(css, null);
 }
 
+document.addEventListener(`DOMContentLoaded`, function (event) {
+  for (let elem of document.querySelectorAll(`[style*="background: #F1F3EB;"]`)) {
+    elem.classList.add(`MTS-not-qualified`);
+  }
+
+  for (let elem of document.querySelectorAll(`[bgcolor="#F1F3EB"]`)) {
+    elem.classList.add(`MTS-not-qualified`);
+  }
+
+  for (let elem of document.querySelectorAll(`[style*="background: #CCCCCC;"]`)) {
+    elem.classList.add(`MTS-not-qualified`);
+  }
+
+  for (let elem of document.querySelectorAll(`[bgcolor="#CCCCCC"]`)) {
+    elem.classList.add(`MTS-not-qualified`);
+  }
+});
+
+
 const css_all = `
 html > body {
   color            : #FFFFFF;
@@ -321,11 +340,19 @@ td[style="border-radius: 0 0 30px 0;border: 1px solid #336699;border-left: 0;bor
   border           : 0       !important;
 }
 
+
 /* Non-Qualified HIT capsule backgrounds */
 td[style="border: 1px solid #336699;border-right: 0;border-bottom: 0;border-top: 0; background: #F1F3EB;"],
 td[bgcolor="#F1F3EB"],
 td[bgcolor="#CCCCCC"] {
   background-color : #16181d !important;
+}
+
+
+/* Not Qualified */
+#sortresults_form[name="hitGroupsForm"] + table .MTS-not-qualified {
+  background-color : #333333 !important;
+  border-radius: 0px !important;;
 }
 
 
