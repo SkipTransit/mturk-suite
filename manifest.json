@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.20.17",
+  "version": "1.20.18",
   
   "permissions": [
     "tts",
@@ -37,20 +37,17 @@
 
   "content_scripts": [
     {
-      "matches": [
-        "https://worker.mturk.com/*"
-      ],
       "css": [
         "worker.mturk.com/todays_projected_earnings.css",
         "worker.mturk.com/turkopticon.css"
+      ],
+      "matches": [
+        "https://worker.mturk.com/*"
       ],
       "run_at": "document_start"
     },
     
     {
-      "matches": [
-        "https://worker.mturk.com/*"
-      ],
       "js": [
         "jquery-3.1.1.min.js",
         "worker.mturk.com/accept_next.js",
@@ -60,13 +57,14 @@
         "worker.mturk.com/turkopticon.js",
         "worker.mturk.com/workspace.js"
       ],
+      "matches": [
+        "https://worker.mturk.com/*"
+      ],
       "run_at": "document_end"
     },
     
     {
-      "matches": [
-        "https://www.mturk.com/*"
-      ],
+      
       "css": [
         "www.mturk.com/hit_export.css",
         "www.mturk.com/todays_projected_earnings.css",
@@ -74,6 +72,9 @@
       ],
       "js": [
         "www.mturk.com/dark_theme.js"
+      ],
+      "matches": [
+        "https://www.mturk.com/*"
       ],
       "run_at": "document_start"
     },
