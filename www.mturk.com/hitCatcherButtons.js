@@ -99,7 +99,7 @@ const hitCatcherButtons = {
     
     obj.once = true;
       
-    chrome.runtime.sendMessage({ 
+    chrome.runtime.sendMessage({
       type: `hitCatcherAddWatcher`,
       message: obj
     });
