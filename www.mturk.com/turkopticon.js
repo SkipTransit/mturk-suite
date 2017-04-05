@@ -47,7 +47,7 @@ const turkopticon = {
   },
   
   element (id) {
-    const to = this.ratings[id];
+    const to = this.ratings[id] || {};
     const mts = this.mts;
         
     function colors (pay, rate) {
