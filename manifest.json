@@ -121,9 +121,7 @@
   
   "externally_connectable": {
     "matches": [
-      "https://www.mturk.com/*",
-      "https://turkerhub.com/*",
-      "http://www.mturkcrowd.com/*"
+      "https://www.mturk.com/*"
     ]
   }
 }
