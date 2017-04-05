@@ -316,6 +316,9 @@ const hitExport = {
     alert(copy ? `HIT export has been copied to your clipboard.` : msg);
 
     document.body.removeChild(document.getElementById(`clipboard`));
+  },
+  response (msg) {
+    alert(msg);
   }
 };
 
@@ -327,6 +330,9 @@ if (document.querySelector(`a[href*="roupId="]`) || document.getElementsByName(`
         break;
       case `forumHitExport`:
         hitExport.forum(request.message);
+        break;
+      case `exportResponse`:
+        hitExport.response(request.message);
         break;
     }
   });
