@@ -351,7 +351,7 @@ const turkopticon = {
 };
 
 const hitExport = {
-  irc: function (tab, msg) {
+  irc (tab, msg) {
     const obj = { 
       links: {
         req: `https://www.mturk.com/mturk/searchbar?selectedSearchType=hitgroups&requesterId=${msg.reqid}`,
@@ -363,7 +363,6 @@ const hitExport = {
     };
   
     function ns4tSuccess (result, status, xhr) {
-      console.log(`ns4tSuccess`);
       const urls = result.split(`;`);
       obj.links.req = urls[0];
       obj.links.preview = urls[1];
@@ -375,16 +374,13 @@ const hitExport = {
     }
   
     function ns4tError (result, status, xhr) {
-      console.log(`ns4tError`);
       getTo();
     }
   
     function getTo () {
       const request = turkopticon.db.transaction([`requester`]).objectStore(`requester`).get(msg.reqid);
       request.onsuccess = function (event) {
-        
         obj.to = request.result ? request.result : {};
-        console.log(obj);
         chrome.tabs.sendMessage(tab, {
           type : `ircHitExport`,
           message : obj
@@ -394,7 +390,7 @@ const hitExport = {
 
     $.get(`https://ns4t.net/yourls-api.php?action=bulkshortener&title=MTurk&signature=39f6cf4959&urls[]=${encodeURIComponent(obj.links.req)}&urls[]=${encodeURIComponent(obj.links.preview)}&urls[]=${encodeURIComponent(obj.links.panda)}&urls[]=${encodeURIComponent(obj.links.to1)}&urls[]=${encodeURIComponent(obj.links.to2)}`).then(ns4tSuccess, ns4tError);
   },
-  forum: function (tab, id) {
+  forum (tab, id) {
     const request = turkopticon.db.transaction([`requester`]).objectStore(`requester`).get(id);
     request.onsuccess = function (event) {
       chrome.tabs.sendMessage(tab, {
@@ -403,51 +399,150 @@ const hitExport = {
       });
     };
   },
-  thDirect: function (tab, msg) {
-    $.get(`https://turkerhub.com/forums/2/?order=post_date&direction=desc`, function (data) {
-      const $data = $(data);
-      const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
-      const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
-
-      $.get(`https://turkerhub.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
-        const groupId = msg.match(/groupId=(\w+)/)[1];
+  thDirect (tab, msg) {
+    let thread, xfToken;
+    
+    function getThread () {
+      $.ajax({
+        url: `https://turkerhub.com/forums/2/?order=post_date&direction=desc`,
+        type: `GET`,
+        timeout: 1500
+      }).then(getThreadSuccess, getThreadError);
+    }
+    
+    function getThreadSuccess (result, status, xhr) {
+      const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
+      thread =
+        doc.querySelectorAll(`li[id^="thread-"]`) ?
+        doc.querySelectorAll(`li[id^="thread-"]`)[1] ?
+        doc.querySelectorAll(`li[id^="thread-"]`)[1].id ? 
+        doc.querySelectorAll(`li[id^="thread-"]`)[1].id.replace(`thread-`, ``) :
+        null :
+        null :
+        null
+      ;
+      xfToken = 
+        doc.querySelector(`input[name="_xfToken"]`) ?
+        doc.querySelector(`input[name="_xfToken"]`).value :
+        null
+      ;
       
-        for (let i = 0; i < data.posts.length; i ++) {
-          if (data.posts[i].message.indexOf(groupId) !== -1) {
-            return;
-          }
-        } 
-           
-        $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
-          _xfToken: xfToken,
-          message_html: msg
-        });
-      });
-    });
-  },
-  mtcDirect: function (tab, msg) {
-    $.get(`http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`, function (data) {
-      const $data = $(data);
-      const thread = $data.find(`li[id^="thread-"]`).eq(1).prop(`id`).replace(`thread-`, ``);
-      const xfToken = $data.find(`input[name="_xfToken"]`).eq(0).val();
-
-      $.get(`http://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${thread}&order_by=post_date`, function (data) {
-        const groupId = msg.match(/groupId=(\w+)/)[1];
+      if (!thread) {
+        exportResponse(`HIT not posted\nReason: Could not retrieve thread from TurkerHub.com`);
+        return;
+      }
+      if (!xfToken) {
+        exportResponse(`HIT not posted\nReason: Could not retrieve xfToken from TurkerHub.com`);
+        return;
+      }
       
-        for (let i = 0; i < data.posts.length; i ++) {
-          if (data.posts[i].message.indexOf(groupId) !== -1) {
-            return;
-          }
+      checkPosts();
+    }
+    
+    function getThreadError (result, status, xhr) {
+      exportResponse(`HIT not posted\nReason: Failed to get response from TurkerHub.com\n\n${xhr}`);
+    }
+    
+    function checkPosts () {
+      $.ajax({
+        url: `https://turkerhub.com/hub.php?action=getPosts&thread_id=${thread}&order_by=post_date`,
+        type: `GET`,
+        timeout: 1500
+      }).then(checkPostsSuccess, checkPostsError);
+    }
+    
+    function checkPostsSuccess (result, status, xhr) {
+      const groupId = msg.match(/groupId=(\w+)/)[1];
+      
+      for (let i = 0; i < result.posts.length; i ++) {
+        if (result.posts[i].message.indexOf(groupId) !== -1) {
+          exportResponse(`HIT not posted\nReason: HIT was recently posted`);
+          return;
         }
-          
-        $.post(`http://www.mturkcrowd.com/threads/${thread}/add-reply`, {
-          _xfToken: xfToken,
-          message_html: msg
-        });
+      }
+      
+      $.post(`https://turkerhub.com/threads/${thread}/add-reply`, {
+        _xfToken: xfToken,
+        message_html: msg
       });
+      
+      exportResponse(`HIT posted to TurkerHub.com`);
+    }
+    
+    function checkPostsError (result, status, xhr) {
+      exportResponse(`HIT not posted\nReason: Failed to get response from TurkerHub.com\n\n${xhr}`);
+    }
+    
+    function exportResponse (message) {
+      chrome.tabs.sendMessage(tab, {
+        type: `exportResponse`,
+        message: message
+      });
+    }
+    
+    getThread();
+  },
+  mtcDirect (tab, msg) {
+    let thread, xfToken;
+    
+    function getThreadSuccess (result) {
+      try {
+        thread = result.querySelectorAll(`li[id^="thread-"]`)[1].id.replace(`thread-`, ``);
+        xfToken = result.querySelector(`input[name="_xfToken"]`).value
+        
+        if (!xfToken) {
+          throw `Could not retrieve xfToken from MturkCrowd.com`;
+        }
+      }
+      catch (error) {
+        throw error
+      }
+    }
+    
+    function checkPostsSuccess (result) {
+      const groupId = msg.match(/groupId=(\w+)/)[1];
+      
+      for (let i = 0; i < result.posts.length; i ++) {
+        if (result.posts[i].message.indexOf(groupId) !== -1) {
+          throw `HIT was recently posted`;
+        }
+      }
+    }
+    
+    function exportResponse (message) {
+      chrome.tabs.sendMessage(tab, {
+        type: `exportResponse`,
+        message: message
+      });
+    }
+
+    tools.xhr({
+      method: `GET`,
+      url: `http://www.mturkcrowd.com/forums/4/?order=post_date&direction=desc`,
+      responseType: `document`
+    })
+    .then(getThreadSuccess)
+    .then(function () {
+      return tools.xhr({
+        method: `GET`,
+        url: `http://www.mturkcrowd.com/api.php?action=getPosts&thread_id=${thread}&order_by=post_date`,
+        responseType: `json`
+      });
+    })
+    .then(checkPostsSuccess)
+    .then(function () {
+      $.post(`http://www.mturkcrowd.com/threads/${thread}/add-reply`, {
+        _xfToken: xfToken,
+        message_html: msg
+      });
+      
+      exportResponse(`HIT posted to MturkCrowd.com`);
+    })
+    .catch(function (error) {
+      exportResponse(`HIT not posted to MturkCrowd.com\n\n${error}`);
     });
   },
-  drawOnForum: function (data) {
+  drawOnForum (data) {
     const forum = data.url.match(/mturkcrowd|turkerhub/);
     const thread = data.url.split(`threads/`)[1].split(`/`)[0];
     const regex = new RegExp(`.+${forum}\.com\/threads\/.+\.${thread}`);
@@ -546,6 +641,29 @@ const webRequests = {
         }
       }
     }
+  }
+};
+
+const tools = {
+  xhr (obj) {
+    return new Promise( function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
+      xhr.open(obj.method, obj.url);
+      xhr.timeout = obj.timeout ? obj.timeout : 1500;
+      xhr.responseType = obj.responseType ? obj.responseType : `text`;
+      xhr.send();
+      
+      xhr.onload = function () {
+        if (this.status === 200) resolve(this.response);
+        else reject(`${this.status } - ${this.statusText}`);
+      };
+      xhr.onerror = function() {
+        reject(`${this.status } - ${this.statusText}`);
+      };
+      xhr.ontimeout = function() {
+        reject(`${this.status } - ${this.statusText}`);
+      };
+    });
   }
 };
 
