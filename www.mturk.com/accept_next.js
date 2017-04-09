@@ -1,10 +1,14 @@
 const acceptNext = {
   mts: {},
   
-  execute () {    
+  init () {    
     if (this.mts.acceptNext) {
-      document.getElementsByName(`autoAcceptEnabled`)[0].checked = true;
+      doc.getElementsByName(`autoAcceptEnabled`)[0].checked = true;
     }
+  },
+  
+  update () {
+    
   },
   
   storageLocalGet (result) {
@@ -20,7 +24,7 @@ const acceptNext = {
   }
 };
 
-if (document.getElementsByName(`autoAcceptEnabled`)[0]) {
+if (doc.getElementsByName(`autoAcceptEnabled`)[0]) {
   chrome.storage.local.get(`settings`, acceptNext.storageLocalGet);
   chrome.storage.onChanged.addListener(acceptNext.storageOnChanged);
 }

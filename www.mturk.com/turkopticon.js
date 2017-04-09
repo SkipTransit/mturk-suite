@@ -1,7 +1,7 @@
 const turkopticon = {
   mts: {},
   
-  execute () {
+  init () {
     const ids = [];
     
     for (let elem of document.querySelectorAll(`a[href*="requesterId="]`)) {
@@ -171,7 +171,7 @@ const turkopticon = {
   
   storageLocalGet (result) {
     turkopticon.mts = result.settings;
-    turkopticon.execute();
+    turkopticon.init();
   },
 };
 

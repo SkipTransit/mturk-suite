@@ -1,14 +1,14 @@
 const acceptLinks = {
-  execute () {    
-    for (let element of document.querySelectorAll(`a[href^="/mturk/preview?groupId="]`)) {
-      element.insertAdjacentHTML(
+  init () {    
+    for (let elem of doc.querySelectorAll(`a[href^="/mturk/preview?groupId="]`)) {
+      elem.insertAdjacentHTML(
         `beforebegin`,
-        `<a href="${element.href.replace(`preview?`, `previewandaccept?`)}" target="_blank" style="padding-right: 5px;">Accept</a>`
+        `<a href="${elem.href.replace(`preview?`, `previewandaccept?`)}" target="_blank" style="padding-right: 5px;">Accept</a>`
       );
     }
   }
 };
 
-if (document.querySelector(`a[href^="/mturk/preview?groupId="]`)) {
-  acceptLinks.execute();
+if (doc.querySelector(`a[href^="/mturk/preview?groupId="]`)) {
+  acceptLinks.init();
 }

@@ -1,7 +1,7 @@
 const todaysProjectedEarnings = {
   mts: {},
   
-  execute () {    
+  init () {    
     document.getElementById(`subtabs_and_searchbar`).insertAdjacentHTML(
       `afterbegin`,
       `<mts-tpe>
@@ -29,7 +29,7 @@ const todaysProjectedEarnings = {
   
   storageLocalGet (result) {
     todaysProjectedEarnings.mts = result.tpe;
-    todaysProjectedEarnings.execute();
+    todaysProjectedEarnings.init();
   },
   
   storageOnChanged (changes) {
