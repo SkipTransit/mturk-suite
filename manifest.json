@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.21.6",
+  "version": "1.21.7",
   
   "permissions": [
     "tts",
@@ -108,7 +108,9 @@
   
   "externally_connectable": {
     "matches": [
-      "https://www.mturk.com/*"
+      "https://www.mturk.com/*",
+      "https://turkerhub.com/*",
+      "http://www.mturkcrowd.com/*"
     ]
   }
 }
