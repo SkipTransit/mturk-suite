@@ -71,11 +71,8 @@ const onMessageHandler = {
   turkopticon: function (tabId, message) {
     turkopticon.check(tabId, message);
   },
-  ircHitExport: function (tabId, message) {
+  hitExportIrc: function (tabId, message) {
     hitExport.irc(tabId, message);
-  },
-  forumHitExport: function (tabId, message) {
-    hitExport.forum(tabId, message);
   },
   hitExportThDirect: function (tabId, message) {
     hitExport.thDirect(tabId, message);

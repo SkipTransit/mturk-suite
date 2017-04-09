@@ -1,6 +1,4 @@
 const doc = document;
-const qs = (sel) => doc.querySelector(sel);
-const qsa = (sel) => doc.querySelectorAll(sel);
 
 const mts = {
   tpe: null,
@@ -962,7 +960,7 @@ const tools = {
       
       if (hitExport.info.type.match(/irc/)) {
         chrome.runtime.sendMessage({
-          type: `ircHitExport`,
+          type: `hitExportIrc`,
           message: {
             reqid: hitExport.hits[hitExport.info.key].reqid,
             groupid: hitExport.hits[hitExport.info.key].groupid
