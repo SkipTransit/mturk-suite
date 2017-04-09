@@ -377,7 +377,7 @@ const hitExport = {
     }
   },
   
-  irc (msg) {
+  irc (links) {
     const hit = this.hits[this.info.key];
     const to1 = turkopticon.ratings[hit.reqid].to1, to2 = turkopticon.ratings[hit.reqid].to2;
     
@@ -985,7 +985,7 @@ const tools = {
       case `hitExportIrc`:
         hitExport.irc(request.message);
         break;
-      case `hitExportAlert`:
+      case `alert`:
         tools.alert(request.message);
         break;
       case `turkopticon`:
