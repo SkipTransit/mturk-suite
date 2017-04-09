@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.20.18",
+  "version": "1.21.1",
   
   "permissions": [
     "tts",
@@ -81,20 +81,7 @@
     
     {
       "js": [
-        "www.mturk.com/accept_links.js",
-        "www.mturk.com/accept_next.js",
-        "www.mturk.com/captcha_cleared.js",
-        "www.mturk.com/hit_capsule.js",
-        "www.mturk.com/hit_export.js",
-        "www.mturk.com/hitCatcherButtons.js",
-        "www.mturk.com/logged_in.js",
-        "www.mturk.com/pre_reloader.js",
-        "www.mturk.com/queue_value.js",
-        "www.mturk.com/send_hit.js",
-        "www.mturk.com/todays_projected_earnings.js",
-        "www.mturk.com/turkopticon.js",
-        "www.mturk.com/unqualled_contact.js",
-        "www.mturk.com/workspace.js"
+        "www.mturk.com/mturk_suite.js"
       ],
       "matches": [
         "https://www.mturk.com/*"
