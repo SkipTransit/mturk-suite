@@ -122,9 +122,7 @@ const hitCatcherButtons = {
     return html;
   },
   
-  drawOnHits () {
-    if (doc.getElementsByClassName(`hitCatcherButtonPanda`)[0]) return;
-        
+  drawOnHits () {        
     for (let hit of doc.querySelectorAll(`table[cellpadding="0"][cellspacing="5"][border="0"] > tbody > tr`)) {
       const key = hit.querySelector(`[href*="roupId="]`).getAttribute(`href`).match(/roupId=(.*)/)[1];
     
@@ -167,9 +165,7 @@ const hitCatcherButtons = {
     }
   },
   
-  drawOnHeader () {
-    if (doc.getElementsByClassName(`hitCatcherButtonPanda`)[0]) return;
-    
+  drawOnHeader () {    
     const key = doc.URL.match(/roupId=(.*)/)[1];
     
     this.hits[key] = {
@@ -423,7 +419,7 @@ const hitExport = {
       if (rating > 2.99) return `[color=#cccc00]${rating}[/color]`;
       if (rating > 1.99) return `[color=#cc6600]${rating}[/color]`;
       if (rating > 0.00) return `[color=#cc0000]${rating}[/color]`;
-      return `${rating}`;
+      return rating;
     }
     
     function to2Rating (rating) {
