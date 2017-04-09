@@ -264,7 +264,7 @@ const hitExport = {
       
     if (this.enabled === 1) {
       html = 
-        `<button class="MTS-export MTS-export_hit" type="button"` +
+        `<button class="MTS-export MTS-export-hit" type="button"` +
         (mts.settings.hitExport.irc ? `data-type="irc"` : ``) +
         (mts.settings.hitExport.forum ? `data-type="forum"` : ``) +
         (mts.settings.hitExport.thDirect ? `data-type="th-direct` : ``) +
