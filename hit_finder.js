@@ -1482,7 +1482,8 @@ const hitExport = {
       if (rating > 3.99) return `[color=#00cc00]${rating}[/color]`;
       if (rating > 2.99) return `[color=#cccc00]${rating}[/color]`;
       if (rating > 1.99) return `[color=#cc6600]${rating}[/color]`;
-      return `[color=#cc0000]${rating}[/color]`;
+      if (rating > 0.00) return `[color=#cc0000]${rating}[/color]`;
+      return rating;
     }
     
     function to2Rating (rating) {
