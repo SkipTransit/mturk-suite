@@ -231,7 +231,9 @@ const watcher = {
     element.className = element.className.replace(`btn-default`, `btn-success`);
     if (catcher.ids.includes(obj.hitSetId) === false) {
       catcher.ids.push(obj.hitSetId);
-      catcher.catch();
+      if (!catcher.ids[1]) {
+        catcher.catch();
+      }
     }
   },
   catchOff: function (obj) {
@@ -635,6 +637,24 @@ document.addEventListener(`keydown`, function (event) {
 document.addEventListener(`DOMContentLoaded`, function () {
   storageHandler.loadHitCatcherWatchers();
   storageHandler.loadHitCatcherSettings();
+});
+
+window.addEventListener(`beforeunload`, function (event) {
+  storageHandler.saveHitCatcherWatchers();
+});
+
+chrome.tabs.query({}, function (tabs) {
+  for (let i = 0; i < tabs.length; i ++) {
+    if (tabs[i].url.match(/www\.mturk\.com/)) {
+          
+      chrome.tabs.sendMessage(tabs[i].id, {
+        type: `hitCatcherPing`,
+        message: true
+      });
+          
+
+    }
+  }
 });
 
 window.addEventListener(`beforeunload`, function (event) {
