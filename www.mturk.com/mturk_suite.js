@@ -116,8 +116,8 @@ const hitCatcherButtons = {
     
   html (key) {
     const html =
-      `<button data-key="${key} type="button" class="hitCatcherButtonPanda MTS-export" style="margin-right: 0px;"">Panda</button>
-      <button data-key="${key} type="button" class="hitCatcherButtonOnce MTS-export"">Once</button>`
+      `<button data-key="${key}" type="button" class="hitCatcherButtonPanda MTS-export" style="margin-right: 0px;"">Panda</button>
+      <button data-key="${key}" type="button" class="hitCatcherButtonOnce MTS-export"">Once</button>`
     ;
     return html;
   },
@@ -936,6 +936,8 @@ const tools = {
     }
     
     if (elem.matches(`.hitCatcherButtonOnce`)) {
+      console.log(elem, elem.dataset.key);
+      console.log(hitCatcherButtons.hits);
       const obj = hitCatcherButtons.hits[elem.dataset.key];
       hitCatcherButtons.sendOnceWatcher(obj);
     }

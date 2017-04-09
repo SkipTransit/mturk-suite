@@ -3,7 +3,7 @@
 
   "name": "Mturk Suite",
   "short_name": "MTS",
-  "version": "1.21.3",
+  "version": "1.21.4",
   
   "permissions": [
     "tts",
