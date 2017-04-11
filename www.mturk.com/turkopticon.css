@@ -27,6 +27,7 @@ mts-to-reviews {
   font-weight: normal;
   box-shadow: 0px 0px 30px 5px rgba(0, 0, 0, 0.75);
   line-height: 14px;
+  z-index: 9999;
 }
 
 mts-table {
