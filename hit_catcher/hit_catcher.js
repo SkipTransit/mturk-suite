@@ -138,19 +138,19 @@ const storageHandler = {
 
 const watcher = {
   watchers: {},
-  add: function (obj) {
-    console.log(`watcher.add()`, obj);
+  
+  add (obj) {
     if (!watcher.watchers[obj.hitSetId]) {
       watcher.watchers[obj.hitSetId] = obj;
       storageHandler.saveHitCatcherWatchers();
     }
   },
-  update: function (obj) {
-    console.log(`watcher.update()`, obj);
+  
+  update (obj) {
     document.getElementById(obj.hitSetId).getElementsByClassName(`name`)[0].textContent = obj.nickname ? obj.nickname : obj.requesterName ? obj.requesterName : obj.hitSetId;
   },
-  remove: function (obj) {
-    console.log(`watcher.remove()`, obj);
+  
+  remove (obj) {
     bootbox.confirm({
       message: `Are you sure you want to delete this watcher?`,
       buttons: {
@@ -164,16 +164,27 @@ const watcher = {
       animate: false,
       callback: function (result) {
         if (result) {
-          delete watcher.watchers[obj.hitSetId];
-          catcher.ids.splice(catcher.ids.indexOf(obj.hitSetId), 1);
-          document.getElementById(obj.hitSetId).parentNode.removeChild(document.getElementById(obj.hitSetId));
+          const id = obj.hitSetId;
+          
+          if (watcher.watchers[id]) {
+            delete watcher.watchers[id];
+          }
+          
+          if (catcher.ids.includes(id)) {
+            catcher.ids.splice(catcher.ids.indexOf(id), 1);
+          }
+          
+          if (document.getElementById(id)) {
+            document.getElementById(id).parentNode.removeChild(document.getElementById(id));
+          }
+          
           storageHandler.saveHitCatcherWatchers();
         }
       }
     });
   },
-  draw: function (obj) {
-    console.log(`watcher.draw()`, obj);
+  
+  draw (obj) {
     if (document.getElementById(obj.hitSetId)) return;
     
     document.getElementById(`hits`).insertAdjacentHTML(
@@ -206,29 +217,30 @@ const watcher = {
       </div>`
     );
   },
-  moveLeft: function (obj) {
-    console.log(`watcher.moveLeft()`, obj);
-    const element = document.getElementById(obj.hitSetId);
-    if (element.previousElementSibling) {
-      element.parentNode.insertBefore(element, element.previousElementSibling);
+  
+  moveLeft (obj) {
+    const elem = document.getElementById(obj.hitSetId);
+    if (elem.previousElementSibling) {
+      elem.parentNode.insertBefore(elem, elem.previousElementSibling);
     }
   },
-  moveRight: function (obj) {
-    console.log(`watcher.moveRight()`, obj);
-    const element = document.getElementById(obj.hitSetId);
-    if (element.nextElementSibling) {
-      element.parentNode.insertBefore(element.nextElementSibling, element);
+  
+  moveRight (obj) {
+    const elem = document.getElementById(obj.hitSetId);
+    if (elem.nextElementSibling) {
+      elem.parentNode.insertBefore(elem.nextElementSibling, elem);
     }
   },
+  
   stats: function (obj) {
     document.getElementById(obj.hitSetId).getElementsByClassName(`stats`)[0].textContent =
       `Caught: ${obj.caught ? obj.caught : 0}; Searched: ${obj.searched ? obj.searched : 0}; PRE: ${obj.pre ? obj.pre : 0};`
     ;
   },
-  catchOn: function (obj) {
-    console.log(`watcher.catchOn()`, obj);
-    const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
-    element.className = element.className.replace(`btn-default`, `btn-success`);
+  
+  catchOn (obj) {
+    const elem = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
+    elem.className = elem.className.replace(`btn-default`, `btn-success`);
     if (catcher.ids.includes(obj.hitSetId) === false) {
       catcher.ids.push(obj.hitSetId);
       if (!catcher.ids[1]) {
@@ -236,12 +248,15 @@ const watcher = {
       }
     }
   },
-  catchOff: function (obj) {
-    console.log(`watcher.catchOff()`, obj);
-    const element = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
-    element.className = element.className.replace(`btn-success`, `btn-default`);
-    catcher.ids.splice(catcher.ids.indexOf(obj.hitSetId), 1);
+  
+  catchOff (obj) {
+    const elem = document.getElementById(obj.hitSetId).getElementsByClassName(`catch`)[0];
+    elem.className = elem.className.replace(`btn-success`, `btn-default`);
+    if (catcher.ids.includes(obj.hitSetId)) {
+      catcher.ids.splice(catcher.ids.indexOf(obj.hitSetId), 1);
+    }
   },
+  
   soundOn: function (obj) {
     console.log(`watcher.soundOn()`, obj);
     const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
@@ -281,8 +296,8 @@ const watcher = {
       storageHandler.saveHitCatcherWatchers();
     });
   },
-  found: function (obj) {
-    console.log(`watcher.found()`, obj);
+  
+  found (obj) {
     if (obj.once) {
       watcher.catchOff(obj);
     }
@@ -292,14 +307,12 @@ const watcher = {
   },
   
   notQual (obj) {
-    console.log(`watcher.notQual()`, obj);
     const elem = document.getElementById(obj.hitSetId).getElementsByClassName(`watcher`)[0];
     elem.className = elem.className.replace(`card-inverse`, `card-warning`);
     notifications.speak(`Not Qualified... watcher stopped.`);
   },
   
   blocked (obj) {
-    console.log(`watcher.blocked()`, obj);
     const elem = document.getElementById(obj.hitSetId).getElementsByClassName(`watcher`)[0];
     elem.className = elem.className.replace(`card-inverse`, `card-danger`);
     notifications.speak(`Blocked... watcher stopped.`);
@@ -308,7 +321,7 @@ const watcher = {
 
 const catcher = {
   settings: {},
-  id: null, ids: [], index: 0, timeout: null, repeat: false,
+  id: null, ids: [], index: 0, timeout: null, repeat: false, running: false,
   paused: {
     status: false,
     reason: null
@@ -331,14 +344,16 @@ const catcher = {
     catcher.time = new Date().getTime();
     catcher.repeat = false;
     
-    $.ajax({
-      url:
-      `https://www.mturk.com/mturk/previewandaccept?groupId=${catcher.id}`,
-      type:
-      `GET`,
-      timeout:
-      5000
-    }).then(catcher.wwwParse, catcher.wwwError);
+    tools.xhr({
+      method: `GET`,
+      url: `https://www.mturk.com/mturk/previewandaccept?groupId=${catcher.id}`
+    })
+    .then(catcher.wwwParse)
+    .catch(function (error) {
+      console.error(error);
+      notifications.speak(`HIT Catcher Error`);
+      catcher.timeout = setTimeout(catcher.catch, catcher.delay());
+    });
   },
   
   pauseOn (reason) {
@@ -356,7 +371,7 @@ const catcher = {
     catcher.catch();
   },
   
-  wwwParse (result, status, xhr) {
+  wwwParse (result) {
     const doc = document.implementation.createHTMLDocument().documentElement; doc.innerHTML = result;
     const obj = watcher.watchers[catcher.id];
     
@@ -383,6 +398,7 @@ const catcher = {
         watcher.update(obj);
         watcher.notQual(obj);
         watcher.catchOff(obj);
+        throw `Not Qualified: ${obj.hitSetId}`;
       }
       // Blocked
       else if (doc.querySelector(`[id="alertBox"]`).textContent.match(/prevent/)) {
@@ -390,6 +406,7 @@ const catcher = {
         watcher.update(obj);
         watcher.blocked(obj);
         watcher.catchOff(obj);
+        throw `Blocked: ${obj.hitSetId}`;
       }
     }
     
@@ -410,11 +427,6 @@ const catcher = {
         submitted: null
       };
       
-      chrome.runtime.sendMessage({
-        msg: `sendhit`,
-        data: hit
-      });
-      
       if (obj) {
         obj.title = hit.title;
         obj.reward = hit.reward;
@@ -428,7 +440,12 @@ const catcher = {
         watcher.found(obj);
         watcher.update(obj);
         catcher.repeat = obj.once ? false : true;
-      } 
+      }
+      
+      chrome.runtime.sendMessage({
+        msg: `sendhit`,
+        data: hit
+      });
     }
   
     if (obj) {
@@ -437,17 +454,14 @@ const catcher = {
       
     watcher.stats(obj);
     catcher.timeout = setTimeout(catcher.catch, catcher.delay());
-  },
-  
-  wwwError (result, status, xhr) {
-    catcher.timeout = setTimeout(catcher.catch, catcher.delay());
+    
+    chrome.runtime.sendMessage({
+      type: `hitCatcherDocument`,
+      message: result
+    });
   },
   
   workerParse (result, status, xhr) {
-    catcher.timeout = setTimeout(catcher.catch, catcher.delay());
-  },
-  
-  workerError (result, status, xhr) {
     catcher.timeout = setTimeout(catcher.catch, catcher.delay());
   },
   
@@ -509,6 +523,43 @@ const notifications = {
     chrome.tts.speak(phrase, {
       enqueue: true,
       voiceName: `Google US English`
+    });
+  }
+};
+
+const tools = {
+  xhr (obj) {
+    return new Promise(function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
+      xhr.open(obj.method, obj.url);
+      xhr.timeout = obj.timeout ? obj.timeout : 5000;
+      xhr.responseType = obj.responseType ? obj.responseType : `text`;
+      
+      if (obj.headers) {
+        for (let key in obj.headers) {
+          xhr.setRequestHeader(key, obj.headers[key]);
+        }
+      }
+      
+      let formData = obj.formData ? obj.formData : null;
+      if (formData && typeof formData === `object`) {
+        formData = Object.keys(formData)
+          .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(formData[key])}`)
+          .join('&');
+      }
+      
+      xhr.send(formData);
+      
+      xhr.onload = function () {
+        if (this.status === 200) resolve(this.response);
+        else reject(`not 200 ${this.status} - ${this.statusText}`);
+      };
+      xhr.onerror = function () {
+        reject(`error ${this.status} - ${this.statusText}`);
+      };
+      xhr.ontimeout = function () {
+        reject(`timeout ${this.status} - ${this.statusText}`);
+      };
     });
   }
 };
@@ -589,7 +640,6 @@ document.addEventListener(`change`, function (event) {
   storageHandler.updateHitCatcherSettings();
 });
 
-
 document.addEventListener(`keydown`, function (event) {
   const key = event.key;
   
@@ -621,9 +671,12 @@ document.addEventListener(`keydown`, function (event) {
         animate: false,
         callback: function (result) {
           if (result) {
-            for (let i = 0; i < ids.length; i ++) { 
+            for (let i = 0; i < ids.length; i ++) {
+              const id = ids[i];
               delete watcher.watchers[ids[i]];
-              catcher.ids.splice(catcher.ids.indexOf(ids[i]), 1);
+              if (catcher.ids.includes(id)) {
+                catcher.ids.splice(catcher.ids.indexOf(id), 1);
+              }
               document.getElementById(ids[i]).parentNode.removeChild(document.getElementById(ids[i]));
             }
             storageHandler.saveHitCatcherWatchers();
@@ -646,19 +699,12 @@ window.addEventListener(`beforeunload`, function (event) {
 chrome.tabs.query({}, function (tabs) {
   for (let i = 0; i < tabs.length; i ++) {
     if (tabs[i].url.match(/www\.mturk\.com/)) {
-          
       chrome.tabs.sendMessage(tabs[i].id, {
         type: `hitCatcherPing`,
         message: true
       });
-          
-
     }
   }
-});
-
-window.addEventListener(`beforeunload`, function (event) {
-  storageHandler.saveHitCatcherWatchers();
 });
 
 function whenAccepted (time) {
