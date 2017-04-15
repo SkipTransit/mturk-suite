@@ -559,7 +559,7 @@ const preReloader = {
 
 const queueValue = {
   run () {
-    if (!doc.querySelector(`a[class="nonboldsubnavclass"][href*="myhits"]`)) return;
+    if (!doc.querySelector(`a[class="nonboldsubnavclass"][href*="myhits"]`) || !doc.getElementsByClassName(`title_orange_text_bold`)[0]) return;
         
     const total = [...doc.getElementsByClassName(`reward`)]
     .map(elem => +elem.textContent.replace(/[^0-9.]/g, ``))
@@ -640,7 +640,7 @@ const todaysProjectedEarnings = {
   },
   
   update () {
-    if (!this.go) return;
+    //if (!this.go) return;
     
     const progress = doc.querySelector(`mts-tpe-progress`);
     const earnings = doc.querySelector(`mts-tpe-earnings`);
@@ -1080,6 +1080,10 @@ const tools = {
 
     doc.body.removeChild(doc.getElementById(`clipboard`));
   },
+};
+
+const listeners = {
+  
 };
 
 for (let func of [acceptLinks, captchaCleared, hitCapsule, hitCatcherButtons, loggedIn, turkopticon, queueValue, sendHit, unqualledContact]) {
