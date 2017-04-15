@@ -1,0 +1,198 @@
+/********** Bootstrap Primary Change **********/
+.bg-primary {
+  background-color: #222222 !important;
+}
+
+.btn-primary {
+  color: #FFFFFF !important;
+  border-color: #222222 !important;
+  background-color: #222222 !important;
+}
+
+.btn-primary:hover {
+  color: #FFFFFF !important;
+  border-color: #444444 !important;
+  background-color: #444444 !important;
+}
+
+.panel-primary {
+  border-width: 1px !important;
+  border-color: #222222 !important;
+}
+
+.panel-primary > .panel-heading {
+  color: #FFFFFF !important;
+  border-width: 1px !important;
+  border-color: #222222 !important;
+  background-color: #222222 !important;
+}
+
+.card-outline-primary {
+  border-color: #222222;
+}
+
+.card-header-primary {
+  color: #FFFFFF;
+  background-color: #222222;
+}
+/**********************************************/
+
+.card-inverse {
+  background-color: #222222 !important;
+}
+
+body {
+  font-size: 14px;
+  font-family: 'Open Sans', sans-serif;
+  background-color: #444444;
+}
+
+.card-header {
+  padding: 0px 3px;
+}
+
+.card-block {
+  padding: 3px 3px;
+}
+
+.table {
+  margin-bottom: 0rem;
+}
+
+.table-extra-condensed th {
+  border: 1px solid #222222;
+  padding: 1px 1px !important;
+}
+
+.table-extra-condensed td {
+  color: #000000;
+  border: 1px solid #222222;
+  padding: 1px 1px !important;
+}
+
+.table thead th {
+  border-bottom: 0;
+}
+
+.table-extra-condensed {
+  border: #222222;
+}
+
+.toNone td {
+  background-color: rgba(160, 160, 160, 0.65);
+  font-weight: bold;
+}
+
+a:link {
+  color : #224f77;
+}
+
+a:visited {
+  color: #551A8B; 
+}
+
+.btn-group-xs > .btn,
+.btn-xs {
+  padding: 1px 2px !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  border-radius: 3px !important;
+}
+
+div.tooltip-inner {
+    max-width: 50vw;
+}
+
+mts-to {
+  
+  font-size: 8px !important;
+}
+
+.to-hover:hover + mts-to-reviews, mts-to-reviews:hover {
+  display: block;
+}
+
+mts-to-reviews {
+  float: left;
+  font-size: 10px !important;
+  -webkit-border-horizontal-spacing: 0px;
+  -webkit-border-vertical-spacing: 1px;
+  
+  z-index: 9999;
+  transform: translate(0px, -3px);
+  right: 25px;
+  width: 300px;
+  position: absolute;
+  display: none;
+  border: 1px solid;
+  border-color: #222222;
+  background-color: #FFFFFF;
+  padding: 3px;
+  box-shadow: 0px 0px 30px 5px rgba(0,0,0,0.75);
+}
+
+mts-table {
+  display: table;
+}
+
+mts-tr {
+  display: table-row;
+}
+
+mts-th {
+  display: table-cell;
+}
+
+mts-td {
+  display: table-cell;
+}
+
+.MTS-info-table mts-td {
+  text-align: center;
+}
+
+.mts-attr-table {
+  width: 100%;
+  text-align: left;
+}
+
+.mts-attr-table mts-td:nth-child(1), .mts-attr-table mts-td:nth-child(3) {
+  font-weight: bold;
+}
+
+.mts-link-table {
+  width: 100%
+}
+
+.mts-link-table mts-td {
+  text-align: center;
+}
+
+.toHigh td {
+  background-color: rgba(0, 255, 0, 0.65);
+  font-weight: bold;
+}
+.toGood td {
+  background-color: rgba(255, 255, 0, 0.65);
+  font-weight: bold;
+}
+.toAverage td {
+  background-color: rgba(255, 140, 0, 0.65);
+  font-weight: bold;
+}
+.toLow td {
+  background-color: rgba(255, 0, 0, 0.65);
+  font-weight: bold;
+}
+.toNone td {
+  background-color: rgba(160, 160, 160, 0.65);
+  font-weight: bold;
+}
+
+table {
+  background-color: #FFFFFF;
+}
+
+table th {
+  background-color: #222222;
+}
