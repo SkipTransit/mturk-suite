@@ -34,6 +34,8 @@
     ],
     "persistent": true
   },
+  
+  "options_page": "settings.html",
 
   "content_scripts": [
     {
