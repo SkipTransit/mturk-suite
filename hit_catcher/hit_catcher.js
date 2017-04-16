@@ -351,7 +351,6 @@ const catcher = {
     .then(catcher.wwwParse)
     .catch(function (error) {
       console.error(error);
-      notifications.speak(`HIT Catcher Error`);
       catcher.timeout = setTimeout(catcher.catch, catcher.delay());
     });
   },
@@ -408,6 +407,11 @@ const catcher = {
         watcher.catchOff(obj);
         throw `Blocked: ${obj.hitSetId}`;
       }
+      // Capped
+      else if (doc.querySelector(`[id="alertBox"]`).textContent.match(/tomorrow/)) {
+        catcher.capped(obj);
+        throw `Capped: ${obj.hitSetId}`;
+      }
     }
     
     // Accepted
@@ -463,6 +467,25 @@ const catcher = {
   
   workerParse (result, status, xhr) {
     catcher.timeout = setTimeout(catcher.catch, catcher.delay());
+  },
+  
+  capped () {
+    catcher.pauseOn(`capped`);
+    notifications.speak(`You have capped. Please try again tomorrow.`);
+    bootbox.confirm({
+      message: `You have capped. Please try again tomorrow.`,
+      buttons: {
+        confirm: {
+          className: `btn-sm btn-success`
+        },
+        cancel: {
+          className: `btn-sm btn-danger`
+        }
+      },
+      animate: false,
+      callback: function (result) {
+      }
+    });
   },
   
   loggedOut () {
