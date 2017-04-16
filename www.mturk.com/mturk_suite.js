@@ -640,7 +640,7 @@ const todaysProjectedEarnings = {
   },
   
   update () {
-    //if (!this.go) return;
+    if (!this.go) return;
     
     const progress = doc.querySelector(`mts-tpe-progress`);
     const earnings = doc.querySelector(`mts-tpe-earnings`);
