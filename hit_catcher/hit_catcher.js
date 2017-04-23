@@ -146,6 +146,31 @@ const watcher = {
     }
   },
   
+  popup () {
+    bootbox.prompt({
+      title: `Add watcher by group id, preview or panda.`,
+      buttons: {
+        confirm: {
+          className: 'btn-sm btn-success'
+        },
+        cancel: {
+          className: 'btn-sm btn-danger'
+        }
+      },
+      callback: function (result) {
+        if (result) {
+          const obj = {
+            hitSetId: result.match(/groupId=([A-Z0-9]*)/) ? result.match(/groupId=([A-Z0-9]*)/)[1] : result,
+            sound: true
+          };
+          watcher.add(obj);
+          watcher.draw(obj);
+          watcher.catchOn(obj);
+        }
+      }
+    });
+  },
+  
   update (obj) {
     document.getElementById(obj.hitSetId).getElementsByClassName(`name`)[0].textContent = obj.nickname ? obj.nickname : obj.requesterName ? obj.requesterName : obj.hitSetId;
   },
@@ -232,7 +257,7 @@ const watcher = {
     }
   },
   
-  stats: function (obj) {
+  stats (obj) {
     document.getElementById(obj.hitSetId).getElementsByClassName(`stats`)[0].textContent =
       `Caught: ${obj.caught ? obj.caught : 0}; Searched: ${obj.searched ? obj.searched : 0}; PRE: ${obj.pre ? obj.pre : 0};`
     ;
@@ -257,22 +282,21 @@ const watcher = {
     }
   },
   
-  soundOn: function (obj) {
-    console.log(`watcher.soundOn()`, obj);
-    const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
-    element.className = element.className.replace(`btn-default`, `btn-success`);
+  soundOn (obj) {
+    const elem = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
+    elem.className = elem.className.replace(`btn-default`, `btn-success`);
     obj.sound = true;
     storageHandler.saveHitCatcherWatchers();
-  }, 
-  soundOff: function (obj) {
-    console.log(`watcher.soundOff()`, obj);
-    const element = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
-    element.className = element.className.replace(`btn-success`, `btn-default`);
+  },
+  
+  soundOff (obj) {
+    const elem = document.getElementById(obj.hitSetId).getElementsByClassName(`sound`)[0];
+    elem.className = elem.className.replace(`btn-success`, `btn-default`);
     obj.sound = false;
     storageHandler.saveHitCatcherWatchers();
   },
-  settingsShow: function (obj) {
-    console.log(`watcher.settingsShow()`, obj);
+  
+  settingsShow (obj) {
     document.getElementById(`watcher-settings-nickname`).value = obj.nickname;
     document.getElementById(`watcher-settings-once`).checked = obj.once;
     
@@ -356,15 +380,15 @@ const catcher = {
   },
   
   pauseOn (reason) {
-    const element = document.getElementById(`pause`);
-    element.className = element.className.replace(`btn-default`, `btn-danger`);
+    const elem = document.getElementById(`pause`);
+    elem.className = elem.className.replace(`btn-default`, `btn-danger`);
     catcher.paused.status = true;
     catcher.paused.reason = reason;
   },
   
   pauseOff () {
-    const element = document.getElementById(`pause`);
-    element.className = element.className.replace(`btn-danger`, `btn-default`);
+    const elem = document.getElementById(`pause`);
+    elem.className = elem.className.replace(`btn-danger`, `btn-default`);
     catcher.paused.status = false;
     catcher.paused.reason = null;
     catcher.catch();
@@ -472,6 +496,7 @@ const catcher = {
   capped () {
     catcher.pauseOn(`capped`);
     notifications.speak(`You have capped. Please try again tomorrow.`);
+    
     bootbox.confirm({
       message: `You have capped. Please try again tomorrow.`,
       buttons: {
@@ -490,7 +515,6 @@ const catcher = {
   
   loggedOut () {
     catcher.pauseOn(`loggedOut`);
-    
     notifications.speak(`You are logged out. HIT Catcher paused.`);
     
     bootbox.confirm({
@@ -515,7 +539,7 @@ const catcher = {
   captchaFound () {
     catcher.pauseOn(`captchaFound`);
     
-    notifications.speak(`Captcha found. HIT Catcher paused.`);
+    //notifications.speak(`Captcha found. HIT Catcher paused.`);
     
     bootbox.confirm({
       message: `Captcha found. Do you want to resume HIT Catcher?`,
@@ -600,6 +624,10 @@ document.addEventListener(`click`, function (event) {
     }
   }
   
+  if (element.matches(`#add-watcher`)) {
+    watcher.popup();
+  }
+  
   // Watcher left button is clicked
   if (element.matches(`.move-left`)) {
     watcher.moveLeft(watcher.watchers[element.dataset.id]);
@@ -643,20 +671,19 @@ document.addEventListener(`click`, function (event) {
   if (element.matches(`#advanced_settings`)) {
     $(document.getElementById(`advanced_settings_modal`)).modal(`show`);
   }
+  
+  // Ctrl click to select or deselect watchers
+  if (event.ctrlKey) {
+    const watcher = $(element).parents(`.watcher`)[0];
+    
+    if (watcher && watcher.matches(`.selected`)) {
+      watcher.classList.remove(`selected`);
+    }
+    else if (watcher) {
+      watcher.classList.add(`selected`);
+    }
+  }
 });
-
-document.addEventListener(`dblclick`, function () {
-  const element = event.target;
-  
-  const watcher = $(element).parents(`.watcher`)[0];
-  
-  if (watcher && watcher.matches(`.selected`)) {
-    watcher.classList.remove(`selected`);
-  }
-  else if (watcher) {
-    watcher.classList.add(`selected`);
-  }
-}); 
 
 document.addEventListener(`change`, function (event) {
   storageHandler.saveHitCatcherSettings();

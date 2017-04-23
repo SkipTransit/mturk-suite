@@ -228,3 +228,9 @@ select {
     padding-right: 15px;
   }
 }
+
+.modal-title {
+  font-size: 1em;
+  font-weight: normal;
+  float: left;
+}
